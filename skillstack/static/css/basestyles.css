@@ -2,3 +2,14 @@
     background: linear-gradient(to right, #b57edc, #000000); /* pastel purple to black */
     color: white;
 }
+
+a.nav-link{
+    color: white !important;
+    font-family: 'bowlby one sc' !important;
+    font-size: 25px;
+    font-weight: bold;
+}
+
+h1{
+    font-family: 'bowlby one sc' !important;
+}
