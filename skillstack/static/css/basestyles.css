@@ -1,0 +1,4 @@
+.header-gradient {
+    background: linear-gradient(to right, #b57edc, #000000); /* pastel purple to black */
+    color: white;
+}
