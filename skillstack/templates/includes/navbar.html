@@ -10,10 +10,10 @@
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav ms-auto">
         {% if user.is_authenticated %}
-          <li class="nav-item"><a class="nav-link">Projects</a></li>
+          <li class="nav-item"><a href="{% url 'dashboard' %}" class="nav-link">Projects</a></li>
           <li class="nav-item"><a class="nav-link">Inbox</a></li>
           <li class="nav-item"><a class="nav-link">Profile</a></li>
-          <li class="nav-item"><a class="nav-link">Logout</a></li>
+          <li class="nav-item"><a href="{% url 'logout' %}" class="nav-link">Logout</a></li>
         {% else %}
           <li class="nav-item"><a href="{% url 'login' %}" class="nav-link">Login</a></li>
           <li class="nav-item"><a href="{% url 'register' %}" class="nav-link">Register</a></li>

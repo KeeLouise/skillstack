@@ -4,7 +4,7 @@
 {% block content %}
 <div class="container mt-5">
   <h2>Welcome, {{ request.user.first_name|default:request.user.username }}</h2>
-
+<a href="{% url 'create_project' %}">+ New Project</a>
   <h4 class="mt-4">Your Projects</h4>
   {% if projects %}
     <ul class="list-group">
