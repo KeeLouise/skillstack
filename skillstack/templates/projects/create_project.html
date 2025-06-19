@@ -1,9 +1,21 @@
 {% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}New Project{% endblock %}
+
 {% block content %}
-<h2>Create a New Project</h2>
-<form method="POST">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Create Project</button>
-</form>
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <h2 class="mb-4 text-center">Create a New Project</h2>
+
+      <form method="POST">
+        {% csrf_token %}
+        {{ form|crispy }}
+
+        <button type="submit" class="btn btn-dark w-100 mt-3">Create Project</button>
+      </form>
+    </div>
+  </div>
+</div>
 {% endblock %}
