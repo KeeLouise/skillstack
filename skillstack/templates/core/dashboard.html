@@ -10,8 +10,10 @@
     <ul class="list-group">
       {% for project in projects %}
         <li class="list-group-item">
-          <strong>{{ project.title }}</strong> — {{ project.status }}
-        </li>
+  <a href="{% url 'project_detail' project.pk %}">
+    <strong>{{ project.title }}</strong>
+  </a> — {{ project.status }}
+</li>
       {% endfor %}
     </ul>
   {% else %}

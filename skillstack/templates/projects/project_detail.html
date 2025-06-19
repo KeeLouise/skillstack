@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ project.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2>{{ project.title }}</h2>
+  <p><strong>Description:</strong> {{ project.description }}</p>
+  <p><strong>Status:</strong> {{ project.status }}</p>
+  <p><strong>Start Date:</strong> {{ project.start_date }}</p>
+  <p><strong>End Date:</strong> {{ project.end_date }}</p>
+</div>
+<a href="{% url 'dashboard' %}">Back To Projects</a>
+{% endblock %}
