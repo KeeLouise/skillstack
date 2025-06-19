@@ -85,8 +85,12 @@ WSGI_APPLICATION = 'skillstack.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'skillstack',
+        'USER': 'skillstack_user',
+        'PASSWORD': 'Skillstack2025*',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
