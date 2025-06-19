@@ -3,17 +3,17 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from django.contrib.auth.views import LoginView
 from django.contrib.auth import logout
+from .forms import CustomUserRegistrationForm
 
 def register_view(request):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = CustomUserRegistrationForm(request.POST)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Account successfully created! You will now be logged in.')
-            return redirect('dashboard')
+            messages.success(request, 'Account created! Please log in.')
+            return redirect('login')
     else:
-        form = UserCreationForm()
-
+        form = CustomUserRegistrationForm()
     return render(request, 'users/register.html', {'form': form})
 
 from django.contrib.auth.views import LoginView
