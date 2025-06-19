@@ -62,6 +62,7 @@ from django.utils.timezone import now
 from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
 from .models import EmailVerificationCode
+from django.contrib.auth import login, get_backends
 import random
 import logging
 
@@ -123,10 +124,12 @@ def verify_2fa_code(request):
             return redirect('login')
 
         if code_obj and code_obj.code == code_input:
-            login(request, user)
-            request.session.pop('temp_user_id')
-            code_obj.delete()
-            return redirect('dashboard')
+           backend = get_backends()[0]  # use the default backend
+           user.backend = f"{backend.__module__}.{backend.__class__.__name__}"
+           login(request, user)
+           request.session.pop('temp_user_id')
+           code_obj.delete()
+           return redirect('dashboard')
         else:
             messages.error(request, 'Invalid verification code.')
 
