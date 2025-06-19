@@ -3,12 +3,36 @@
 {% block title %}{{ project.title }}{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-  <h2>{{ project.title }}</h2>
-  <p><strong>Description:</strong> {{ project.description }}</p>
-  <p><strong>Status:</strong> {{ project.status }}</p>
-  <p><strong>Start Date:</strong> {{ project.start_date }}</p>
-  <p><strong>End Date:</strong> {{ project.end_date }}</p>
+<div class="container py-5">
+  <div class="card shadow-lg border-0">
+    <div class="card-body">
+      <h2 class="card-title text-primary fw-bold">{{ project.title }}</h2>
+      <hr>
+      <p><strong class="text-muted">Description:</strong><br> {{ project.description }}</p>
+
+      <div class="row mt-4">
+        <div class="col-md-6">
+          <p><strong class="text-muted">Status:</strong>
+            {% if project.status == 'completed' %}
+              <span class="badge bg-success">Completed</span>
+            {% elif project.status == 'ongoing' %}
+              <span class="badge bg-warning text-dark">Ongoing</span>
+            {% else %}
+              <span class="badge bg-danger">Paused</span>
+            {% endif %}
+          </p>
+          <p><strong class="text-muted">Start Date:</strong> {{ project.start_date }}</p>
+          <p><strong class="text-muted">End Date:</strong> {{ project.end_date }}</p>
+        </div>
+        <div class="col-md-6">
+          <p><strong class="text-muted">Category:</strong> {{ project.category }}</p>
+          <p><strong class="text-muted">Owner:</strong> {{ project.owner.username }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="card-footer bg-transparent border-top-0 d-flex justify-content-end">
+      <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">← Back to Dashboard</a>
+    </div>
+  </div>
 </div>
-<a href="{% url 'dashboard' %}">Back To Projects</a>
 {% endblock %}

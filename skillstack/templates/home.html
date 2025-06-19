@@ -1,33 +1,48 @@
 {% extends "base.html" %}
+
 {% block title %}Home{% endblock %}
+
 {% block content %}
-  <div class="bg-light py-5 text-center">
-  <div class="container">
-    <h1 class="display-4 fw-bold">Welcome to SkillStack</h1>
-    <p class="lead">Your portfolio and project hub — all in one place, designed for freelance Software.</p>
-    <section class="container my-5">
-  <div class="row text-center">
-    <div class="col-md-4">
-      <h4>📁 Project Tracker</h4>
-      <p>Organize projects by status, deadline, and stakeholders.</p>
+<div class="homepage py-5">
+  <div class="container text-center">
+    <h1 class="display-4 fw-bold brand-title">Welcome to SkillStack</h1>
+    <p class="lead subtitle">Your portfolio and project hub — built for freelance software developers.</p>
+
+    <div class="row mt-5">
+      <div class="col-md-4 mb-4">
+        <div class="card custom-card h-100">
+          <div class="card-body">
+            <h4 class="card-title icon-title">📁 Project Tracker</h4>
+            <p class="card-text text-muted">Organize your work by status, deadline, and more.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4 mb-4">
+        <div class="card custom-card h-100">
+          <div class="card-body">
+            <h4 class="card-title icon-title">🎨 Portfolio Builder</h4>
+            <p class="card-text text-muted">Showcase your software projects in a stunning layout.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4 mb-4">
+        <div class="card custom-card h-100">
+          <div class="card-body">
+            <h4 class="card-title icon-title">💬 Messaging</h4>
+            <p class="card-text text-muted">Stay connected with collaborators inside the platform.</p>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="col-md-4">
-      <h4>🎨 Portfolio Builder</h4>
-      <p>Showcase your best work with clean, beautiful layouts.</p>
-    </div>
-    <div class="col-md-4">
-      <h4>💬 Built-In Messaging</h4>
-      <p>Stay in touch with collaborators, all in one place.</p>
-    </div>
-  </div>
-</section>
-    <section class="text-center my-5">
-  <h2 class="fw-bold">Start Showcasing Your Work Today</h2>
-  <p>Join a growing community of freelancers and professionals building in public.</p></section>
-    <div class="mt-4">
-      <a class="btn btn-primary btn-lg me-2">Get Started</a>
-      <a class="btn btn-outline-secondary btn-lg">Login</a>
-    </div>
+
+    <section class="mt-5">
+      <h2 class="fw-bold section-title">Start Building Your Dev Portfolio</h2>
+      <p class="text-muted">Join other freelance professionals sharing their work with the world.</p>
+      <div class="mt-4">
+        <a href="{% url 'register' %}" class="btn btn-lg btn-pink me-3">🚀 Get Started</a>
+        <a href="{% url 'login' %}" class="btn btn-outline-dark btn-lg">🔐 Login</a>
+      </div>
+    </section>
   </div>
 </div>
 {% endblock %}
