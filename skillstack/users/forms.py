@@ -1,9 +1,39 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Row, Column
 
+class EmailLoginForm(forms.Form):
+    email = forms.EmailField(
+        label="Email",
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'you@example.com'
+        })
+    )
+    password = forms.CharField(
+        label="Password",
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': '••••••••'
+        })
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        email = cleaned_data.get("email")
+        password = cleaned_data.get("password")
+
+        if email and password:
+            try:
+                user = User.objects.get(email=email)
+                if not user.check_password(password):
+                    raise forms.ValidationError("Invalid login credentials.")
+            except User.DoesNotExist:
+                raise forms.ValidationError("User with this email does not exist.")
+
+        return cleaned_data
 class CustomUserRegistrationForm(UserCreationForm):
     full_name = forms.CharField(max_length=150, required=True, label="Full Name")
     email = forms.EmailField(required=True)
