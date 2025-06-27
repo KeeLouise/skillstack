@@ -8,8 +8,8 @@
   <h2 class="text-center mb-4">Compose Message</h2>
 
   <form method="post">
-    {% csrf_token %}
-    {{ form|crispy }}
+      {% csrf_token %}
+      {% crispy form %}
   </form>
 </div>
 {% endblock %}
