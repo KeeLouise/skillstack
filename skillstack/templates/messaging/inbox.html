@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Inbox{% endblock %}
+{% block content %}
+<div class="container mt-5">
+  <h2>Inbox</h2>
+  <ul class="list-group">
+    {% for msg in messages %}
+      <li class="list-group-item {% if not msg.is_read %}fw-bold{% endif %}">
+        <a href="{% url 'message_detail' msg.pk %}">{{ msg.subject }}</a>
+        <small class="text-muted">from {{ msg.sender.username }} on {{ msg.sent_at }}</small>
+      </li>
+    {% empty %}
+      <li class="list-group-item">No messages</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}
