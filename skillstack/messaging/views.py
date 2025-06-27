@@ -22,14 +22,14 @@ def message_detail(request, pk):
 
 @login_required
 def compose_message(request):
-    if request.method =='POST':
+    if request.method == 'POST':
         form = MessageForm(request.POST)
         if form.is_valid():
             msg = form.save(commit=False)
             msg.sender = request.user
             msg.save()
             return redirect ('inbox')
+    else:
+        form = MessageForm()
         
-        else:
-            form = MessageForm()
-        return render(request, 'messaging/compose.html', {'form: form'})
+    return render(request, 'messaging/compose.html', {'form': form})
