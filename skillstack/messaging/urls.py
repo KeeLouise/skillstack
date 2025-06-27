@@ -1,7 +1,7 @@
 from django.urls import path
 from . import views
 
-urlpatters = [
+urlpatterns = [
     path('', views.inbox, name='inbox'),
     path('sent/', views.sent_messages, name='sent'),
     path ('compose/', views.compose_message, name='compose'),
