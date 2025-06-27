@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}Sent Messages{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2 class="mb-4">Sent Messages</h2>
+  <ul class="list-group">
+    {% for msg in messages %}
+      <li class="list-group-item">
+        <strong>To:</strong> {{ msg.recipient.username }}<br>
+        <a href="{% url 'message_detail' msg.pk %}">{{ msg.subject }}</a>
+        <small class="text-muted d-block">Sent: {{ msg.sent_at }}</small>
+      </li>
+    {% empty %}
+      <li class="list-group-item">You haven’t sent any messages yet.</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

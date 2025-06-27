@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Message{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2>{{ message.subject }}</h2>
+  <p class="text-muted">
+    <strong>From:</strong> {{ message.sender.username }}<br>
+    <strong>To:</strong> {{ message.recipient.username }}<br>
+    <strong>Sent:</strong> {{ message.sent_at }}
+  </p>
+  <hr>
+  <p>{{ message.body }}</p>
+  <a href="{% url 'inbox' %}" class="btn btn-outline-secondary mt-3">Back to Inbox</a>
+</div>
+{% endblock %}
