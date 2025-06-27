@@ -20,7 +20,7 @@
       <ul class="navbar-nav ms-auto">
         {% if user.is_authenticated %}
           <li class="nav-item"><a href="{% url 'dashboard' %}" class="nav-link">Projects</a></li>
-          <li class="nav-item"><a class="nav-link">Inbox</a></li>
+          <li class="nav-item"><a href="{% url 'inbox' %}" class="nav-link">Inbox</a></li>
           <li class="nav-item"><a class="nav-link">Profile</a></li>
           <li class="nav-item"><a href="{% url 'logout' %}" class="nav-link">Logout</a></li>
         {% else %}
