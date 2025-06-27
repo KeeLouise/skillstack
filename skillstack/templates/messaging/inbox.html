@@ -1,13 +1,12 @@
 {% extends 'base.html' %}
-{% block title %}Inbox{% endblock %}
 {% block content %}
-<div class="container mt-5">
+<div class="container mt-4">
   <h2>Inbox</h2>
+  <a href="{% url 'compose' %}" class="btn btn-primary mb-3">New Message</a>
   <ul class="list-group">
     {% for msg in messages %}
       <li class="list-group-item {% if not msg.is_read %}fw-bold{% endif %}">
-        <a href="{% url 'message_detail' msg.pk %}">{{ msg.subject }}</a>
-        <small class="text-muted">from {{ msg.sender.username }} on {{ msg.sent_at }}</small>
+        <strong>{{ msg.subject }}</strong> from {{ msg.sender.username }} - {{ msg.sent_at|date:"SHORT_DATETIME_FORMAT" }}
       </li>
     {% empty %}
       <li class="list-group-item">No messages</li>
