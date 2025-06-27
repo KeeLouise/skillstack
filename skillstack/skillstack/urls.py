@@ -22,4 +22,5 @@ urlpatterns = [
     path('', include('core.urls')),
     path('users/', include('users.urls')),
     path('projects/', include('projects.urls')),
+    path('messages/', include('messaging.urls')),
 ]
