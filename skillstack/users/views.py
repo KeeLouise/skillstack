@@ -1,11 +1,13 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils import timezone
 from datetime import timedelta
+from .models import Profile
 import random
 
 from .forms import CustomUserRegistrationForm, EmailLoginForm
@@ -56,6 +58,11 @@ def email_login_view(request):
 
     return render(request, 'users/login.html', {'form': form})
 
+#Profile view
+@login_required
+def profile_view(request):
+    profile, _ = Profile.objects.get_or_create(user=request.user)
+    return render(request, 'users/profile.html', {'profile': profile})
 
 # Send 2FA Verification Email
 from django.utils.timezone import now
