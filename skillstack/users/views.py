@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils import timezone
+from .forms import CustomUserRegistrationForm, EmailLoginForm, UserUpdateForm, ProfileForm
 from datetime import timedelta
 from .models import Profile
 import random
@@ -62,7 +63,24 @@ def email_login_view(request):
 @login_required
 def profile_view(request):
     profile, _ = Profile.objects.get_or_create(user=request.user)
-    return render(request, 'users/profile.html', {'profile': profile})
+
+    if request.method == 'POST':
+        u_form = UserUpdateForm(request.POST, instance=request.user)
+        p_form = ProfileForm(request.POST, request.FILES, instance=profile)
+        if u_form.is_valid() and p_form.is_valid():
+            u_form.save()
+            p_form.save()
+            messages.success(request, 'Your profile has been updated.')
+            return redirect('profile')
+    else:
+        u_form = UserUpdateForm(instance=request.user)
+        p_form = ProfileForm(instance=profile)
+
+    return render(request, 'users/profile.html', {
+        'u_form': u_form,
+        'p_form': p_form,
+        'profile': profile,
+    })
 
 # Send 2FA Verification Email
 from django.utils.timezone import now
