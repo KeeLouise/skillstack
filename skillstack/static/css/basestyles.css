@@ -1,21 +1,20 @@
 .header-gradient {
-    background: linear-gradient(to right, #b57edc, white);
-    color: white;
+    background-color: black;
 }
 
 a.nav-link{
-    color: black !important;
-    font-family: 'bowlby one sc' !important;
-    font-size: 25px;
+    color: white !important;
+    font-family: 'cal sans' !important;
+    font-size: 32px;
     font-weight: bold;
 }
 
 h1{
-    font-family: 'bowlby one sc' !important;
+    font-family: 'cal sans' !important;
     color: black !important;
 }
 
 p, p.lead{
-    font-family: 'inter' !important;
+    font-family: sans-serif !important;
     color: black !important;
 }
