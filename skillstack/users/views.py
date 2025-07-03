@@ -64,23 +64,28 @@ def email_login_view(request):
 def profile_view(request):
     profile, _ = Profile.objects.get_or_create(user=request.user)
 
+    is_editing = request.GET.get('edit') == 'true'
+
     if request.method == 'POST':
         u_form = UserUpdateForm(request.POST, instance=request.user)
         p_form = ProfileForm(request.POST, request.FILES, instance=profile)
         if u_form.is_valid() and p_form.is_valid():
             u_form.save()
             p_form.save()
-            messages.success(request, 'Your profile has been updated.')
+            messages.success(request, 'Your profile has been updated successfully!')
             return redirect('profile')
     else:
         u_form = UserUpdateForm(instance=request.user)
         p_form = ProfileForm(instance=profile)
-
-    return render(request, 'users/profile.html', {
+    
+    context = {
         'u_form': u_form,
         'p_form': p_form,
         'profile': profile,
-    })
+        'is_editing': is_editing,
+    }
+
+    return render(request, 'users/profile.html', context)
 
 # Send 2FA Verification Email
 from django.utils.timezone import now

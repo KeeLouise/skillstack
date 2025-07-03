@@ -4,22 +4,41 @@
 
 {% block content %}
 <div class="container mt-5">
-  <h2 class="mb-4 custom-profile-heading text-center">Your Profile, {{ user.username }}</h2>
+  <h2 class="mb-4 text-center">Your Profile</h2>
   <div class="row justify-content-center">
     <div class="col-md-6">
+
       {% if messages %}
         {% for message in messages %}
           <div class="alert alert-{{ message.tags }}">{{ message }}</div>
         {% endfor %}
       {% endif %}
+
+      {% if is_editing %}
       <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="card p-4 shadow-sm">
           {{ u_form|crispy }}
           {{ p_form|crispy }}
-          <button type="submit" class="btn btn-primary mt-3 w-100">Save Changes</button>
+          <button type="submit" class="btn btn-success mt-3 w-100">Save Changes</button>
         </div>
       </form>
+      {% else %}
+      <div class="card p-4 shadow-sm">
+        <p><strong>Username:</strong> {{ user.username }}</p>
+        <p><strong>Full Name:</strong> {{ user.first_name }}</p>
+        <p><strong>Email:</strong> {{ user.email }}</p>
+        <p><strong>Company:</strong> {{ profile.company }}</p>
+        <p><strong>Bio:</strong> {{ profile.bio }}</p>
+        <p><strong>Profile Image:</strong></p>
+        {% if profile.profile_picture %}
+          <img src="{{ profile.profile_picture.url }}" alt="Profile picture" class="img-thumbnail" width="150">
+        {% else %}
+          <p>No Profile Image Uploaded</p>
+        {% endif %}
+        <a href="{% url 'profile' %}?edit=true" class="btn btn-primary mt-3 w-100">Edit Profile</a>
+      </div>
+      {% endif %}
     </div>
   </div>
 </div>
