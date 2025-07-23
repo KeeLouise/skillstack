@@ -95,10 +95,11 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 import dj_database_url
+import os
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.getenv('DATABASE_URL', 'postgresql://postgres:password@localhost:5432/frameworks-unit-04-blog'),
+        default=os.getenv('DATABASE_URL', 'postgresql://skillstack_user:Skillstack2025*@localhost:5432/skillstack'),
         conn_max_age=600
     )
 }
@@ -150,11 +151,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
-STATIC_URL = 'static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
