@@ -26,7 +26,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'your-dev-fallback-key')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'skillstack-1bx8.onrender.com']
 
 
 # Application definition
