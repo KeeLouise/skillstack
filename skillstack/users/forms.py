@@ -64,6 +64,13 @@ class CustomUserRegistrationForm(UserCreationForm):
             ),
             Submit('submit', 'Register', css_class='btn btn-primary w-100 mt-3')
         )
+    
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError("An account with this email already exists.")
+        return email
+
 
     def save(self, commit=True):
         user = super().save(commit=False)
@@ -71,6 +78,7 @@ class CustomUserRegistrationForm(UserCreationForm):
         user.first_name = self.cleaned_data['full_name']
         if commit:
             user.save()
+        Profile.objects.update_or_create(user=user, defaults={'company': self.cleaned_data['company']})
         return user
 
 class UserUpdateForm(forms.ModelForm):
