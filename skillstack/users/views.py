@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.mail import EmailMultiAlternatives
@@ -23,6 +23,10 @@ def register_view(request):
         form = CustomUserRegistrationForm(request.POST)
         if form.is_valid():
             form.save()
+            #Assigns user to default group
+            group, _ = Group.objects.get_or_create(name='Standard User')
+            user.groups.add(Group)
+
             messages.success(request, 'Account created! Please log in.')
             return redirect('login')
     else:
