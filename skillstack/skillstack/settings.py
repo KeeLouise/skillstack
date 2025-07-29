@@ -33,7 +33,7 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'skillstack-1bx8.onrender.com']
 
 INSTALLED_APPS = [
     # Local apps
-    'users',
+    'users.apps.UsersConfig',
     'projects',
     'messaging',
 
