@@ -22,10 +22,10 @@ def register_view(request):
     if request.method == 'POST':
         form = CustomUserRegistrationForm(request.POST)
         if form.is_valid():
-            form.save()
+            user=form.save()
             #Assigns user to default group
             group, _ = Group.objects.get_or_create(name='Standard User')
-            user.groups.add(Group)
+            user.groups.add(group)
 
             messages.success(request, 'Account created! Please log in.')
             return redirect('login')
