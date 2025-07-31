@@ -14,3 +14,6 @@ class ProjectForm(forms.ModelForm):
     class Meta:
         model = Project
         fields = ['title', 'description', 'start_date', 'end_date', 'status', 'category']
+
+class InviteCollaboratorForm(forms.Form):
+    email = forms.EmailField(label="Collaborator's Email")
