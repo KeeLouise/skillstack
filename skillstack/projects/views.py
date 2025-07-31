@@ -1,10 +1,37 @@
-from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.urls import reverse
+
 from .forms import InviteCollaboratorForm, ProjectForm
 from .models import Invitation, Project
-from django.urls import reverse
+
+import logging
+logger = logging.getLogger(__name__)
+
+def send_invite_email(email, project):
+    invite_link = f"https://skillstack-1bx8.onrender.com/users/register/?email={email}&project={project.id}"
+    subject = f"You’ve been invited to collaborate on {project.title}"
+    body = f"""
+        You've been invited to collaborate on the project "{project.title}" on SkillStack.
+        
+        Register or log in to accept the invitation:
+        {invite_link}
+    """
+
+    email_msg = EmailMultiAlternatives(
+        subject=subject,
+        body=body,
+        from_email='email.skillstack@gmail.com',
+        to=[email],
+    )
+    try:
+        email_msg.send(fail_silently=False)
+        logger.info(f"Invitation email sent to {email}")
+    except Exception as e:
+        logger.error(f"Failed to send invite to {email}: {e}")
 
 @login_required
 def create_project(request):
@@ -14,45 +41,34 @@ def create_project(request):
             project = form.save(commit=False)
             project.owner = request.user
             project.save()
+            form.save_m2m()
+
+            # Handles collaborator invitations - KR 31/07/2025
+            invite_emails = form.cleaned_data.get('invite_emails', '')
+            emails = [email.strip() for email in invite_emails.split(',') if email.strip()]
+
+            for email in emails:
+                try:
+                    user = User.objects.get(email=email)
+                    project.collaborators.add(user)
+                    logger.info(f"Added existing user {email} as collaborator.")
+                except User.DoesNotExist:
+                    Invitation.objects.create(email=email, project=project, invited_by=request.user)
+                    send_invite_email(email, project)
+
+            messages.success(request, 'Project created and collaborators invited.')
             return redirect('dashboard')
     else:
         form = ProjectForm()
+
     return render(request, 'projects/create_project.html', {'form': form})
 
 @login_required
 def project_detail(request, pk):
-    project = get_object_or_404(Project, pk=pk, owner=request.user)
+    project = get_object_or_404(Project, pk=pk)
+
+    if request.user != project.owner and request.user not in project.collaborators.all():
+        messages.error(request, "You do not have permission to view this project.")
+        return redirect('dashboard')
+
     return render(request, 'projects/project_detail.html', {'project': project})
-
-@login_required
-def invite_collaborator(request, project_id):
-    project = get_object_or_404(Project, id=project_id, owner=request.user)
-
-    if request.method == 'POST':
-        form = InviteCollaboratorForm(request.POST)
-        if form.is_valid():
-            email = form.cleaned_data['email']
-
-            # This will check if the user exists on database - KR 31/07/2025
-            try:
-                user = User.objects.get(email=email)
-                project.collaborators.add(user)
-            except User.DoesNotExist:
-                # If the user does not exist, they will be sent an invitation email - KR 31/07/2025
-                Invitation.objects.create(email=email, project=project, invited_by=request.user)
-                invite_link = request.build_absolute_uri(
-                    reverse('register') + f'?email={email}&project={project.id}'
-                )
-                send_mail(
-                    subject='You’ve been invited to collaborate on a project on Skillstack',
-                    message=f'You’ve been invited to join the project "{project.title}". Register here: {invite_link}',
-                    from_email='email.skillstack@gmail.com',
-                    recipient_list=[email],
-                    fail_silently=False,
-                )
-
-            return redirect('project_detail', project_id=project.id)
-    else:
-        form = InviteCollaboratorForm()
-
-    return render(request, 'projects/invite_collaborator.html', {'form': form, 'project': project})
