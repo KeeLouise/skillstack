@@ -1,6 +1,14 @@
 from django import forms
 from .models import Project
 
+class InviteCollaboratorForm(forms.Form):
+    email = forms.EmailField(
+        label="Collaborator's Email",
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter collaborator email'
+        })
+    )
 class ProjectForm(forms.ModelForm):
     start_date = forms.DateField(
         widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
