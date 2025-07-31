@@ -26,5 +26,7 @@ class Project(models.Model):
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='other')
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='projects')
 
+    collaborators = models.ManyToManyField(User, blank=True, related_name='collaborations')
+
     def __str__(self):
         return self.title
