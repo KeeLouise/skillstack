@@ -1,6 +1,7 @@
 from django.urls import path
-from .views import create_project
+from .views import create_project, project_detail, delete_project
 
 urlpatterns = [
     path('create/', create_project, name='create_project'),
+    path('<int:pk>/delete/', delete_project, name='delete_project')
 ]

@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.urls import reverse
-
+from django.views.decorators.http import require_POST
 from .forms import InviteCollaboratorForm, ProjectForm
 from .models import Invitation, Project
 
@@ -90,3 +90,16 @@ def project_detail(request, pk):
         return redirect('dashboard')
 
     return render(request, 'projects/project_detail.html', {'project': project})
+
+@login_required
+@require_POST
+def delete_project(request, pk):
+    project = get_object_or_404(Project, pk=pk)
+
+    if request.user != project.owner:
+        messages.error(request, "You don't have permission to delete this project.")
+        return redirect('dashboard')
+
+    project.delete()
+    messages.success(request, "Project deleted successfully.")
+    return redirect('dashboard')

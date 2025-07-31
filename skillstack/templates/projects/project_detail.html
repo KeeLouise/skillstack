@@ -33,6 +33,13 @@
       <span class="badge bg-secondary">{{ user.username }}</span>{% if not forloop.last %}, {% endif %}
     {% endfor %}
   </p>
+{% if user == project.owner %}
+  <form method="POST" action="{% url 'delete_project' project.pk %}" style="display:inline;">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this project?');">
+      Delete Project
+    </button>
+  </form>
 {% endif %}
         </div>
       </div>
