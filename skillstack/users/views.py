@@ -13,24 +13,41 @@ import random
 
 from .forms import CustomUserRegistrationForm, EmailLoginForm
 from .models import EmailVerificationCode
+from projects.models import Project, Invitation
 
 # Register View
 def register_view(request):
     if request.user.is_authenticated:
         return redirect('dashboard')
 
+    # This will check if the user was invited - KR 31/07/2025
+    email = request.GET.get('email')
+    project_id = request.GET.get('project')
+
     if request.method == 'POST':
         form = CustomUserRegistrationForm(request.POST)
         if form.is_valid():
-            user=form.save()
-            #Assigns user to default group
+            user = form.save()
+
+            # This assigns the user to the "Standard User" group - KR 31/07/2025
             group, _ = Group.objects.get_or_create(name='Standard User')
             user.groups.add(group)
+
+            # If the user was invited to a projected, it will add this project to their dashboard - KR 31/07/2025
+            if email and project_id:
+                try:
+                    project = Project.objects.get(id=project_id)
+                    if project:
+                        project.collaborators.add(user)
+                        Invitation.objects.filter(email=user.email, project=project).update(accepted=True)
+                except Project.DoesNotExist:
+                    pass 
 
             messages.success(request, 'Account created! Please log in.')
             return redirect('login')
     else:
-        form = CustomUserRegistrationForm()
+        form = CustomUserRegistrationForm(initial={'email': email} if email else None)
+
     return render(request, 'users/register.html', {'form': form})
 
 
