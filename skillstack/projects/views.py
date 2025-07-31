@@ -92,6 +92,26 @@ def project_detail(request, pk):
     return render(request, 'projects/project_detail.html', {'project': project})
 
 @login_required
+def edit_project(request, pk):
+    project = get_object_or_404(Project, pk=pk)
+
+    # Only allow the owner to edit their project - KR 31/07/2025
+    if request.user != project.owner:
+        messages.error(request, "You don't have permission to edit this project.")
+        return redirect('dashboard')
+
+    if request.method == 'POST':
+        form = ProjectForm(request.POST, instance=project)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Project updated successfully.')
+            return redirect('project_detail', pk=project.pk)
+    else:
+        form = ProjectForm(instance=project)
+
+    return render(request, 'projects/edit_project.html', {'form': form, 'project': project})
+
+@login_required
 @require_POST
 def delete_project(request, pk):
     project = get_object_or_404(Project, pk=pk)
