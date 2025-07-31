@@ -11,9 +11,11 @@ class ProjectForm(forms.ModelForm):
         required=False
     )
 
+    invite_emails = forms.CharField(
+        required=False,
+        label="Invite Collaborators (comma-separated emails)",
+        widget=forms.TextInput(attrs={'placeholder': 'e.g. John@example.com, Rob@example.com'})
+    )
     class Meta:
         model = Project
         fields = ['title', 'description', 'start_date', 'end_date', 'status', 'category']
-
-class InviteCollaboratorForm(forms.Form):
-    email = forms.EmailField(label="Collaborator's Email")
