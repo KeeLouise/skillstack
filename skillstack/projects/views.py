@@ -1,4 +1,4 @@
-from django.core.mail import EmailMultiAlternatives
+from django.core.mail import EmailMultiAlternatives, send_mail
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
@@ -11,6 +11,8 @@ from .models import Invitation, Project
 import logging
 logger = logging.getLogger(__name__)
 
+
+# Sends email invitation for users who don’t yet have accounts – KR 31/07/2025
 def send_invite_email(email, project):
     invite_link = f"https://skillstack-1bx8.onrender.com/users/register/?email={email}&project={project.id}"
     subject = f"You’ve been invited to collaborate on {project.title}"
@@ -33,6 +35,20 @@ def send_invite_email(email, project):
     except Exception as e:
         logger.error(f"Failed to send invite to {email}: {e}")
 
+
+# Notifies existing users by email when added as collaborators – KR 31/07/2025
+def notify_existing_collaborator(user, project):
+    send_mail(
+        subject='You have been added to a new project on Skillstack',
+        message=f'Hello {user.first_name or user.username},\n\n'
+                f'You’ve been added as a collaborator to the project: "{project.title}". '
+                f'You can view it now in your dashboard.',
+        from_email='email.skillstack@gmail.com',
+        recipient_list=[user.email],
+        fail_silently=False,
+    )
+
+
 @login_required
 def create_project(request):
     if request.method == 'POST':
@@ -43,7 +59,7 @@ def create_project(request):
             project.save()
             form.save_m2m()
 
-            # Handles collaborator invitations - KR 31/07/2025
+            # Handles collaborator invitations – KR 31/07/2025
             invite_emails = form.cleaned_data.get('invite_emails', '')
             emails = [email.strip() for email in invite_emails.split(',') if email.strip()]
 
@@ -51,6 +67,7 @@ def create_project(request):
                 try:
                     user = User.objects.get(email=email)
                     project.collaborators.add(user)
+                    notify_existing_collaborator(user, project)
                     logger.info(f"Added existing user {email} as collaborator.")
                 except User.DoesNotExist:
                     Invitation.objects.create(email=email, project=project, invited_by=request.user)
@@ -62,6 +79,7 @@ def create_project(request):
         form = ProjectForm()
 
     return render(request, 'projects/create_project.html', {'form': form})
+
 
 @login_required
 def project_detail(request, pk):
