@@ -19,28 +19,24 @@
     <button type="submit" class="btn btn-outline-primary">Search</button>
   </form>
 
-  <ul class="nav nav-tabs mb-3">
-    <li class="nav-item">
-      <a class="nav-link {% if active_tab == 'inbox' %}active{% endif %}" href="{% url 'messages' %}">
-        Inbox {% if unread_count > 0 %}<span class="badge bg-secondary">{{ unread_count }}</span>{% endif %}
-      </a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link {% if active_tab == 'sent' %}active{% endif %}" href="{% url 'sent' %}">Sent</a>
-    </li>
-  </ul>
-
   {% if messages %}
     <div class="list-group">
       {% for msg in messages %}
-        <a href="{% url 'message_detail' msg.pk %}" class="list-group-item list-group-item-action {% if not msg.is_read %}fw-bold bg-light{% endif %}">
-          <div class="d-flex w-100 justify-content-between">
+        <a href="{% url 'message_detail' msg.pk %}" 
+           class="list-group-item list-group-item-action 
+           {% if not msg.is_read and msg.recipient == user %}fw-bold bg-light{% endif %}">
+          <div class="d-flex justify-content-between">
             <h5 class="mb-1">{{ msg.subject }}</h5>
             <small>{{ msg.sent_at|date:"M d, Y H:i" }}</small>
           </div>
           <p class="mb-1 text-muted">
-            {% if active_tab == 'inbox' %}From: {{ msg.sender.username }}
-            {% else %}To: {{ msg.recipient.username }}
+            {% if msg.sender == user %}
+              To: {{ msg.recipient.username }} 
+              <span class="badge bg-secondary">Sent</span>
+            {% else %}
+              From: {{ msg.sender.username }} 
+              {% if not msg.is_read %}<span class="badge bg-success">Unread</span>{% endif %}
+              <span class="badge bg-primary">Received</span>
             {% endif %}
           </p>
         </a>

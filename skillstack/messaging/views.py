@@ -23,6 +23,31 @@ def inbox(request):
         'query': query
     })
 
+@login_required
+def all_messages(request):
+    user = request.user
+    query = request.GET.get('q', '')
+
+    messages = Message.objects.filter(
+        Q(sender=user) | Q(recipient=user)
+    )
+
+    if query:
+        messages = messages.filter(
+            Q(subject__icontains=query) |
+            Q(body__icontains=query)
+        )
+
+    messages = messages.order_by('-sent_at')
+
+    unread_count = Message.objects.filter(recipient=user, is_read=False).count()
+
+    return render(request, 'messaging/messages.html', {
+        'messages': messages,
+        'query': query,
+        'unread_count': unread_count,
+        'user': user  # pass explicitly to use in template
+    })
 
 @login_required
 def sent_messages(request):
@@ -45,9 +70,15 @@ def sent_messages(request):
 
 @login_required
 def message_detail(request, pk):
-    message=get_object_or_404(Message, pk=pk, recipient=request.user)
-    message.is_read = True
-    message.save()
+    message = get_object_or_404(Message, pk=pk)
+
+    if request.user != message.recipient and request.user != message.sender:
+        return redirect('messages')
+
+    if message.recipient == request.user and not message.is_read:
+        message.is_read = True
+        message.save()
+
     return render(request, 'messaging/message_detail.html', {'message': message})
 
 @login_required
