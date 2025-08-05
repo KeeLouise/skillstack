@@ -12,10 +12,12 @@ def home(request):
 @login_required
 def dashboard(request):
     user = request.user
-
     projects = Project.objects.filter(
         Q(owner=user) | Q(collaborators=user)
     ).distinct()
+
+    for project in projects:
+        project.my_role = "Owner" if project.owner == user else "Collaborator"
 
     return render(request, 'core/dashboard.html', {'projects': projects})
 
