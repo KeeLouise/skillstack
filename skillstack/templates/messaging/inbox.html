@@ -1,15 +1,29 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="container mt-4">
-  <h2>Inbox</h2>
+  <h2>Messages</h2>
   <a href="{% url 'compose' %}" class="btn btn-primary mb-3">New Message</a>
-  <ul class="list-group">
-    {% for msg in messages %}
+
+  <h4>Received Messages</h4>
+  <ul class="list-group mb-4">
+    {% for msg in received_messages %}
       <li class="list-group-item {% if not msg.is_read %}fw-bold{% endif %}">
         <strong>{{ msg.subject }}</strong> from {{ msg.sender.username }} - {{ msg.sent_at|date:"SHORT_DATETIME_FORMAT" }}
+        <a href="{% url 'message_detail' msg.pk %}" class="stretched-link"></a>
       </li>
     {% empty %}
-      <li class="list-group-item">No messages</li>
+      <li class="list-group-item">No received messages</li>
+    {% endfor %}
+  </ul>
+
+  <h4>Sent Messages</h4>
+  <ul class="list-group">
+    {% for msg in sent_messages %}
+      <li class="list-group-item">
+        <strong>{{ msg.subject }}</strong> to {{ msg.recipient.username }} - {{ msg.sent_at|date:"SHORT_DATETIME_FORMAT" }}
+      </li>
+    {% empty %}
+      <li class="list-group-item">No sent messages</li>
     {% endfor %}
   </ul>
 </div>
