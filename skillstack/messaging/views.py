@@ -42,11 +42,11 @@ def all_messages(request):
 
     unread_count = Message.objects.filter(recipient=user, is_read=False).count()
 
-    return render(request, 'messaging/messages.html', {
+    return render(request, 'messaging/inbox.html', {
         'messages': messages,
         'query': query,
         'unread_count': unread_count,
-        'user': user  # pass explicitly to use in template
+        'user': user  
     })
 
 @login_required
