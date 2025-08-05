@@ -1,24 +1,47 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
+from django.db.models import Q
 from .models import Message
 from .forms import MessageForm
 
 @login_required
 def inbox(request):
-    received_messages = Message.objects.filter(recipient=request.user)
-    sent_messages = Message.objects.filter(sender=request.user)
+    query = request.GET.get('q', '')
+    messages_qs = Message.objects.filter(recipient=request.user)
 
-    context = {
-        'received_messages': received_messages,
-        'sent_messages': sent_messages,
-    }
+    if query:
+        messages_qs = messages_qs.filter(
+            Q(subject__icontains=query) | Q(sender__username__icontains=query)
+        )
 
-    return render(request, 'messaging/inbox.html', context)
+    unread_count = Message.objects.filter(recipient=request.user, is_read=False).count()
+
+    return render(request, 'messaging/inbox.html', {
+        'messages': messages_qs,
+        'active_tab': 'inbox',
+        'unread_count': unread_count,
+        'query': query
+    })
+
 
 @login_required
 def sent_messages(request):
-    messages = Message.objects.filter(sender=request.user)
-    return render (request, 'messaging/sent.html', {'messages': messages})
+    query = request.GET.get('q', '')
+    messages_qs = Message.objects.filter(sender=request.user)
+
+    if query:
+        messages_qs = messages_qs.filter(
+            Q(subject__icontains=query) | Q(recipient__username__icontains=query)
+        )
+
+    unread_count = Message.objects.filter(recipient=request.user, is_read=False).count()
+
+    return render(request, 'messaging/inbox.html', {
+        'messages': messages_qs,
+        'active_tab': 'sent',
+        'unread_count': unread_count,
+        'query': query
+    })
 
 @login_required
 def message_detail(request, pk):
