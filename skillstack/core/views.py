@@ -10,8 +10,13 @@ def home(request):
 
 @login_required
 def dashboard(request):
-    user_projects = Project.objects.filter(owner=request.user)
-    return render(request, 'core/dashboard.html', {'projects': user_projects})
+    user = request.user
+
+    projects = Project.objects.filter(
+        Q(owner=user) | Q(collaborators=user)
+    ).distinct()
+
+    return render(request, 'core/dashboard.html', {'projects': projects})
 
 @login_required
 def create_project(request):
