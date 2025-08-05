@@ -11,16 +11,16 @@ class MessageForm(forms.ModelForm):
     class Meta:
         model = Message
         fields = ['recipient', 'subject', 'body']
-    
+
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user')
         super().__init__(*args, **kwargs)
 
         owned_projects = Project.objects.filter(owner=user)
-        collaborator_projects = Project.objects.filter(collaborators=user)
+        collaborated_projects = Project.objects.filter(collaborators=user)
 
         collaborators = User.objects.filter(
-            Q(projects__in=owned_projects) | Q(collaborating_projects__in=collaborator_projects)
+            Q(collaborations__in=owned_projects) | Q(projects__in=collaborated_projects)
         ).exclude(id=user.id).distinct()
 
         self.fields['recipient'].queryset = collaborators
