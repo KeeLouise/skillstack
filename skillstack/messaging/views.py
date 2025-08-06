@@ -26,14 +26,23 @@ def inbox(request):
 
 @login_required
 def all_messages(request):
-    user = request.user
-    messages = Message.objects.filter(Q(sender=user) | Q(recipient=user)).order_by('-sent_at')
-    unread_count = Message.objects.filter(recipient=user, is_read=False).count()
+    query = request.GET.get('q', '')
+
+    messages = Message.objects.filter(
+        Q(sender=request.user) | Q(recipient=request.user)
+    ).order_by('-sent_at')
+
+    if query:
+        messages = messages.filter(
+            Q(subject__icontains=query) | Q(body__icontains=query)
+        )
+
+    unread_count = Message.objects.filter(recipient=request.user, is_read=False).count()
 
     return render(request, 'messaging/messages.html', {
         'messages': messages,
+        'query': query,
         'unread_count': unread_count,
-        'active_tab': 'all'
     })
 
 @login_required
