@@ -12,6 +12,7 @@
   <hr>
   <p>{{ message.body }}</p>
   <a href="{% url 'reply_message' message.pk %}" class="btn btn-outline-secondary btn-sm">Reply</a>
+  <br>
   <form method="POST" action="{% url 'delete_message' message.pk %}">
   {% csrf_token %}
   <button type="submit" class="btn btn-danger"
