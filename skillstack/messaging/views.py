@@ -1,5 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
+from django.views.decorators.http import require_POST
 from django.db.models import Q, Max
 from collections import defaultdict
 from .models import Message
@@ -90,3 +91,16 @@ def compose_message(request):
         form = MessageForm(user=request.user)
         
     return render(request, 'messaging/compose.html', {'form': form})
+
+@login_required
+@require_POST
+def delete_message(request, pk):
+    message = get_object_or_404(Message, pk=pk)
+
+    if message.sender != request.user and message.recipient != request.user:
+        messages.error(request, "You don't have permission to delete this message.")
+        return redirect('messages')
+
+    message.delete()
+    messages.success(request, "Message deleted successfully.")
+    return redirect('messages')

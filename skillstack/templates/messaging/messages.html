@@ -27,6 +27,13 @@
             <div class="card-body">
               <div class="d-flex justify-content-between align-items-center mb-2">
                 <h5 class="card-title mb-0">{{ msg.subject }}</h5>
+                <form method="POST" action="{% url 'delete_message' msg.pk %}" class="d-inline">
+  {% csrf_token %}
+  <button type="submit" class="btn btn-sm btn-outline-danger"
+          onclick="return confirm('Are you sure you want to delete this message?');">
+    Delete
+  </button>
+</form>
                 <small class="text-muted">{{ msg.sent_at|date:"M d, Y H:i" }}</small>
               </div>
               <p class="card-text text-muted mb-2">{{ msg.body|truncatechars:100 }}</p>

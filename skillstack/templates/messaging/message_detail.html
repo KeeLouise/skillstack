@@ -4,6 +4,11 @@
 {% block content %}
 <div class="container mt-5">
   <h2>{{ message.subject }}</h2>
+  <form method="POST" action="{% url 'delete_message' message.pk %}">
+  {% csrf_token %}
+  <button type="submit" class="btn btn-danger"
+          onclick="return confirm('Delete this message?');">Delete Message</button>
+</form>
   <p class="text-muted">
     <strong>From:</strong> {{ message.sender.username }}<br>
     <strong>To:</strong> {{ message.recipient.username }}<br>
