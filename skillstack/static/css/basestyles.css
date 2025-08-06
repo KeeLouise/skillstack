@@ -25,3 +25,16 @@ p, p.lead{
     font-family: sans-serif !important;
     color: black !important;
 }
+
+.btn-gradient {
+  background: linear-gradient(90deg, #007bff, #00c6ff);
+  border: none;
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.btn-gradient:hover,
+.btn-gradient:focus {
+  background: linear-gradient(90deg, #0056b3, #00aaff);
+  box-shadow: 0 6px 16px rgba(0, 123, 255, 0.4);
+}
