@@ -30,7 +30,7 @@ def all_messages(request):
     messages = Message.objects.filter(Q(sender=user) | Q(recipient=user)).order_by('-sent_at')
     unread_count = Message.objects.filter(recipient=user, is_read=False).count()
 
-    return render(request, 'messaging/messages.html', {
+    return render(request, 'messaging/inbox.html', {
         'messages': messages,
         'unread_count': unread_count,
         'active_tab': 'all'
