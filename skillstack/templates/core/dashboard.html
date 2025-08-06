@@ -8,8 +8,7 @@
       <h2 class="fw-bold mb-1 text-primary-emphasis">Welcome, {{ request.user.first_name|default:request.user.username }}</h2>
       <p class="text-secondary">Here’s a snapshot of your software projects.</p>
     </div>
-    <a href="{% url 'create_project' %}" class="btn btn-gradient btn-lg px-4 py-2 text-white fw-semibold"
-       style="background: linear-gradient(135deg, #4f46e5, #3b82f6); border: none;">
+    <a href="{% url 'create_project' %}" class="btn btn-gradient btn-lg px-4 py-2 text-white fw-semibold">
       + New Project
     </a>
   </div>
