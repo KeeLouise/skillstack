@@ -8,19 +8,23 @@ from django.db.models import Q
 
 class MessageForm(forms.ModelForm):
     recipient = forms.ModelChoiceField(queryset=User.objects.none(), label="Select Collaborator")
+
     class Meta:
         model = Message
-        fields = ['recipient', 'subject', 'body']
+        fields = ['recipient', 'subject', 'body', 'importance']
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user')
         super().__init__(*args, **kwargs)
 
+        from projects.models import Project
+        from django.db.models import Q
+
         owned_projects = Project.objects.filter(owner=user)
-        collaborated_projects = Project.objects.filter(collaborators=user)
+        collaborator_projects = Project.objects.filter(collaborators=user)
 
         collaborators = User.objects.filter(
-            Q(collaborations__in=owned_projects) | Q(projects__in=collaborated_projects)
+            Q(projects__in=owned_projects) | Q(collaborations__in=collaborator_projects)
         ).exclude(id=user.id).distinct()
 
         self.fields['recipient'].queryset = collaborators

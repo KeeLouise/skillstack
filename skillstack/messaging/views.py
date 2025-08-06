@@ -94,6 +94,29 @@ def compose_message(request):
     return render(request, 'messaging/compose.html', {'form': form})
 
 @login_required
+def reply_message(request, pk):
+    original = get_object_or_404(Message, pk=pk, recipient=request.user)
+    
+    if request.method == 'POST':
+        form = MessageForm(request.POST, user=request.user)
+        if form.is_valid():
+            reply = form.save(commit=False)
+            reply.sender = request.user
+            reply.reply_to = original
+            reply.save()
+            return redirect('messages')
+    else:
+        form = MessageForm(
+            initial={
+                'recipient': original.sender,
+                'subject': f"Re: {original.subject}"
+            },
+            user=request.user
+        )
+    
+    return render(request, 'messaging/compose.html', {'form': form})
+
+@login_required
 @require_POST
 def delete_message(request, pk):
     message = get_object_or_404(

@@ -4,7 +4,6 @@
 {% block content %}
 <div class="container mt-5">
   <h2>{{ message.subject }}</h2>
-  <form method="POST" action="{% url 'delete_message' message.pk %}">
   {% csrf_token %}
   <button type="submit" class="btn btn-danger"
           onclick="return confirm('Delete this message?');">Delete Message</button>
@@ -16,6 +15,8 @@
   </p>
   <hr>
   <p>{{ message.body }}</p>
+  <a href="{% url 'reply_message' msg.pk %}" class="btn btn-outline-secondary btn-sm">Reply</a>
+  <form method="POST" action="{% url 'delete_message' message.pk %}"></form>
   <a href="{% url 'messages' %}" class="btn btn-outline-secondary mt-3">Back to Inbox</a>
 </div>
 {% endblock %}
