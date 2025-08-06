@@ -96,11 +96,10 @@ def compose_message(request):
 @login_required
 @require_POST
 def delete_message(request, pk):
-    message = get_object_or_404(Message, pk=pk)
-
-    if message.sender != request.user and message.recipient != request.user:
-        messages.error(request, "You don't have permission to delete this message.")
-        return redirect('messages')
+    message = get_object_or_404(
+        Message,
+        Q(pk=pk) & (Q(sender=request.user) | Q(recipient=request.user))
+    )
 
     message.delete()
     messages.success(request, "Message deleted successfully.")
