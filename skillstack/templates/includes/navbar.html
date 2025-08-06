@@ -21,7 +21,7 @@
         {% if user.is_authenticated %}
           <li class="nav-item"><a href="{% url 'profile' %}" class="nav-link">My Profile</a></li>
           <li class="nav-item"><a href="{% url 'dashboard' %}" class="nav-link">Projects</a></li>
-          <li class="nav-item"><a href="{% url 'inbox' %}" class="nav-link">Messages</a></li>
+          <li class="nav-item"><a href="{% url 'messages' %}" class="nav-link">Messages</a></li>
           <li class="nav-item"><a href="{% url 'logout' %}" class="nav-link">Logout</a></li>
         {% else %}
           <li class="nav-item"><a href="{% url 'login' %}" class="nav-link">Login</a></li>
