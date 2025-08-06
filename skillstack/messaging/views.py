@@ -76,7 +76,7 @@ def compose_message(request):
             msg = form.save(commit=False)
             msg.sender = request.user
             msg.save()
-            return redirect ('inbox')
+            return redirect ('messages')
     else:
         form = MessageForm(user=request.user)
         
