@@ -102,7 +102,7 @@ import os
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.getenv('DATABASE_URL', 'postgresql://skillstack_user:Skillstack2025*@localhost:5432/skillstack'),
+        default=os.getenv('DATABASE_URL', 'postgresql://skillstack_user:Skill2025***@localhost:5432/skillstack'),
         conn_max_age=600
     )
 }
