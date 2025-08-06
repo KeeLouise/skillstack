@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
-from django.db.models import Q
+from django.db.models import Q, Max
+from collections import defaultdict
 from .models import Message
 from .forms import MessageForm
 
@@ -24,29 +25,22 @@ def inbox(request):
     })
 
 @login_required
-def all_messages(request):
+def all_messages_view(request):
     user = request.user
-    query = request.GET.get('q', '')
 
-    messages = Message.objects.filter(
-        Q(sender=user) | Q(recipient=user)
-    )
+    messages = Message.objects.filter(Q(sender=user) | Q(recipient=user)).order_by('-sent_at')
 
-    if query:
-        messages = messages.filter(
-            Q(subject__icontains=query) |
-            Q(body__icontains=query)
-        )
-
-    messages = messages.order_by('-sent_at')
+    threads = {}
+    for msg in messages:
+        other_user = msg.recipient if msg.sender == user else msg.sender
+        if other_user not in threads:
+            threads[other_user] = msg 
 
     unread_count = Message.objects.filter(recipient=user, is_read=False).count()
 
-    return render(request, 'messaging/inbox.html', {
-        'messages': messages,
-        'query': query,
+    return render(request, 'messaging/message_threads.html', {
+        'threads': threads,
         'unread_count': unread_count,
-        'user': user  
     })
 
 @login_required

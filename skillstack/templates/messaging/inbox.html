@@ -3,7 +3,7 @@
 
 {% block content %}
 <div class="container mt-5">
-  <div class="d-flex justify-content-between align-items-center mb-3">
+  <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="mb-0">
       Messages
       {% if unread_count > 0 %}
@@ -13,33 +13,42 @@
     <a href="{% url 'compose' %}" class="btn btn-dark">New Message</a>
   </div>
 
-  <form method="get" class="mb-3 d-flex">
+  <form method="get" class="mb-4 d-flex">
     <input type="text" name="q" class="form-control me-2" placeholder="Search messages..."
            value="{{ query|default:'' }}">
     <button type="submit" class="btn btn-outline-primary">Search</button>
   </form>
 
   {% if messages %}
-    <div class="list-group">
+    <div class="row row-cols-1 g-3">
       {% for msg in messages %}
-        <a href="{% url 'message_detail' msg.pk %}" 
-           class="list-group-item list-group-item-action 
-           {% if not msg.is_read and msg.recipient == user %}fw-bold bg-light{% endif %}">
-          <div class="d-flex justify-content-between">
-            <h5 class="mb-1">{{ msg.subject }}</h5>
-            <small>{{ msg.sent_at|date:"M d, Y H:i" }}</small>
+        <div class="col">
+          <div class="card shadow-sm {% if not msg.is_read and msg.recipient == user %}border-primary{% endif %}">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="card-title mb-0">{{ msg.subject }}</h5>
+                <small class="text-muted">{{ msg.sent_at|date:"M d, Y H:i" }}</small>
+              </div>
+              <p class="card-text text-muted mb-2">{{ msg.body|truncatechars:100 }}</p>
+
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  {% if msg.sender == user %}
+                    <span class="badge bg-secondary">To: {{ msg.recipient.username }}</span>
+                    <span class="badge bg-dark">Sent</span>
+                  {% else %}
+                    <span class="badge bg-secondary">From: {{ msg.sender.username }}</span>
+                    <span class="badge bg-primary">Received</span>
+                    {% if not msg.is_read %}
+                      <span class="badge bg-success">Unread</span>
+                    {% endif %}
+                  {% endif %}
+                </div>
+                <a href="{% url 'message_detail' msg.pk %}" class="btn btn-outline-primary btn-sm">View</a>
+              </div>
+            </div>
           </div>
-          <p class="mb-1 text-muted">
-            {% if msg.sender == user %}
-              To: {{ msg.recipient.username }} 
-              <span class="badge bg-secondary">Sent</span>
-            {% else %}
-              From: {{ msg.sender.username }} 
-              {% if not msg.is_read %}<span class="badge bg-success">Unread</span>{% endif %}
-              <span class="badge bg-primary">Received</span>
-            {% endif %}
-          </p>
-        </a>
+        </div>
       {% endfor %}
     </div>
   {% else %}
