@@ -51,7 +51,7 @@
                   {% endif %}
                 </div>
                 <div class="d-flex gap-2">
-                  <a href="{% url 'message_detail' message.pk %}" class="btn btn-outline-primary btn-sm">View</a>
+                  <a href="{% url 'message_detail' msg.pk %}" class="btn btn-outline-primary btn-sm">View</a>
                   {% if msg.sender == user or msg.recipient == user %}
                     <form method="POST" action="{% url 'delete_message' msg.pk %}" class="d-inline">
                       {% csrf_token %}

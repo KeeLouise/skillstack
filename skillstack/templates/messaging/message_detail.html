@@ -16,7 +16,7 @@
   </p>
   <hr>
   <p>{{ message.body }}</p>
-  <a href="{% url 'reply_message' msg.pk %}" class="btn btn-outline-secondary btn-sm">Reply</a>
+  <a href="{% url 'reply_message' message.pk %}" class="btn btn-outline-secondary btn-sm">Reply</a>
   <form method="POST" action="{% url 'delete_message' message.pk %}"></form>
   <a href="{% url 'messages' %}" class="btn btn-outline-secondary mt-3">Back to Inbox</a>
 </div>
