@@ -1,32 +1,16 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-class Message(models.Model):
-    IMPORTANCE_CHOICES = [
-        ('low', 'Low'),
-        ('normal', 'Normal'),
-        ('high', 'High'),
-    ]
-
-    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
-    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_messages')
-    subject = models.CharField(max_length=500)
-    body = models.TextField()
-    importance = models.CharField(max_length=10, choices=IMPORTANCE_CHOICES, default='normal')
-    sent_at = models.DateTimeField(auto_now_add=True)
-    is_read = models.BooleanField(default=False)
-    reply_to = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL)
-
-    class Meta:
-        ordering = ['-sent_at']
-
-    def __str__(self):
-        return f"From {self.sender} to {self.recipient} - {self.subject}"
 
 class Conversation(models.Model):
     participants = models.ManyToManyField(User, related_name='conversations')
-    project = models.ForeignKey('projects.Project', null=True, blank=True,
-                                on_delete=models.SET_NULL, related_name='conversations')
+    project = models.ForeignKey(
+        'projects.Project',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='conversations'
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -37,16 +21,21 @@ class Conversation(models.Model):
         ps = ", ".join(self.participants.values_list('username', flat=True))
         return f"Conversation({ps})"
 
+
 class Message(models.Model):
-    IMPORTANCE_CHOICES = [('low','Low'),('normal','Normal'),('high','High')]
+    IMPORTANCE_CHOICES = [
+        ('low', 'Low'),
+        ('normal', 'Normal'),
+        ('high', 'High'),
+    ]
 
     conversation = models.ForeignKey(
-    "Conversation",
-    on_delete=models.CASCADE,
-    related_name="messages",
-    null=True,
-    blank=True
-)
+        "Conversation",
+        on_delete=models.CASCADE,
+        related_name="messages",
+        null=True,
+        blank=True
+    )
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
     recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_messages')
     subject = models.CharField(max_length=500, blank=True)
@@ -54,6 +43,7 @@ class Message(models.Model):
     importance = models.CharField(max_length=10, choices=IMPORTANCE_CHOICES, default='normal')
     sent_at = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
+    reply_to = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL)
 
     class Meta:
         ordering = ['sent_at']
