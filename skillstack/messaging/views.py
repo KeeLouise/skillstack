@@ -102,16 +102,27 @@ def compose_message(request):
 def reply_message(request, pk):
     original_msg = get_object_or_404(Message, pk=pk)
 
+    # If this is the first reply, make sure the conversation exists - KR 08/08/2025
+    if not original_msg.conversation:
+        convo = Conversation.objects.create()
+        convo.participants.add(original_msg.sender, original_msg.recipient)
+        original_msg.conversation = convo
+        original_msg.save()
+    else:
+        convo = original_msg.conversation
+
     initial_data = {
-        'recipient': original_msg.sender,
+        'recipient': original_msg.sender if request.user == original_msg.recipient else original_msg.recipient,
         'subject': f"Re: {original_msg.subject}",
+        'conversation': convo.id
     }
 
     if request.method == 'POST':
-        form = MessageForm(request.POST, user=request.user, initial=initial_data)
+        form = MessageForm(request.POST, user=request.user)
         if form.is_valid():
             reply = form.save(commit=False)
             reply.sender = request.user
+            reply.conversation = convo
             reply.save()
             return redirect('messages')
     else:

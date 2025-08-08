@@ -9,6 +9,8 @@ from projects.models import Project
 class MessageForm(forms.ModelForm):
     recipient = forms.ModelChoiceField(queryset=User.objects.none(), label="Select Collaborator")
 
+    conversation = forms.ModelChoiceField(queryset=Conversation.objects.all(),required=False,widget=forms.HiddenInput())
+
     class Meta:
         model = Message
         fields = ['recipient', 'subject', 'body', 'importance']
