@@ -23,6 +23,11 @@
 
       <form method="post" novalidate>
         {% csrf_token %}
+        {# Preserve conversation if replying #}
+        {% if is_reply and original_msg.conversation %}
+          <input type="hidden" name="conversation" value="{{ original_msg.conversation.id }}">
+        {% endif %}
+
         {% crispy form %}
       </form>
     </div>
