@@ -2,19 +2,21 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
-from django.db.models import Q, Max
-from collections import defaultdict
+from django.db.models import Q
 from .models import Message
 from .forms import MessageForm
+
 
 @login_required
 def inbox(request):
     query = request.GET.get('q', '')
-    messages_qs = Message.objects.filter(recipient=request.user)
+    messages_qs = Message.objects.filter(recipient=request.user).order_by('-sent_at')
 
     if query:
         messages_qs = messages_qs.filter(
-            Q(subject__icontains=query) | Q(sender__username__icontains=query)
+            Q(subject__icontains=query) |
+            Q(sender__first_name__icontains=query) |
+            Q(sender__last_name__icontains=query)
         )
 
     unread_count = Message.objects.filter(recipient=request.user, is_read=False).count()
@@ -26,35 +28,44 @@ def inbox(request):
         'query': query
     })
 
+
 @login_required
 def all_messages(request):
     query = request.GET.get('q', '')
 
-    messages = Message.objects.filter(
+    messages_qs = Message.objects.filter(
         Q(sender=request.user) | Q(recipient=request.user)
     ).order_by('-sent_at')
 
     if query:
-        messages = messages.filter(
-            Q(subject__icontains=query) | Q(body__icontains=query)
+        messages_qs = messages_qs.filter(
+            Q(subject__icontains=query) |
+            Q(body__icontains=query) |
+            Q(sender__first_name__icontains=query) |
+            Q(sender__last_name__icontains=query) |
+            Q(recipient__first_name__icontains=query) |
+            Q(recipient__last_name__icontains=query)
         )
 
     unread_count = Message.objects.filter(recipient=request.user, is_read=False).count()
 
     return render(request, 'messaging/messages.html', {
-        'messages': messages,
+        'messages': messages_qs,
         'query': query,
         'unread_count': unread_count,
     })
 
+
 @login_required
 def sent_messages(request):
     query = request.GET.get('q', '')
-    messages_qs = Message.objects.filter(sender=request.user)
+    messages_qs = Message.objects.filter(sender=request.user).order_by('-sent_at')
 
     if query:
         messages_qs = messages_qs.filter(
-            Q(subject__icontains=query) | Q(recipient__username__icontains=query)
+            Q(subject__icontains=query) |
+            Q(recipient__first_name__icontains=query) |
+            Q(recipient__last_name__icontains=query)
         )
 
     unread_count = Message.objects.filter(recipient=request.user, is_read=False).count()
@@ -66,18 +77,22 @@ def sent_messages(request):
         'query': query
     })
 
+
 @login_required
 def message_detail(request, pk):
-    message = get_object_or_404(Message, pk=pk)
+    message_obj = get_object_or_404(Message, pk=pk)
 
-    if request.user != message.recipient and request.user != message.sender:
+    if request.user != message_obj.recipient and request.user != message_obj.sender:
         return redirect('messages')
 
-    if message.recipient == request.user and not message.is_read:
-        message.is_read = True
-        message.save()
+    if message_obj.recipient == request.user and not message_obj.is_read:
+        message_obj.is_read = True
+        message_obj.save()
 
-    return render(request, 'messaging/message_detail.html', {'message': message})
+    return render(request, 'messaging/message_detail.html', {
+        'message': message_obj
+    })
+
 
 @login_required
 def compose_message(request):
@@ -87,10 +102,11 @@ def compose_message(request):
             msg = form.save(commit=False)
             msg.sender = request.user
             msg.save()
-            return redirect ('messages')
+            messages.success(request, "Message sent successfully.")
+            return redirect('messages')
     else:
         form = MessageForm(user=request.user)
-        
+
     return render(request, 'messaging/compose.html', {'form': form})
 
 
@@ -98,7 +114,6 @@ def compose_message(request):
 def reply_message(request, pk):
     original_msg = get_object_or_404(Message, pk=pk)
 
-    # Pre-fill subject and recipient - KR 08/08/2025
     initial_data = {
         'recipient': original_msg.sender,
         'subject': f"Re: {original_msg.subject}",
@@ -110,6 +125,7 @@ def reply_message(request, pk):
             reply = form.save(commit=False)
             reply.sender = request.user
             reply.save()
+            messages.success(request, "Reply sent successfully.")
             return redirect('messages')
     else:
         form = MessageForm(user=request.user, initial=initial_data)
@@ -120,14 +136,15 @@ def reply_message(request, pk):
         'original_msg': original_msg
     })
 
+
 @login_required
 @require_POST
 def delete_message(request, pk):
-    message = get_object_or_404(
+    message_obj = get_object_or_404(
         Message,
         Q(pk=pk) & (Q(sender=request.user) | Q(recipient=request.user))
     )
 
-    message.delete()
+    message_obj.delete()
     messages.success(request, "Message deleted successfully.")
     return redirect('messages')
