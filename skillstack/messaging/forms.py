@@ -7,7 +7,10 @@ from crispy_forms.layout import Submit
 from django.db.models import Q
 
 class MessageForm(forms.ModelForm):
-    recipient = forms.ModelChoiceField(queryset=User.objects.none(), label="Select Collaborator")
+    recipient = forms.ModelChoiceField(
+        queryset=User.objects.none(),
+        label="Select Collaborator"
+    )
 
     class Meta:
         model = Message
@@ -28,6 +31,11 @@ class MessageForm(forms.ModelForm):
         ).exclude(id=user.id).distinct()
 
         self.fields['recipient'].queryset = collaborators
+
+        # This will show full name in dropdown, it will fallback to username if missing. KR 08/08/2025
+        self.fields['recipient'].label_from_instance = (
+            lambda obj: obj.get_full_name() or obj.username
+        )
 
         self.helper = FormHelper()
         self.helper.form_method = 'post'
