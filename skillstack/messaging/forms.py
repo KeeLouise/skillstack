@@ -1,16 +1,13 @@
 from django import forms
 from django.contrib.auth.models import User
-from .models import Message
-from projects.models import Project
+from django.db.models import Q
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
-from django.db.models import Q
+from .models import Message
+from projects.models import Project
 
 class MessageForm(forms.ModelForm):
-    recipient = forms.ModelChoiceField(
-        queryset=User.objects.none(),
-        label="Select Collaborator"
-    )
+    recipient = forms.ModelChoiceField(queryset=User.objects.none(), label="Select Collaborator")
 
     class Meta:
         model = Message
@@ -20,21 +17,20 @@ class MessageForm(forms.ModelForm):
         user = kwargs.pop('user')
         super().__init__(*args, **kwargs)
 
-        from projects.models import Project
-        from django.db.models import Q
+        # Projects I can see (owner or collaborator) - KR 08/08/2025
+        shared_projects = Project.objects.filter(
+            Q(owner=user) | Q(collaborators=user)
+        )
 
-        owned_projects = Project.objects.filter(owner=user)
-        collaborator_projects = Project.objects.filter(collaborators=user)
-
+        # Anyone else attached to those projects (owners or collaborators), not me - KR 08/08/2025
         collaborators = User.objects.filter(
-            Q(projects__in=owned_projects) | Q(collaborations__in=collaborator_projects)
+            Q(projects__in=shared_projects) |  # owners of those projects - KR 08/08/2025
+            Q(collaborations__in=shared_projects)  # collaborators on those projects - KR 08/08/2025
         ).exclude(id=user.id).distinct()
 
         self.fields['recipient'].queryset = collaborators
-
-        # This will show full name in dropdown, it will fallback to username if missing. KR 08/08/2025
         self.fields['recipient'].label_from_instance = (
-            lambda obj: obj.get_full_name() or obj.username
+            lambda u: u.get_full_name() or u.username
         )
 
         self.helper = FormHelper()
