@@ -21,6 +21,17 @@ h2.custom-profile-heading{
 
 }
 
+
+.nav.nav-tabs .nav-link { 
+  color: #212529 !important;  
+}
+.nav.nav-tabs .nav-link:hover { 
+  color: #0a58ca !important;  
+}
+.nav.nav-tabs .nav-link.active {
+  color: #212529 !important;
+}
+
 p, p.lead{
     font-family: sans-serif !important;
     color: black !important;
