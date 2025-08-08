@@ -13,18 +13,23 @@
     <a href="{% url 'compose' %}" class="btn btn-dark">New Message</a>
   </div>
 
-  <!-- Navigation Tabs -->
-  <ul class="nav nav-tabs mb-4">
-    <li class="nav-item">
-      <a class="nav-link {% if active_tab == 'all' %}active{% endif %}" href="{% url 'all_messages' %}">All</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link {% if active_tab == 'inbox' %}active{% endif %}" href="{% url 'messages' %}">Inbox</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link {% if active_tab == 'sent' %}active{% endif %}" href="{% url 'sent' %}">Sent</a>
-    </li>
-  </ul>
+ <!-- Navigation Tabs -->
+<ul class="nav nav-tabs mb-4">
+  <li class="nav-item">
+    <a class="nav-link text-dark {% if active_tab == 'all' %}active{% endif %}" href="{% url 'all_messages' %}">All</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link text-dark {% if active_tab == 'inbox' %}active{% endif %}" href="{% url 'messages' %}">
+      Inbox
+      {% if unread_count > 0 %}
+        <span class="badge bg-danger ms-1">{{ unread_count }}</span>
+      {% endif %}
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link text-dark {% if active_tab == 'sent' %}active{% endif %}" href="{% url 'sent' %}">Sent</a>
+  </li>
+</ul>
 
   <!-- Search Bar -->
   <form method="get" class="mb-4 d-flex">
