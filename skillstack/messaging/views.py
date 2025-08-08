@@ -116,6 +116,39 @@ def reply_message(request, pk):
     
     return render(request, 'messaging/compose.html', {'form': form})
 
+
+@login_required
+def reply_message(request, pk):
+    original_msg = get_object_or_404(
+        Message,
+        pk=pk,
+        recipient=request.user  # only allow replying to messages you received - KR 08/08/2025
+    )
+
+    if request.method == 'POST':
+        form = MessageForm(request.POST, user=request.user)
+        if form.is_valid():
+            reply = form.save(commit=False)
+            reply.sender = request.user
+            reply.save()
+            messages.success(request, 'Reply sent successfully!')
+            return redirect('messages')
+    else:
+        form = MessageForm(
+            user=request.user,
+            initial={
+                'recipient': original_msg.sender,
+                'subject': f"Re: {original_msg.subject}",
+                'body': f"\n\n--- Original message ---\n{original_msg.body}"
+            }
+        )
+
+    return render(request, 'messaging/compose.html', {
+        'form': form,
+        'is_reply': True,
+        'original_msg': original_msg
+    })
+
 @login_required
 @require_POST
 def delete_message(request, pk):
