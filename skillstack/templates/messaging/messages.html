@@ -3,6 +3,7 @@
 
 {% block content %}
 <div class="container mt-5">
+
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="mb-0">
       Messages
@@ -12,6 +13,21 @@
     </h2>
     <a href="{% url 'compose' %}" class="btn btn-dark">New Message</a>
   </div>
+
+  <!-- Navigation Tabs -->
+  <ul class="nav nav-tabs mb-4">
+    <li class="nav-item">
+      <a class="nav-link {% if active_tab == 'inbox' %}active{% endif %}" href="{% url 'messages' %}">
+        Inbox {% if unread_count > 0 %}<span class="badge bg-secondary">{{ unread_count }}</span>{% endif %}
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if active_tab == 'sent' %}active{% endif %}" href="{% url 'sent' %}">Sent</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if active_tab == 'all' %}active{% endif %}" href="{% url 'all_messages' %}">All</a>
+    </li>
+  </ul>
 
   <form method="get" class="mb-4 d-flex">
     <input type="text" name="q" class="form-control me-2" placeholder="Search messages..." value="{{ query|default:'' }}">
@@ -28,11 +44,12 @@
                 <h5 class="card-title mb-0 text-truncate" title="{{ msg.subject }}">{{ msg.subject }}</h5>
                 <small class="text-muted">{{ msg.sent_at|date:"M d, Y H:i" }}</small>
               </div>
+
               <span class="badge 
-                  {% if msg.importance == 'high' %}bg-danger
-                  {% elif msg.importance == 'normal' %}bg-primary
-                  {% else %}bg-secondary{% endif %}">
-                 {{ msg.get_importance_display }}
+                {% if msg.importance == 'high' %}bg-danger
+                {% elif msg.importance == 'normal' %}bg-primary
+                {% else %}bg-secondary{% endif %}">
+                {{ msg.get_importance_display }}
               </span>
 
               <p class="card-text text-muted mb-3">{{ msg.body|truncatechars:100 }}</p>
@@ -40,10 +57,10 @@
               <div class="d-flex justify-content-between align-items-center">
                 <div>
                   {% if msg.sender == user %}
-                    <span class="badge bg-secondary">To: {{ msg.recipient.username }}</span>
+                    <span class="badge bg-secondary">To: {{ msg.recipient.get_full_name|default:msg.recipient.username }}</span>
                     <span class="badge bg-dark">Sent</span>
                   {% else %}
-                    <span class="badge bg-secondary">From: {{ msg.sender.username }}</span>
+                    <span class="badge bg-secondary">From: {{ msg.sender.get_full_name|default:msg.sender.username }}</span>
                     <span class="badge bg-primary">Received</span>
                     {% if not msg.is_read %}
                       <span class="badge bg-success">Unread</span>
@@ -63,6 +80,7 @@
                   {% endif %}
                 </div>
               </div>
+
             </div>
           </div>
         </div>
