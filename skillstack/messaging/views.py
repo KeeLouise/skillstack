@@ -93,37 +93,16 @@ def compose_message(request):
         
     return render(request, 'messaging/compose.html', {'form': form})
 
-@login_required
-def reply_message(request, pk):
-    original = get_object_or_404(Message, pk=pk, recipient=request.user)
-    
-    if request.method == 'POST':
-        form = MessageForm(request.POST, user=request.user)
-        if form.is_valid():
-            reply = form.save(commit=False)
-            reply.sender = request.user
-            reply.reply_to = original
-            reply.save()
-            return redirect('messages')
-    else:
-        form = MessageForm(
-            initial={
-                'recipient': original.sender,
-                'subject': f"Re: {original.subject}"
-            },
-            user=request.user
-        )
-    
-    return render(request, 'messaging/compose.html', {'form': form})
-
 
 @login_required
 def reply_message(request, pk):
-    original_msg = get_object_or_404(
-        Message,
-        pk=pk,
-        recipient=request.user  # only allow replying to messages you received - KR 08/08/2025
-    )
+    original_msg = get_object_or_404(Message, pk=pk)
+
+    # Pre-fill subject and recipient - KR 08/08/2025
+    initial_data = {
+        'recipient': original_msg.sender,
+        'subject': f"Re: {original_msg.subject}",
+    }
 
     if request.method == 'POST':
         form = MessageForm(request.POST, user=request.user)
@@ -131,17 +110,9 @@ def reply_message(request, pk):
             reply = form.save(commit=False)
             reply.sender = request.user
             reply.save()
-            messages.success(request, 'Reply sent successfully!')
             return redirect('messages')
     else:
-        form = MessageForm(
-            user=request.user,
-            initial={
-                'recipient': original_msg.sender,
-                'subject': f"Re: {original_msg.subject}",
-                'body': f"\n\n--- Original message ---\n{original_msg.body}"
-            }
-        )
+        form = MessageForm(user=request.user, initial=initial_data)
 
     return render(request, 'messaging/compose.html', {
         'form': form,
