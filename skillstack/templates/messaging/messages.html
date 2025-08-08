@@ -13,25 +13,24 @@
     <a href="{% url 'compose' %}" class="btn btn-dark">New Message</a>
   </div>
 
-  <form method="get" class="mb-4 d-flex">
-    <input type="text" name="q" class="form-control me-2" placeholder="Search messages..." value="{{ query|default:'' }}">
-    <button type="submit" class="btn btn-outline-primary">Search</button>
-  </form>
-
   <!-- Navigation Tabs -->
   <ul class="nav nav-tabs mb-4">
     <li class="nav-item">
-      <a class="nav-link {% if active_tab == 'inbox' %}active{% endif %}" href="{% url 'messages' %}">
-        Inbox {% if unread_count > 0 %}<span class="badge bg-secondary">{{ unread_count }}</span>{% endif %}
-      </a>
+      <a class="nav-link {% if active_tab == 'all' %}active{% endif %}" href="{% url 'all_messages' %}">All</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if active_tab == 'inbox' %}active{% endif %}" href="{% url 'messages' %}">Inbox</a>
     </li>
     <li class="nav-item">
       <a class="nav-link {% if active_tab == 'sent' %}active{% endif %}" href="{% url 'sent' %}">Sent</a>
     </li>
-    <li class="nav-item">
-      <a class="nav-link {% if active_tab == 'all' %}active{% endif %}" href="{% url 'all_messages' %}">All</a>
-    </li>
   </ul>
+
+  <!-- Search Bar -->
+  <form method="get" class="mb-4 d-flex">
+    <input type="text" name="q" class="form-control me-2" placeholder="Search messages..." value="{{ query|default:'' }}">
+    <button type="submit" class="btn btn-outline-primary">Search</button>
+  </form>
 
   {% if messages %}
     <div class="row row-cols-1 g-3">
@@ -43,6 +42,7 @@
                 <h5 class="card-title mb-0 text-truncate" title="{{ msg.subject }}">{{ msg.subject }}</h5>
                 <small class="text-muted">{{ msg.sent_at|date:"M d, Y H:i" }}</small>
               </div>
+
               <span class="badge 
                   {% if msg.importance == 'high' %}bg-danger
                   {% elif msg.importance == 'normal' %}bg-primary
