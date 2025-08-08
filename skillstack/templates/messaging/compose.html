@@ -1,19 +1,30 @@
 {% extends "base.html" %}
 {% load crispy_forms_tags %}
 
-{% block title %}Compose Message{% endblock %}
+{% block title %}
+  {% if is_reply %}
+    Reply to {{ original_msg.sender.get_full_name|default:original_msg.sender.username }}
+  {% else %}
+    Compose Message
+  {% endif %}
+{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
   <div class="card shadow-sm border-0">
     <div class="card-body p-4">
-      <h3 class="mb-4 text-center">Compose New Message</h3>
+      <h3 class="mb-4 text-center">
+        {% if is_reply %}
+          Reply to {{ original_msg.sender.get_full_name|default:original_msg.sender.username }}
+        {% else %}
+          Compose New Message
+        {% endif %}
+      </h3>
 
       <form method="post" novalidate>
         {% csrf_token %}
         {% crispy form %}
       </form>
-      
     </div>
   </div>
 </div>
