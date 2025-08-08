@@ -40,7 +40,13 @@ class Conversation(models.Model):
 class Message(models.Model):
     IMPORTANCE_CHOICES = [('low','Low'),('normal','Normal'),('high','High')]
 
-    conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='messages')
+    conversation = models.ForeignKey(
+    "Conversation",
+    on_delete=models.CASCADE,
+    related_name="messages",
+    null=True,
+    blank=True
+)
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
     recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_messages')
     subject = models.CharField(max_length=500, blank=True)
