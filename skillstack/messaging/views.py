@@ -1,5 +1,5 @@
 from django.contrib.auth.decorators import login_required
-from django.contrib import messages as django_messages
+from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
 from django.db.models import Q
@@ -13,9 +13,7 @@ def inbox(request):
 
     if query:
         messages_qs = messages_qs.filter(
-            Q(subject__icontains=query) |
-            Q(sender__first_name__icontains=query) |
-            Q(sender__last_name__icontains=query)
+            Q(subject__icontains=query) | Q(sender__first_name__icontains=query) | Q(sender__last_name__icontains=query)
         )
 
     unread_count = Message.objects.filter(recipient=request.user, is_read=False).count()
@@ -27,6 +25,30 @@ def inbox(request):
         'query': query
     })
 
+
+@login_required
+def all_messages(request):
+    query = request.GET.get('q', '')
+
+    messages_qs = Message.objects.filter(
+        Q(sender=request.user) | Q(recipient=request.user)
+    ).order_by('-sent_at')
+
+    if query:
+        messages_qs = messages_qs.filter(
+            Q(subject__icontains=query) | Q(body__icontains=query)
+        )
+
+    unread_count = Message.objects.filter(recipient=request.user, is_read=False).count()
+
+    return render(request, 'messaging/messages.html', {
+        'messages': messages_qs,
+        'active_tab': 'all',
+        'unread_count': unread_count,
+        'query': query,
+    })
+
+
 @login_required
 def sent_messages(request):
     query = request.GET.get('q', '')
@@ -34,9 +56,7 @@ def sent_messages(request):
 
     if query:
         messages_qs = messages_qs.filter(
-            Q(subject__icontains=query) |
-            Q(recipient__first_name__icontains=query) |
-            Q(recipient__last_name__icontains=query)
+            Q(subject__icontains=query) | Q(recipient__first_name__icontains=query) | Q(recipient__last_name__icontains=query)
         )
 
     unread_count = Message.objects.filter(recipient=request.user, is_read=False).count()
@@ -48,31 +68,6 @@ def sent_messages(request):
         'query': query
     })
 
-@login_required
-def all_messages(request):
-    query = request.GET.get('q', '')
-    messages_qs = Message.objects.filter(
-        Q(sender=request.user) | Q(recipient=request.user)
-    ).order_by('-sent_at')
-
-    if query:
-        messages_qs = messages_qs.filter(
-            Q(subject__icontains=query) |
-            Q(body__icontains=query) |
-            Q(sender__first_name__icontains=query) |
-            Q(sender__last_name__icontains=query) |
-            Q(recipient__first_name__icontains=query) |
-            Q(recipient__last_name__icontains=query)
-        )
-
-    unread_count = Message.objects.filter(recipient=request.user, is_read=False).count()
-
-    return render(request, 'messaging/messages.html', {
-        'messages': messages_qs,
-        'active_tab': 'all',
-        'unread_count': unread_count,
-        'query': query
-    })
 
 @login_required
 def message_detail(request, pk):
@@ -86,6 +81,7 @@ def message_detail(request, pk):
         message.save()
 
     return render(request, 'messaging/message_detail.html', {'message': message})
+
 
 @login_required
 def compose_message(request):
@@ -101,6 +97,7 @@ def compose_message(request):
         
     return render(request, 'messaging/compose.html', {'form': form})
 
+
 @login_required
 def reply_message(request, pk):
     original_msg = get_object_or_404(Message, pk=pk)
@@ -111,7 +108,7 @@ def reply_message(request, pk):
     }
 
     if request.method == 'POST':
-        form = MessageForm(request.POST, user=request.user)
+        form = MessageForm(request.POST, user=request.user, initial=initial_data)
         if form.is_valid():
             reply = form.save(commit=False)
             reply.sender = request.user
@@ -126,6 +123,7 @@ def reply_message(request, pk):
         'original_msg': original_msg
     })
 
+
 @login_required
 @require_POST
 def delete_message(request, pk):
@@ -135,5 +133,5 @@ def delete_message(request, pk):
     )
 
     message.delete()
-    django_messages.success(request, "Message deleted successfully.")
+    messages.success(request, "Message deleted successfully.")
     return redirect('messages')
