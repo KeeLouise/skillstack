@@ -168,6 +168,30 @@ def message_detail(request, pk):
         }
     )
 
+@login_required
+def conversation_detail(request, pk):
+    """Jump to the latest message in a conversation (and reuse message_detail)."""
+    convo = get_object_or_404(
+        Conversation.objects.prefetch_related(
+            Prefetch(
+                'messages',
+                queryset=Message.objects.select_related('sender', 'recipient').order_by('-sent_at')
+            ),
+            'participants'
+        ),
+        pk=pk,
+    )
+    
+    if not convo.participants.filter(id=request.user.id).exists():
+        messages.error(request, "You don't have access to that conversation.")
+        return redirect('messages')
+
+    last_msg = next(iter(convo.messages.all()), None)
+    if not last_msg:
+        messages.info(request, "This conversation has no messages yet.")
+        return redirect('messages')
+
+    return redirect('message_detail', pk=last_msg.pk)
 
 @login_required
 def compose_message(request):
