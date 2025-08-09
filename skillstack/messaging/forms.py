@@ -6,6 +6,9 @@ from crispy_forms.layout import Submit
 from .models import Message, Conversation
 from projects.models import Project
 
+class MultiFileInput(forms.ClearableFileInput):
+    allow_multiple_selected = True
+
 class MessageForm(forms.ModelForm):
     recipient = forms.ModelChoiceField(queryset=User.objects.none(), label="Select Collaborator")
 
