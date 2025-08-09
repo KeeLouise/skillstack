@@ -12,8 +12,8 @@ class MessageForm(forms.ModelForm):
     conversation = forms.ModelChoiceField(
         queryset=Conversation.objects.none(),
         required=False,
-        widget=forms.HiddenInput()
-        attachments = forms.FileField(required=False, widget=forms.ClearableFileInput(attrs={"multiple": True}))
+        widget=forms.HiddenInput(),
+        attachments = forms.FileField(required=False, widget=forms.ClearableFileInput(attrs={"multiple": True})),
     )
 
     class Meta:
