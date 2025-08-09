@@ -15,7 +15,7 @@
         {% endif %}
       </h3>
 
-      <form method="post" novalidate>
+      <form method="post" enctype="multipart/form-data" novalidate>
         {% csrf_token %}
         {# No manual hidden input here; the form provides conversation as a hidden field #}
         {% crispy form %}

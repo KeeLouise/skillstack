@@ -136,7 +136,7 @@ def sent_messages(request):
 
 @login_required
 def message_detail(request, pk):
-    """Show one message; if it belongs to a conversation, also show the thread."""
+    """Show a message; if it has a conversation, also show the thread."""
     message = (
         Message.objects
         .select_related('conversation', 'sender', 'recipient')
@@ -155,6 +155,7 @@ def message_detail(request, pk):
         thread_messages = (
             message.conversation.messages
             .select_related('sender', 'recipient')
+            .prefetch_related('attachments')
             .order_by('sent_at')
         )
 
@@ -188,6 +189,7 @@ def compose_message(request):
                     message=msg,
                     file=f,
                     uploaded_by=request.user
+                    original_name=getattr(f, 'name', '')
                 )
 
             messages.success(request, "Message sent.")
@@ -225,9 +227,10 @@ def reply_message(request, pk):
 
             for f in request.FILES.getlist('attachments'):
                 MessageAttachment.objects.create(
-                    message=reply,
+                    message=msg,
                     file=f,
                     uploaded_by=request.user
+                    original_name=getattr(f, 'name', '')
                 )
 
             messages.success(request, "Reply sent.")

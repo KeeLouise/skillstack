@@ -25,7 +25,7 @@
       <div class="card shadow-sm mb-3 {% if not m.is_read and m.recipient == user %}border-primary bg-light{% endif %}">
         <div class="card-body">
           <div class="d-flex justify-content-between align-items-start">
-            <div>
+            <div class="pe-3">
               <h5 class="mb-1">{{ m.subject|default:"(no subject)" }}</h5>
               <p class="text-muted mb-2">
                 <strong>From:</strong> {{ m.sender.get_full_name|default:m.sender.username }}
@@ -43,8 +43,25 @@
               <div class="small text-muted mt-1">{{ m.sent_at|date:"M d, Y H:i" }}</div>
             </div>
           </div>
+
           <hr>
-          <p class="mb-0">{{ m.body|linebreaksbr }}</p>
+          <p class="mb-3">{{ m.body|linebreaksbr }}</p>
+
+          {% if m.attachments.all %}
+            <div class="mt-2">
+              <strong class="d-block mb-1">Attachments</strong>
+              <ul class="list-unstyled mb-0">
+                {% for a in m.attachments.all %}
+                  <li class="mb-1">
+                    <a href="{{ a.file.url }}" target="_blank" rel="noopener">
+                      {{ a.original_name|default:a.file.name }}
+                    </a>
+                    <span class="text-muted small">({{ a.file.size|filesizeformat }})</span>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
         </div>
       </div>
     {% endfor %}
@@ -52,11 +69,11 @@
     <div class="d-flex flex-wrap gap-2 mt-3">
       <a href="{% url 'reply_message' message.pk %}" class="btn btn-outline-secondary">Reply</a>
       {% if message.sender == user or message.recipient == user %}
-      <form method="POST" action="{% url 'delete_message' message.pk %}">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-danger"
-                onclick="return confirm('Delete this message?');">Delete Message</button>
-      </form>
+        <form method="POST" action="{% url 'delete_message' message.pk %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger"
+                  onclick="return confirm('Delete this message?');">Delete Message</button>
+        </form>
       {% endif %}
       <a href="{% url 'messages' %}" class="btn btn-outline-secondary">Back to Inbox</a>
     </div>
@@ -77,16 +94,32 @@
           {{ message.get_importance_display }}
         </span>
         <hr>
-        <p class="card-text">{{ message.body|linebreaksbr }}</p>
+        <p class="card-text mb-3">{{ message.body|linebreaksbr }}</p>
+
+        {% if message.attachments.all %}
+          <div class="mt-2">
+            <strong class="d-block mb-1">Attachments</strong>
+            <ul class="list-unstyled mb-0">
+              {% for a in message.attachments.all %}
+                <li class="mb-1">
+                  <a href="{{ a.file.url }}" target="_blank" rel="noopener">
+                    {{ a.original_name|default:a.file.name }}
+                  </a>
+                  <span class="text-muted small">({{ a.file.size|filesizeformat }})</span>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
 
         <div class="d-flex flex-wrap gap-2 mt-4">
           <a href="{% url 'reply_message' message.pk %}" class="btn btn-outline-secondary">Reply</a>
           {% if message.sender == user or message.recipient == user %}
-          <form method="POST" action="{% url 'delete_message' message.pk %}">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-danger"
-                    onclick="return confirm('Delete this message?');">Delete Message</button>
-          </form>
+            <form method="POST" action="{% url 'delete_message' message.pk %}">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-danger"
+                      onclick="return confirm('Delete this message?');">Delete Message</button>
+            </form>
           {% endif %}
           <a href="{% url 'messages' %}" class="btn btn-outline-secondary">Back to Inbox</a>
         </div>
