@@ -41,39 +41,41 @@
     <!-- Threaded Conversations -->
     <div class="row row-cols-1 g-3">
       {% for convo in conversations %}
-        {% with last_msg=convo.messages.order_by('-sent_at').first %}
-          <div class="col">
-            <div class="card shadow-sm {% if not last_msg.is_read and last_msg.recipient == user %}border-primary bg-light{% endif %}">
-              <div class="card-body">
-                <div class="d-flex justify-content-between align-items-start mb-2">
-                  <h5 class="card-title mb-0 text-truncate" title="{{ last_msg.subject }}">
-                    {{ last_msg.subject }}
-                  </h5>
-                  <small class="text-muted">{{ last_msg.sent_at|date:"M d, Y H:i" }}</small>
-                </div>
-
-                <span class="badge 
-                    {% if last_msg.importance == 'high' %}bg-danger
-                    {% elif last_msg.importance == 'normal' %}bg-primary
-                    {% else %}bg-secondary{% endif %}">
-                   {{ last_msg.get_importance_display }}
-                </span>
-
-                <p class="card-text text-muted mb-3">{{ last_msg.body|truncatechars:100 }}</p>
-
-                <div class="d-flex justify-content-between align-items-center">
-                  <div>
-                    <small class="text-muted">
-                      Participants:
-                      {{ convo.participants.exclude(id=user.id)|join:", " }}
-                      — {{ convo.messages.count }} messages
-                    </small>
+        {% with last_msg=convo.last_message %}
+          {% if last_msg %}
+            <div class="col">
+              <div class="card shadow-sm {% if not last_msg.is_read and last_msg.recipient == user %}border-primary bg-light{% endif %}">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="card-title mb-0 text-truncate" title="{{ last_msg.subject }}">
+                      {{ last_msg.subject }}
+                    </h5>
+                    <small class="text-muted">{{ last_msg.sent_at|date:"M d, Y H:i" }}</small>
                   </div>
-                  <a href="{% url 'conversation_detail' convo.id %}" class="btn btn-outline-primary btn-sm">View Thread</a>
+
+                  <span class="badge 
+                      {% if last_msg.importance == 'high' %}bg-danger
+                      {% elif last_msg.importance == 'normal' %}bg-primary
+                      {% else %}bg-secondary{% endif %}">
+                    {{ last_msg.get_importance_display }}
+                  </span>
+
+                  <p class="card-text text-muted mb-3">{{ last_msg.body|truncatechars:100 }}</p>
+
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <small class="text-muted">
+                        Participants:
+                        {{ convo.participants.exclude(id=user.id)|join:", " }}
+                        — {{ convo.messages.count }} messages
+                      </small>
+                    </div>
+                    <a href="{% url 'conversation_detail' convo.id %}" class="btn btn-outline-primary btn-sm">View Thread</a>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          {% endif %}
         {% endwith %}
       {% endfor %}
     </div>
