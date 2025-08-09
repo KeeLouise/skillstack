@@ -11,22 +11,19 @@ class MultiFileInput(forms.ClearableFileInput):
 
 class MessageForm(forms.ModelForm):
     recipient = forms.ModelChoiceField(queryset=User.objects.none(), label="Select Collaborator")
-
     conversation = forms.ModelChoiceField(
         queryset=Conversation.objects.none(),
         required=False,
         widget=forms.HiddenInput()
     )
-
     attachments = forms.FileField(
         required=False,
-        widget=forms.FileInput(attrs={'multiple': True}),
-        label="Attachments"
+        widget=MultiFileInput(attrs={'multiple': True})
     )
 
     class Meta:
         model = Message
-        fields = ['recipient', 'subject', 'body', 'importance', 'conversation']  # <-- no 'attachments' here
+        fields = ['recipient', 'subject', 'body', 'importance', 'conversation', 'attachments']
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
