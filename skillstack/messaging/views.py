@@ -61,6 +61,7 @@ def inbox(request):
         request,
         'messaging/messages.html',
         {
+            'conversations': conversations, 
             'messages': latest_messages,
             'active_tab': 'inbox',
             'unread_count': unread_count,
