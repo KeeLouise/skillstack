@@ -53,10 +53,11 @@ INSTALLED_APPS = [
 ]
 
 CLOUDINARY_STORAGE = {
-    "CLOUD_NAME": "dvlybiplt",
-    "API_KEY": "962523639115955",
-    "API_SECRET": "QNUeoayy31CuRrlHQmq3IRXcrdM",
+    "CLOUD_NAME": os.environ.get("CLOUDINARY_CLOUD_NAME"),
+    "API_KEY": os.environ.get("CLOUDINARY_API_KEY"),
+    "API_SECRET": os.environ.get("CLOUDINARY_API_SECRET"),
 }
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -109,7 +110,6 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 import dj_database_url
-import os
 
 DATABASES = {
     'default': dj_database_url.config(
