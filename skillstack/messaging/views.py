@@ -227,7 +227,7 @@ def reply_message(request, pk):
 
             for f in request.FILES.getlist('attachments'):
                 MessageAttachment.objects.create(
-                    message=msg,
+                    message=reply,
                     file=f,
                     uploaded_by=request.user,
                     original_name=getattr(f, 'name', '')

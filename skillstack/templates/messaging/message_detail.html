@@ -52,11 +52,23 @@
               <strong class="d-block mb-1">Attachments</strong>
               <ul class="list-unstyled mb-0">
                 {% for a in m.attachments.all %}
-                  <li class="mb-1">
-                    <a href="{{ a.file.url }}" target="_blank" rel="noopener">
+                  <li class="mb-2">
+                    <a href="{{ a.file.url }}" target="_blank" rel="noopener"
+                       download="{{ a.original_name|default:a.file.name }}">
                       {{ a.original_name|default:a.file.name }}
                     </a>
                     <span class="text-muted small">({{ a.file.size|filesizeformat }})</span>
+
+                    {% with u=a.file.url|lower %}
+                      {% if '.png' in u or '.jpg' in u or '.jpeg' in u or '.gif' in u or '.webp' in u %}
+                        <div class="mt-2">
+                          <a href="{{ a.file.url }}" target="_blank" rel="noopener">
+                            <img src="{{ a.file.url }}" alt="{{ a.original_name|default:a.file.name }}"
+                                 class="img-fluid rounded" style="max-height: 160px;">
+                          </a>
+                        </div>
+                      {% endif %}
+                    {% endwith %}
                   </li>
                 {% endfor %}
               </ul>
@@ -101,11 +113,23 @@
             <strong class="d-block mb-1">Attachments</strong>
             <ul class="list-unstyled mb-0">
               {% for a in message.attachments.all %}
-                <li class="mb-1">
-                  <a href="{{ a.file.url }}" target="_blank" rel="noopener">
+                <li class="mb-2">
+                  <a href="{{ a.file.url }}" target="_blank" rel="noopener"
+                     download="{{ a.original_name|default:a.file.name }}">
                     {{ a.original_name|default:a.file.name }}
                   </a>
                   <span class="text-muted small">({{ a.file.size|filesizeformat }})</span>
+
+                  {% with u=a.file.url|lower %}
+                    {% if '.png' in u or '.jpg' in u or '.jpeg' in u or '.gif' in u or '.webp' in u %}
+                      <div class="mt-2">
+                        <a href="{{ a.file.url }}" target="_blank" rel="noopener">
+                          <img src="{{ a.file.url }}" alt="{{ a.original_name|default:a.file.name }}"
+                               class="img-fluid rounded" style="max-height: 160px;">
+                        </a>
+                      </div>
+                    {% endif %}
+                  {% endwith %}
                 </li>
               {% endfor %}
             </ul>
