@@ -89,17 +89,35 @@ def sent_messages(request):
 
 @login_required
 def message_detail(request, pk):
-    message = get_object_or_404(Message, pk=pk)
+    message = (
+        Message.objects
+        .select_related('conversation', 'sender', 'recipient')
+        .get(pk=pk)
+    )
 
-    if request.user != message.recipient and request.user != message.sender:
+    if request.user not in (message.sender, message.recipient):
         return redirect('messages')
 
-    if message.recipient == request.user and not message.is_read:
+    if message.recipient_id == request.user.id and not message.is_read:
         message.is_read = True
-        message.save()
+        message.save(update_fields=['is_read'])
 
-    return render(request, 'messaging/message_detail.html', {'message': message})
+    thread_messages = None
+    if message.conversation_id:
+        thread_messages = (
+            message.conversation.messages
+            .select_related('sender', 'recipient')
+            .order_by('sent_at')
+        )
 
+    return render(
+        request,
+        'messaging/message_detail.html',
+        {
+            'message': message,
+            'thread_messages': thread_messages,
+        }
+    )
 
 @login_required
 def compose_message(request):

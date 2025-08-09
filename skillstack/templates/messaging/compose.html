@@ -1,13 +1,7 @@
 {% extends "base.html" %}
 {% load crispy_forms_tags %}
 
-{% block title %}
-  {% if is_reply %}
-    Reply to {{ original_msg.sender.get_full_name|default:original_msg.sender.username }}
-  {% else %}
-    Compose Message
-  {% endif %}
-{% endblock %}
+{% block title %}{% if is_reply %}Reply{% else %}Compose Message{% endif %}{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
@@ -23,11 +17,7 @@
 
       <form method="post" novalidate>
         {% csrf_token %}
-        {# Preserve conversation if replying #}
-        {% if is_reply and original_msg.conversation %}
-          <input type="hidden" name="conversation" value="{{ original_msg.conversation.id }}">
-        {% endif %}
-
+        {# No manual hidden input here; the form provides conversation as a hidden field #}
         {% crispy form %}
       </form>
     </div>
