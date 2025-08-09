@@ -49,3 +49,12 @@ class Message(models.Model):
 
     def __str__(self):
         return f"{self.sender} → {self.recipient}: {self.subject or self.body[:30]}"
+    
+class Attachment(models.Model):
+    message = models.ForeignKey("Message", on_delete=models.CASCADE, related_name="attachments")
+    file = models.FileField(upload_to="attachments/%Y/%m/%d/")
+    original_name = models.CharField(max_length=255, blank=True)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.original_name or (self.file.name if self.file else "attachment")
