@@ -13,7 +13,6 @@
     <a href="{% url 'compose' %}" class="btn btn-dark">New Message</a>
   </div>
 
-  <!-- Navigation Tabs -->
   <ul class="nav nav-tabs mb-4">
     <li class="nav-item">
       <a class="nav-link text-dark {% if active_tab == 'all' %}active{% endif %}" href="{% url 'all_messages' %}">All</a>
@@ -31,14 +30,12 @@
     </li>
   </ul>
 
-  <!-- Search Bar -->
   <form method="get" class="mb-4 d-flex">
     <input type="text" name="q" class="form-control me-2" placeholder="Search messages..." value="{{ query|default:'' }}">
     <button type="submit" class="btn btn-outline-primary">Search</button>
   </form>
 
   {% if conversations %}
-    <!-- Threaded Conversations -->
     <div class="row row-cols-1 g-3">
       {% for convo in conversations %}
         {% with last_msg=convo.last_message %}
@@ -63,12 +60,13 @@
                   <p class="card-text text-muted mb-3">{{ last_msg.body|truncatechars:100 }}</p>
 
                   <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                      <small class="text-muted">
-                        Participants:
-                        {{ convo.participants.exclude(id=user.id)|join:", " }}
-                        — {{ convo.messages.count }} messages
-                      </small>
+                    <div class="d-flex align-items-center flex-wrap gap-1">
+                      {% for p in convo.participants.all %}
+                        {% if p.id != user.id %}
+                          <span class="badge bg-secondary">{{ p.get_full_name|default:p.username }}</span>
+                        {% endif %}
+                      {% endfor %}
+                      <small class="text-muted ms-2">— {{ convo.messages.count }} messages</small>
                     </div>
                     <a href="{% url 'conversation_detail' convo.id %}" class="btn btn-outline-primary btn-sm">View Thread</a>
                   </div>
@@ -81,7 +79,6 @@
     </div>
 
   {% elif messages %}
-    <!-- Flat Message List -->
     <div class="row row-cols-1 g-3">
       {% for msg in messages %}
         <div class="col">
@@ -96,7 +93,7 @@
                   {% if msg.importance == 'high' %}bg-danger
                   {% elif msg.importance == 'normal' %}bg-primary
                   {% else %}bg-secondary{% endif %}">
-                 {{ msg.get_importance_display }}
+                {{ msg.get_importance_display }}
               </span>
 
               <p class="card-text text-muted mb-3">{{ msg.body|truncatechars:100 }}</p>
@@ -104,10 +101,10 @@
               <div class="d-flex justify-content-between align-items-center">
                 <div>
                   {% if msg.sender == user %}
-                    <span class="badge bg-secondary">To: {{ msg.recipient.get_full_name }}</span>
+                    <span class="badge bg-secondary">To: {{ msg.recipient.get_full_name|default:msg.recipient.username }}</span>
                     <span class="badge bg-dark">Sent</span>
                   {% else %}
-                    <span class="badge bg-secondary">From: {{ msg.sender.get_full_name }}</span>
+                    <span class="badge bg-secondary">From: {{ msg.sender.get_full_name|default:msg.sender.username }}</span>
                     <span class="badge bg-primary">Received</span>
                     {% if not msg.is_read %}
                       <span class="badge bg-success">Unread</span>
@@ -119,8 +116,7 @@
                   {% if msg.sender == user or msg.recipient == user %}
                     <form method="POST" action="{% url 'delete_message' msg.pk %}" class="d-inline">
                       {% csrf_token %}
-                      <button type="submit" class="btn btn-sm btn-outline-danger"
-                              onclick="return confirm('Are you sure you want to delete this message?');">
+                      <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this message?');">
                         Delete
                       </button>
                     </form>
