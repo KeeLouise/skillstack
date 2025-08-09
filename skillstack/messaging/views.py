@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
 from django.db.models import Q
-from .models import Message
+from .models import Message, Conversation
 from .forms import MessageForm
 
 @login_required
