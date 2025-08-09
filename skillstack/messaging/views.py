@@ -3,11 +3,28 @@ from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
 from django.db.models import Q, Max, Prefetch
-from .models import Message, Conversation
+
+from .models import Message, Conversation, MessageAttachment
 from .forms import MessageForm
+
+
+def _get_or_create_conversation(user_a, user_b):
+    """Return an existing 2‑party conversation or create a new one."""
+    convo = (
+        Conversation.objects
+        .filter(participants=user_a)
+        .filter(participants=user_b)
+        .first()
+    )
+    if not convo:
+        convo = Conversation.objects.create()
+        convo.participants.add(user_a, user_b)
+    return convo
+
 
 @login_required
 def inbox(request):
+    """Show one card per conversation (latest message), ordered by last activity."""
     query = request.GET.get('q', '')
 
     conversations = (
@@ -15,7 +32,10 @@ def inbox(request):
         .annotate(last_sent=Max('messages__sent_at'))
         .order_by('-last_sent')
         .prefetch_related(
-            Prefetch('messages', queryset=Message.objects.select_related('sender', 'recipient').order_by('-sent_at')),
+            Prefetch(
+                'messages',
+                queryset=Message.objects.select_related('sender', 'recipient').order_by('-sent_at')
+            ),
             'participants',
         )
     )
@@ -25,7 +45,8 @@ def inbox(request):
             Q(messages__subject__icontains=query) |
             Q(messages__body__icontains=query) |
             Q(participants__first_name__icontains=query) |
-            Q(participants__last_name__icontains=query)
+            Q(participants__last_name__icontains=query) |
+            Q(participants__username__icontains=query)
         ).distinct()
 
     latest_messages = []
@@ -36,21 +57,29 @@ def inbox(request):
 
     unread_count = Message.objects.filter(recipient=request.user, is_read=False).count()
 
-    return render(request, 'messaging/messages.html', {
-        'messages': latest_messages,  
-        'active_tab': 'inbox',
-        'unread_count': unread_count,
-        'query': query,
-    })
+    return render(
+        request,
+        'messaging/messages.html',
+        {
+            'messages': latest_messages,
+            'active_tab': 'inbox',
+            'unread_count': unread_count,
+            'query': query,
+        }
+    )
 
 
 @login_required
 def all_messages(request):
+    """Flat list of all messages to/from the user."""
     query = request.GET.get('q', '')
 
-    messages_qs = Message.objects.filter(
-        Q(sender=request.user) | Q(recipient=request.user)
-    ).order_by('-sent_at')
+    messages_qs = (
+        Message.objects
+        .filter(Q(sender=request.user) | Q(recipient=request.user))
+        .select_related('sender', 'recipient', 'conversation')
+        .order_by('-sent_at')
+    )
 
     if query:
         messages_qs = messages_qs.filter(
@@ -59,36 +88,54 @@ def all_messages(request):
 
     unread_count = Message.objects.filter(recipient=request.user, is_read=False).count()
 
-    return render(request, 'messaging/messages.html', {
-        'messages': messages_qs,
-        'active_tab': 'all',
-        'unread_count': unread_count,
-        'query': query,
-    })
+    return render(
+        request,
+        'messaging/messages.html',
+        {
+            'messages': messages_qs,
+            'active_tab': 'all',
+            'unread_count': unread_count,
+            'query': query,
+        }
+    )
 
 
 @login_required
 def sent_messages(request):
+    """Flat list of messages the user has sent."""
     query = request.GET.get('q', '')
-    messages_qs = Message.objects.filter(sender=request.user).order_by('-sent_at')
+    messages_qs = (
+        Message.objects
+        .filter(sender=request.user)
+        .select_related('recipient', 'conversation')
+        .order_by('-sent_at')
+    )
 
     if query:
         messages_qs = messages_qs.filter(
-            Q(subject__icontains=query) | Q(recipient__first_name__icontains=query) | Q(recipient__last_name__icontains=query)
+            Q(subject__icontains=query) |
+            Q(recipient__first_name__icontains=query) |
+            Q(recipient__last_name__icontains=query) |
+            Q(recipient__username__icontains=query)
         )
 
     unread_count = Message.objects.filter(recipient=request.user, is_read=False).count()
 
-    return render(request, 'messaging/messages.html', {
-        'messages': messages_qs,
-        'active_tab': 'sent',
-        'unread_count': unread_count,
-        'query': query
-    })
+    return render(
+        request,
+        'messaging/messages.html',
+        {
+            'messages': messages_qs,
+            'active_tab': 'sent',
+            'unread_count': unread_count,
+            'query': query,
+        }
+    )
 
 
 @login_required
 def message_detail(request, pk):
+    """Show one message; if it belongs to a conversation, also show the thread."""
     message = (
         Message.objects
         .select_related('conversation', 'sender', 'recipient')
@@ -119,66 +166,89 @@ def message_detail(request, pk):
         }
     )
 
+
 @login_required
 def compose_message(request):
+    """Create a new message; auto‑attach to existing 2‑party thread or create one."""
     if request.method == 'POST':
-        form = MessageForm(request.POST, user=request.user)
+        form = MessageForm(request.POST, request.FILES, user=request.user)
         if form.is_valid():
             msg = form.save(commit=False)
             msg.sender = request.user
+
+            convo = form.cleaned_data.get('conversation')
+            if not convo:
+                convo = _get_or_create_conversation(request.user, form.cleaned_data['recipient'])
+            msg.conversation = convo
             msg.save()
+
+            for f in request.FILES.getlist('attachments'):
+                MessageAttachment.objects.create(
+                    message=msg,
+                    file=f,
+                    uploaded_by=request.user
+                )
+
+            messages.success(request, "Message sent.")
             return redirect('messages')
     else:
         form = MessageForm(user=request.user)
-        
+
     return render(request, 'messaging/compose.html', {'form': form})
 
 
 @login_required
 def reply_message(request, pk):
-    original_msg = get_object_or_404(Message, pk=pk)
+    """Reply to a specific message; always stays in the same conversation."""
+    original = get_object_or_404(Message, pk=pk)
 
-    # If this is the first reply, make sure the conversation exists - KR 08/08/2025
-    if not original_msg.conversation:
-        convo = Conversation.objects.create()
-        convo.participants.add(original_msg.sender, original_msg.recipient)
-        original_msg.conversation = convo
-        original_msg.save()
-    else:
-        convo = original_msg.conversation
+    convo = original.conversation or _get_or_create_conversation(original.sender, original.recipient)
+    if not original.conversation_id:
+        original.conversation = convo
+        original.save(update_fields=['conversation'])
 
-    initial_data = {
-        'recipient': original_msg.sender if request.user == original_msg.recipient else original_msg.recipient,
-        'subject': f"Re: {original_msg.subject}",
-        'conversation': convo.id
+    default_recipient = original.sender if request.user == original.recipient else original.recipient
+    initial = {
+        'recipient': default_recipient,
+        'subject': f"Re: {original.subject}",
+        'conversation': convo.id,
     }
 
     if request.method == 'POST':
-        form = MessageForm(request.POST, user=request.user)
+        form = MessageForm(request.POST, request.FILES, user=request.user)
         if form.is_valid():
             reply = form.save(commit=False)
             reply.sender = request.user
             reply.conversation = convo
             reply.save()
+
+            for f in request.FILES.getlist('attachments'):
+                MessageAttachment.objects.create(
+                    message=reply,
+                    file=f,
+                    uploaded_by=request.user
+                )
+
+            messages.success(request, "Reply sent.")
             return redirect('messages')
     else:
-        form = MessageForm(user=request.user, initial=initial_data)
+        form = MessageForm(user=request.user, initial=initial)
 
     return render(request, 'messaging/compose.html', {
         'form': form,
         'is_reply': True,
-        'original_msg': original_msg
+        'original_msg': original,
     })
 
 
 @login_required
 @require_POST
 def delete_message(request, pk):
+    """Allow sender or recipient to delete a message."""
     message = get_object_or_404(
         Message,
         Q(pk=pk) & (Q(sender=request.user) | Q(recipient=request.user))
     )
-
     message.delete()
     messages.success(request, "Message deleted successfully.")
     return redirect('messages')
