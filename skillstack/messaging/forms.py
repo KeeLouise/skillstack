@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
-from .models import Message
+from .models import Message, Conversation
 from projects.models import Project
 
 class MessageForm(forms.ModelForm):
