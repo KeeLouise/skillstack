@@ -14,15 +14,32 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='message',
-            name='reply_to',
+        # Remove 'reply_to' safely: drop column only if it exists, and
+        # still remove the field from Django's state.
+        migrations.SeparateDatabaseAndState(
+            state_operations=[
+                migrations.RemoveField(
+                    model_name='message',
+                    name='reply_to',
+                ),
+            ],
+            database_operations=[
+                migrations.RunSQL(
+                    sql="""
+                        ALTER TABLE messaging_message
+                        DROP COLUMN IF EXISTS reply_to_id;
+                    """,
+                    reverse_sql=migrations.RunSQL.noop,
+                ),
+            ],
         ),
+
         migrations.AlterField(
             model_name='message',
             name='subject',
             field=models.CharField(max_length=500, blank=True),
         ),
+
         migrations.CreateModel(
             name='Conversation',
             fields=[
@@ -30,14 +47,26 @@ class Migration(migrations.Migration):
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('participants', models.ManyToManyField(related_name='conversations', to=settings.AUTH_USER_MODEL)),
-                ('project', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='conversations', to='projects.project')),
+                ('project', models.ForeignKey(
+                    blank=True, null=True,
+                    on_delete=django.db.models.deletion.SET_NULL,
+                    related_name='conversations',
+                    to='projects.project'
+                )),
             ],
         ),
+
         migrations.AddField(
             model_name='message',
             name='conversation',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='messages', to='messaging.conversation'),
+            field=models.ForeignKey(
+                blank=True, null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name='messages',
+                to='messaging.conversation'
+            ),
         ),
+
         migrations.CreateModel(
             name='MessageAttachment',
             fields=[
@@ -45,7 +74,11 @@ class Migration(migrations.Migration):
                 ('file', models.FileField(upload_to='message_attachments/')),
                 ('original_name', models.CharField(max_length=255, blank=True)),
                 ('uploaded_at', models.DateTimeField(auto_now_add=True)),
-                ('message', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='attachments', to='messaging.message')),
+                ('message', models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE,
+                    related_name='attachments',
+                    to='messaging.message'
+                )),
             ],
         ),
     ]
