@@ -188,7 +188,7 @@ def compose_message(request):
                 MessageAttachment.objects.create(
                     message=msg,
                     file=f,
-                    uploaded_by=request.user
+                    uploaded_by=request.user,
                     original_name=getattr(f, 'name', '')
                 )
 
