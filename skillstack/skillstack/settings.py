@@ -52,11 +52,14 @@ INSTALLED_APPS = [
     'cloudinary_storage',
 ]
 
-CLOUDINARY = {
-    "cloud_name": os.environ.get("CLOUDINARY_CLOUD_NAME"),
-    "api_key": os.environ.get("CLOUDINARY_API_KEY"),
-    "api_secret": os.environ.get("CLOUDINARY_API_SECRET"),
+CloudINARY_STORAGE = {
+    "CLOUD_NAME": os.environ.get("CLOUDINARY_CLOUD_NAME"),
+    "API_KEY": os.environ.get("CLOUDINARY_API_KEY"),
+    "API_SECRET": os.environ.get("CLOUDINARY_API_SECRET"),
 }
+
+# Store user uploads (media) on Cloudinary - KR 09/08/2025
+DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -93,8 +96,6 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Store user uploads (media) on Cloudinary - KR 09/08/2025
-DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
