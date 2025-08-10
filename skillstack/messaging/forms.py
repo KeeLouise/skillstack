@@ -17,10 +17,10 @@ class MessageForm(forms.ModelForm):
         required=False,
         widget=forms.HiddenInput()
     )
-    # multi-file input - KR 10/08/2025
+    
     attachments = forms.FileField(
         required=False,
-        widget=MultiFileInput(attrs={'multiple': True})
+        widget=MultiFileInput
     )
 
     class Meta:

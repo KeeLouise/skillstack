@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
 from django.db.models import Q, Max, Prefetch
+from django.db import transaction
 
 from .models import Message, Conversation, MessageAttachment
 from .forms import MessageForm
@@ -201,21 +202,28 @@ def compose_message(request):
     if request.method == 'POST':
         form = MessageForm(request.POST, request.FILES, user=request.user)
         if form.is_valid():
-            msg = form.save(commit=False)
-            msg.sender = request.user
+            with transaction.atomic():
+                msg = form.save(commit=False)
+                msg.sender = request.user
 
-            convo = form.cleaned_data.get('conversation') or _get_or_create_conversation(
-                request.user, form.cleaned_data['recipient']
-            )
-            msg.conversation = convo
-            msg.save()
-
-            for f in request.FILES.getlist('attachments'):
-                MessageAttachment.objects.create(
-                    message=msg,
-                    file=f,
-                    original_name=getattr(f, 'name', '')
+                convo = form.cleaned_data.get('conversation') or _get_or_create_conversation(
+                    request.user, form.cleaned_data['recipient']
                 )
+                msg.conversation = convo
+                msg.save()
+
+                files = request.FILES.getlist('attachments')
+                if not files:
+                    # Fallback in case a single file field is used without `multiple`
+                    single = request.FILES.get('attachments')
+                    files = [single] if single else []
+
+                for f in files:
+                    MessageAttachment.objects.create(
+                        message=msg,
+                        file=f,
+                        original_name=getattr(f, 'name', '')
+                    )
 
             messages.success(request, "Message sent.")
             return redirect('messages')
@@ -246,17 +254,23 @@ def reply_message(request, pk):
     if request.method == 'POST':
         form = MessageForm(request.POST, request.FILES, user=request.user)
         if form.is_valid():
-            reply = form.save(commit=False)
-            reply.sender = request.user
-            reply.conversation = convo
-            reply.save()
+            with transaction.atomic():
+                reply = form.save(commit=False)
+                reply.sender = request.user
+                reply.conversation = convo
+                reply.save()
 
-            for f in request.FILES.getlist('attachments'):
-                MessageAttachment.objects.create(
-                    message=reply,
-                    file=f,
-                    original_name=getattr(f, 'name', '')
-                )
+                files = request.FILES.getlist('attachments')
+                if not files:
+                    single = request.FILES.get('attachments')
+                    files = [single] if single else []
+
+                for f in files:
+                    MessageAttachment.objects.create(
+                        message=reply,
+                        file=f,
+                        original_name=getattr(f, 'name', '')
+                    )
 
             messages.success(request, "Reply sent.")
             return redirect('messages')

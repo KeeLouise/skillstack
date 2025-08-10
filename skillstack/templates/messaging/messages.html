@@ -82,9 +82,9 @@
     </div>
 
   {# Flat list view (All/Sent) — uses 'messages' from the view #}
-  {% elif messages %}
+  {% elif message_list %}
     <div class="row row-cols-1 g-3">
-      {% for msg in messages %}
+      {% for msg in message_list %}
         <div class="col">
           <div class="card shadow-sm {% if not msg.is_read and msg.recipient_id == user.id %}border-primary bg-light{% endif %}">
             <div class="card-body">
