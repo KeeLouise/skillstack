@@ -65,7 +65,6 @@ def inbox(request):
         {
             'conversations': conversations,
             'messages': latest_messages,
-            'message_list': latest_messages,
             'active_tab': 'inbox',
             'unread_count': unread_count,
             'query': query,
@@ -97,7 +96,6 @@ def all_messages(request):
         'messaging/messages.html',
         {
             'messages': messages_qs,
-            'message_list': messages_qs,
             'active_tab': 'all',
             'unread_count': unread_count,
             'query': query,
@@ -131,7 +129,6 @@ def sent_messages(request):
         'messaging/messages.html',
         {
             'messages': messages_qs,
-            'message_list': messages_qs,
             'active_tab': 'sent',
             'unread_count': unread_count,
             'query': query
@@ -215,10 +212,12 @@ def compose_message(request):
                 msg.conversation = convo
                 msg.save()
 
-                # Collect attachments (works for single or multiple inputs)
-                files = request.FILES.getlist('attachments')
-                if not files and 'attachments' in request.FILES:
-                    files = [request.FILES['attachments']]
+                # Collect attachments robustly
+                files = (
+                    form.cleaned_data.get('attachments') or
+                    request.FILES.getlist('attachments') or
+                    ([request.FILES['attachments']] if 'attachments' in request.FILES else [])
+                )
 
                 for f in files:
                     if not f:
@@ -235,8 +234,7 @@ def compose_message(request):
             messages.success(request, "Message sent.")
             return redirect('messages')
         else:
-            # Optional: surface form errors for debugging
-            messages.error(request, "There was a problem sending your message. Please check the form and try again.")
+            messages.error(request, "There was a problem sending your message. Please check the form.")
     else:
         form = MessageForm(user=request.user)
 
@@ -245,6 +243,7 @@ def compose_message(request):
 
 @login_required
 def reply_message(request, pk):
+    """Reply to a specific message; always stays in the same conversation."""
     original = get_object_or_404(Message, pk=pk)
     if request.user not in (original.sender, original.recipient):
         messages.error(request, "You can't reply to this message.")
@@ -270,10 +269,11 @@ def reply_message(request, pk):
                 reply.conversation = convo
                 reply.save()
 
-                # Collect attachments (works for single or multiple inputs)
-                files = request.FILES.getlist('attachments')
-                if not files and 'attachments' in request.FILES:
-                    files = [request.FILES['attachments']]
+                files = (
+                    form.cleaned_data.get('attachments') or
+                    request.FILES.getlist('attachments') or
+                    ([request.FILES['attachments']] if 'attachments' in request.FILES else [])
+                )
 
                 for f in files:
                     if not f:
@@ -292,7 +292,11 @@ def reply_message(request, pk):
     else:
         form = MessageForm(user=request.user, initial=initial)
 
-    return render(request, 'messaging/compose.html', {'form': form, 'is_reply': True, 'original_msg': original})
+    return render(request, 'messaging/compose.html', {
+        'form': form,
+        'is_reply': True,
+        'original_msg': original,
+    })
 
 
 @login_required

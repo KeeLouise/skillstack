@@ -49,3 +49,11 @@ class MessageForm(forms.ModelForm):
         self.helper.form_tag = False
         self.helper.form_method = 'post'
         self.helper.add_input(Submit('submit', 'Send Message', css_class='btn btn-primary w-100 mt-3'))
+
+    def clean_attachments(self):
+        """Return a list of uploaded files (or an empty list). Avoids the
+        'No file was submitted' validation error when the field is optional
+        and the widget allows multiple selections.
+        """
+        files = self.files.getlist('attachments')
+        return files or []

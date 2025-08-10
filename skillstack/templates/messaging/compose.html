@@ -17,11 +17,8 @@
 
       <form method="post" enctype="multipart/form-data" novalidate>
         {% csrf_token %}
-        <div class="mb-3">
-          <label for="id_attachments" class="form-label">Attachments</label>
-          <input id="id_attachments" class="form-control" type="file" name="attachments" multiple>
-        </div>
         {% crispy form %}
+        <button type="submit" class="btn btn-primary w-100">Send</button>
       </form>
     </div>
   </div>
