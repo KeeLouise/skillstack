@@ -63,7 +63,6 @@ def inbox(request):
         {
             'conversations': conversations,
             'messages': latest_messages,      
-            'message_list': latest_messages,  
             'active_tab': 'inbox',
             'unread_count': unread_count,
             'query': query,
@@ -95,7 +94,6 @@ def all_messages(request):
         'messaging/messages.html',
         {
             'messages': messages_qs,
-            'message_list': messages_qs,
             'active_tab': 'all',
             'unread_count': unread_count,
             'query': query,
@@ -129,7 +127,6 @@ def sent_messages(request):
         'messaging/messages.html',
         {
             'messages': messages_qs,
-            'message_list': messages_qs,
             'active_tab': 'sent',
             'unread_count': unread_count,
             'query': query
@@ -198,16 +195,18 @@ def conversation_detail(request, pk):
     return redirect('message_detail', pk=last_msg.pk)
 
 
+@login_required
 def compose_message(request):
+    """Create a new message; auto‑attach to existing 2‑party thread or create one."""
     if request.method == 'POST':
         form = MessageForm(request.POST, request.FILES, user=request.user)
         if form.is_valid():
             msg = form.save(commit=False)
             msg.sender = request.user
 
-            convo = form.cleaned_data.get('conversation')
-            if not convo:
-                convo = _get_or_create_conversation(request.user, form.cleaned_data['recipient'])
+            convo = form.cleaned_data.get('conversation') or _get_or_create_conversation(
+                request.user, form.cleaned_data['recipient']
+            )
             msg.conversation = convo
             msg.save()
 
@@ -215,7 +214,6 @@ def compose_message(request):
                 MessageAttachment.objects.create(
                     message=msg,
                     file=f,
-                    uploaded_by=getattr(request.user, "pk", None) and request.user,
                     original_name=getattr(f, 'name', '')
                 )
 
@@ -227,6 +225,7 @@ def compose_message(request):
     return render(request, 'messaging/compose.html', {'form': form})
 
 
+@login_required
 def reply_message(request, pk):
     original = get_object_or_404(Message, pk=pk)
     if request.user not in (original.sender, original.recipient):
@@ -256,7 +255,6 @@ def reply_message(request, pk):
                 MessageAttachment.objects.create(
                     message=reply,
                     file=f,
-                    uploaded_by=getattr(request.user, "pk", None) and request.user,
                     original_name=getattr(f, 'name', '')
                 )
 

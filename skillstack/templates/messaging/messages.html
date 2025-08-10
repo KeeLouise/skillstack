@@ -35,64 +35,68 @@
     <button type="submit" class="btn btn-outline-primary">Search</button>
   </form>
 
+  {# Threaded view (Inbox) — show one card per conversation using the prefetch-ordered messages #}
   {% if conversations %}
     <div class="row row-cols-1 g-3">
       {% for convo in conversations %}
-        {% with last_msg=convo.last_message %}
-          {% if last_msg %}
-            <div class="col">
-              <div class="card shadow-sm {% if not last_msg.is_read and last_msg.recipient == user %}border-primary bg-light{% endif %}">
-                <div class="card-body">
-                  <div class="d-flex justify-content-between align-items-start mb-2">
-                    <h5 class="card-title mb-0 text-truncate" title="{{ last_msg.subject|default:'(no subject)' }}">
-                      {{ last_msg.subject|default:"(no subject)" }}
-                    </h5>
-                    <small class="text-muted">{{ last_msg.sent_at|date:"M d, Y H:i" }}</small>
-                  </div>
+        {% with msgs=convo.messages.all %}
+          {% if msgs %}
+            {% with last_msg=msgs.0 %}
+              <div class="col">
+                <div class="card shadow-sm {% if not last_msg.is_read and last_msg.recipient_id == user.id %}border-primary bg-light{% endif %}">
+                  <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                      <h5 class="card-title mb-0 text-truncate" title="{{ last_msg.subject|default:'(no subject)' }}">
+                        {{ last_msg.subject|default:"(no subject)" }}
+                      </h5>
+                      <small class="text-muted">{{ last_msg.sent_at|date:"M d, Y H:i" }}</small>
+                    </div>
 
-                  <span class="badge 
+                    <span class="badge
                       {% if last_msg.importance == 'high' %}bg-danger
                       {% elif last_msg.importance == 'normal' %}bg-primary
                       {% else %}bg-secondary{% endif %}">
-                    {{ last_msg.get_importance_display }}
-                  </span>
+                      {{ last_msg.get_importance_display }}
+                    </span>
 
-                  <p class="card-text text-muted mb-3">{{ last_msg.body|truncatechars:100 }}</p>
+                    <p class="card-text text-muted mb-3">{{ last_msg.body|truncatechars:100 }}</p>
 
-                  <div class="d-flex justify-content-between align-items-center">
-                    <div class="d-flex align-items-center flex-wrap gap-1">
-                      {% for p in convo.participants.all %}
-                        {% if p.id != user.id %}
-                          <span class="badge bg-secondary">{{ p.get_full_name|default:p.username }}</span>
-                        {% endif %}
-                      {% endfor %}
-                      <small class="text-muted ms-2">— {{ convo.messages.count }} message{{ convo.messages.count|pluralize }}</small>
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div class="d-flex align-items-center flex-wrap gap-1">
+                        {% for p in convo.participants.all %}
+                          {% if p.id != user.id %}
+                            <span class="badge bg-secondary">{{ p.get_full_name|default:p.username }}</span>
+                          {% endif %}
+                        {% endfor %}
+                        <small class="text-muted ms-2">— {{ convo.messages.count }} message{{ convo.messages.count|pluralize }}</small>
+                      </div>
+                      <a href="{% url 'conversation_detail' convo.id %}" class="btn btn-outline-primary btn-sm">View Thread</a>
                     </div>
-                    <a href="{% url 'conversation_detail' convo.id %}" class="btn btn-outline-primary btn-sm">View Thread</a>
                   </div>
                 </div>
               </div>
-            </div>
+            {% endwith %}
           {% endif %}
         {% endwith %}
       {% endfor %}
     </div>
 
-  {% elif message_list %}
+  {# Flat list view (All/Sent) — uses 'messages' from the view #}
+  {% elif messages %}
     <div class="row row-cols-1 g-3">
-      {% for msg in message_list %}
+      {% for msg in messages %}
         <div class="col">
-          <div class="card shadow-sm {% if not msg.is_read and msg.recipient == user %}border-primary bg-light{% endif %}">
+          <div class="card shadow-sm {% if not msg.is_read and msg.recipient_id == user.id %}border-primary bg-light{% endif %}">
             <div class="card-body">
               <div class="d-flex justify-content-between align-items-start mb-2">
                 <h5 class="card-title mb-0 text-truncate" title="{{ msg.subject|default:'(no subject)' }}">{{ msg.subject|default:"(no subject)" }}</h5>
                 <small class="text-muted">{{ msg.sent_at|date:"M d, Y H:i" }}</small>
               </div>
 
-              <span class="badge 
-                  {% if msg.importance == 'high' %}bg-danger
-                  {% elif msg.importance == 'normal' %}bg-primary
-                  {% else %}bg-secondary{% endif %}">
+              <span class="badge
+                {% if msg.importance == 'high' %}bg-danger
+                {% elif msg.importance == 'normal' %}bg-primary
+                {% else %}bg-secondary{% endif %}">
                 {{ msg.get_importance_display }}
               </span>
 
@@ -100,7 +104,7 @@
 
               <div class="d-flex justify-content-between align-items-center">
                 <div>
-                  {% if msg.sender == user %}
+                  {% if msg.sender_id == user.id %}
                     <span class="badge bg-secondary">To: {{ msg.recipient.get_full_name|default:msg.recipient.username }}</span>
                     <span class="badge bg-dark">Sent</span>
                   {% else %}
@@ -113,7 +117,7 @@
                 </div>
                 <div class="d-flex gap-2">
                   <a href="{% url 'message_detail' msg.pk %}" class="btn btn-outline-primary btn-sm">View</a>
-                  {% if msg.sender == user or msg.recipient == user %}
+                  {% if msg.sender_id == user.id or msg.recipient_id == user.id %}
                     <form method="POST" action="{% url 'delete_message' msg.pk %}" class="d-inline">
                       {% csrf_token %}
                       <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this message?');">
@@ -123,11 +127,13 @@
                   {% endif %}
                 </div>
               </div>
+
             </div>
           </div>
         </div>
       {% endfor %}
     </div>
+
   {% else %}
     <div class="alert alert-info text-center">No messages found.</div>
   {% endif %}
