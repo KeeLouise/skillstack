@@ -126,10 +126,10 @@ def sent_messages(request):
         request,
         'messaging/messages.html',
         {
-            'message_list': messages_qs,
+            'message_list': messages_qs,      # <-- consistent key
             'active_tab': 'sent',
             'unread_count': unread_count,
-            'query': query,
+            'query': query
         }
     )
 
@@ -211,12 +211,10 @@ def compose_message(request):
             msg.save()
 
             for f in request.FILES.getlist('attachments'):
-                MessageAttachment.objects.create(
-                    message=msg,
-                    file=f,
-                    uploaded_by=request.user,
-                    original_name=getattr(f, 'name', '')
-                )
+                kw = dict(message=msg, file=f, original_name=getattr(f, 'name', ''))
+                if hasattr(MessageAttachment, 'uploaded_by'):
+                    kw['uploaded_by'] = request.user
+                MessageAttachment.objects.create(**kw)
 
             messages.success(request, "Message sent.")
             return redirect('messages')
@@ -230,6 +228,11 @@ def compose_message(request):
 def reply_message(request, pk):
     """Reply to a specific message; always stays in the same conversation."""
     original = get_object_or_404(Message, pk=pk)
+
+    # Permission: only participants can reply
+    if request.user not in (original.sender, original.recipient):
+        messages.error(request, "You can't reply to this message.")
+        return redirect('messages')
 
     convo = original.conversation or _get_or_create_conversation(original.sender, original.recipient)
     if not original.conversation_id:
@@ -252,12 +255,10 @@ def reply_message(request, pk):
             reply.save()
 
             for f in request.FILES.getlist('attachments'):
-                MessageAttachment.objects.create(
-                    message=reply,
-                    file=f,
-                    uploaded_by=request.user,
-                    original_name=getattr(f, 'name', '')
-                )
+                kw = dict(message=reply, file=f, original_name=getattr(f, 'name', ''))
+                if hasattr(MessageAttachment, 'uploaded_by'):
+                    kw['uploaded_by'] = request.user
+                MessageAttachment.objects.create(**kw)
 
             messages.success(request, "Reply sent.")
             return redirect('messages')
