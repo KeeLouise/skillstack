@@ -20,7 +20,7 @@ class MessageForm(forms.ModelForm):
     
     attachments = forms.FileField(
         required=False,
-        widget=MultiFileInput
+        widget=MultiFileInput(attrs={'multiple': True})
     )
 
     class Meta:
@@ -44,6 +44,7 @@ class MessageForm(forms.ModelForm):
             self.fields['conversation'].queryset = Conversation.objects.none()
 
         self.helper = FormHelper()
+        self.helper.form_enctype = 'multipart/form-data'
         # Prevent Crispy from rendering it's own form - KR 10/08/2025
         self.helper.form_tag = False
         self.helper.form_method = 'post'

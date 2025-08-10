@@ -219,11 +219,16 @@ def compose_message(request):
                     files = [single] if single else []
 
                 for f in files:
-                    MessageAttachment.objects.create(
-                        message=msg,
-                        file=f,
-                        original_name=getattr(f, 'name', '')
-                    )
+                    if not f:
+                        continue
+                    kwargs = {
+                        'message': msg,
+                        'file': f,
+                        'original_name': getattr(f, 'name', '') or '',
+                    }
+                    if hasattr(MessageAttachment, 'uploaded_by'):
+                        kwargs['uploaded_by'] = request.user
+                    MessageAttachment.objects.create(**kwargs)
 
             messages.success(request, "Message sent.")
             return redirect('messages')
@@ -266,11 +271,16 @@ def reply_message(request, pk):
                     files = [single] if single else []
 
                 for f in files:
-                    MessageAttachment.objects.create(
-                        message=reply,
-                        file=f,
-                        original_name=getattr(f, 'name', '')
-                    )
+                    if not f:
+                        continue
+                    kwargs = {
+                        'message': reply,
+                        'file': f,
+                        'original_name': getattr(f, 'name', '') or '',
+                    }
+                    if hasattr(MessageAttachment, 'uploaded_by'):
+                        kwargs['uploaded_by'] = request.user
+                    MessageAttachment.objects.create(**kwargs)
 
             messages.success(request, "Reply sent.")
             return redirect('messages')
