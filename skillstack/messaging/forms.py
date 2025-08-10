@@ -5,10 +5,32 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 from .models import Message, Conversation
 from projects.models import Project
+from django.core.exceptions import ValidationError
 
 from django.forms.widgets import ClearableFileInput
 class MultiFileInput(ClearableFileInput):
     allow_multiple_selected = True
+
+class MultiFileField(forms.FileField):
+    """A FileField that accepts multiple files and returns a list."""
+    def to_python(self, data):
+        # When no files are submitted, return an empty list
+        if not data:
+            return []
+        # If the widget returned a list/tuple (multiple files), keep it as list
+        if isinstance(data, (list, tuple)):
+            return [f for f in data if f]
+        # Single file -> wrap in a list
+        return [data]
+
+    def validate(self, data):
+        # `data` is a list here
+        if self.required and not data:
+            raise ValidationError(self.error_messages['required'], code='required')
+        # Optionally run validators on each file
+        for f in data:
+            for v in self.validators:
+                v(f)
 
 class MessageForm(forms.ModelForm):
     recipient = forms.ModelChoiceField(queryset=User.objects.none(), label="Select Collaborator")
@@ -18,7 +40,7 @@ class MessageForm(forms.ModelForm):
         widget=forms.HiddenInput()
     )
     
-    attachments = forms.FileField(
+    attachments = MultiFileField(
         required=False,
         widget=MultiFileInput(attrs={'multiple': True})
     )
@@ -44,7 +66,7 @@ class MessageForm(forms.ModelForm):
             self.fields['conversation'].queryset = Conversation.objects.none()
 
         self.helper = FormHelper()
-        self.helper.form_tag = False  # we'll provide the <form> tag in the template
+        self.helper.form_tag = False
         self.helper.form_method = 'post'
         self.helper.form_enctype = 'multipart/form-data'
 
@@ -53,5 +75,5 @@ class MessageForm(forms.ModelForm):
         'No file was submitted' validation error when the field is optional
         and the widget allows multiple selections.
         """
-        files = self.files.getlist('attachments')
+        files = self.cleaned_data.get('attachments')
         return files or []

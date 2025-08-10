@@ -16,9 +16,10 @@
       </h3>
 
       <form method="post" enctype="multipart/form-data" novalidate>
-        {% csrf_token %}
-        {% crispy form %}
-      </form>
+      {% csrf_token %}
+      {% crispy form %}
+      <button type="submit" class="btn btn-primary w-100 mt-3">Send</button>
+</form>
     </div>
   </div>
 </div>
