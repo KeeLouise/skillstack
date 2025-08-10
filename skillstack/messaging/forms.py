@@ -50,12 +50,9 @@ class MessageForm(forms.ModelForm):
             self.fields['conversation'].queryset = Conversation.objects.filter(participants=user)
 
         self.helper = FormHelper()
+        self.helper.form_tag = False
         self.helper.form_method = 'post'
         self.helper.add_input(Submit('submit', 'Send Message', css_class='btn btn-primary w-100 mt-3'))
 
     def clean_attachments(self):
-        """
-        Return a list of uploaded files (or an empty list).
-        This avoids the single-file validation on FileField.
-        """
         return self.files.getlist('attachments')
