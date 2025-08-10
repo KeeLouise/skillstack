@@ -61,8 +61,8 @@ def inbox(request):
         request,
         'messaging/messages.html',
         {
-            'conversations': conversations, 
-            'messages': latest_messages,
+            'conversations': conversations,
+            'message_list': latest_messages,
             'active_tab': 'inbox',
             'unread_count': unread_count,
             'query': query,
@@ -93,7 +93,7 @@ def all_messages(request):
         request,
         'messaging/messages.html',
         {
-            'messages': messages_qs,
+            'message_list': messages_qs,
             'active_tab': 'all',
             'unread_count': unread_count,
             'query': query,
@@ -126,7 +126,7 @@ def sent_messages(request):
         request,
         'messaging/messages.html',
         {
-            'messages': messages_qs,
+            'message_list': messages_qs,
             'active_tab': 'sent',
             'unread_count': unread_count,
             'query': query,
@@ -168,6 +168,7 @@ def message_detail(request, pk):
         }
     )
 
+
 @login_required
 def conversation_detail(request, pk):
     """Jump to the latest message in a conversation (and reuse message_detail)."""
@@ -181,7 +182,7 @@ def conversation_detail(request, pk):
         ),
         pk=pk,
     )
-    
+
     if not convo.participants.filter(id=request.user.id).exists():
         messages.error(request, "You don't have access to that conversation.")
         return redirect('messages')
@@ -192,6 +193,7 @@ def conversation_detail(request, pk):
         return redirect('messages')
 
     return redirect('message_detail', pk=last_msg.pk)
+
 
 @login_required
 def compose_message(request):
