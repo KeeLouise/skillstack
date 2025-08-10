@@ -26,6 +26,8 @@ class Message(models.Model):
     importance = models.CharField(max_length=10, choices=IMPORTANCE_CHOICES, default='normal')
     sent_at = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
+    deleted_by_sender = models.BooleanField(default=False)
+    deleted_by_recipient = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['-sent_at']
