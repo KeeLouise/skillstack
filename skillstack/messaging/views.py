@@ -5,7 +5,6 @@ from django.views.decorators.http import require_POST
 from django.db.models import Q, Max, Prefetch
 from django.db import transaction
 from django.urls import reverse
-
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.utils.dateparse import parse_datetime
 from django.utils.timezone import make_aware
@@ -16,19 +15,24 @@ from .forms import MessageForm
 
 @login_required
 def api_unread_count(request):
-    count = Message.objects.filter(recipient=request.user, is_read=False).count()
+    count = Message.objects.filter(
+        recipient=request.user, is_read=False, deleted_by_recipient=False
+    ).count()
     return JsonResponse({"unread": count})
 
 
 @login_required
 def api_inbox_latest(request):
     """
-    Return latest 10 messages to/from the user.
+    Latest 10 messages to/from the user (excluding items the user deleted).
     Optional ?since=ISO-8601 to only return newer ones.
     """
     qs = (
         Message.objects
-        .filter(Q(sender=request.user) | Q(recipient=request.user))
+        .filter(
+            (Q(sender=request.user) & Q(deleted_by_sender=False)) |
+            (Q(recipient=request.user) & Q(deleted_by_recipient=False))
+        )
         .select_related('sender', 'recipient')
         .order_by('-sent_at')
     )
@@ -42,21 +46,18 @@ def api_inbox_latest(request):
             dt = make_aware(dt)
         qs = qs.filter(sent_at__gt=dt)
 
-    data = []
-    for m in qs[:10]:
-        data.append({
-            "id": m.pk,
-            "subject": m.subject or "(no subject)",
-            "snippet": (m.body or "")[:140],
-            "sender": m.sender.get_full_name() or m.sender.username,
-            "recipient": m.recipient.get_full_name() or m.recipient.username,
-            "is_read": m.is_read,
-            "importance": m.importance,
-            "sent_at": m.sent_at.isoformat(),
-            "detail_url": request.build_absolute_uri(
-                reverse("message_detail", args=[m.pk])
-            ),
-        })
+    data = [{
+        "id": m.pk,
+        "subject": m.subject or "(no subject)",
+        "snippet": (m.body or "")[:140],
+        "sender": m.sender.get_full_name() or m.sender.username,
+        "recipient": m.recipient.get_full_name() or m.recipient.username,
+        "is_read": m.is_read,
+        "importance": m.importance,
+        "sent_at": m.sent_at.isoformat(),
+        "detail_url": request.build_absolute_uri(reverse("message_detail", args=[m.pk])),
+    } for m in qs[:10]]
+
     return JsonResponse({"messages": data})
 
 
@@ -70,6 +71,7 @@ def api_mark_read(request, pk):
         msg.is_read = True
         msg.save(update_fields=['is_read'])
     return JsonResponse({"ok": True})
+
 
 
 def _get_or_create_conversation(user_a, user_b):
@@ -88,91 +90,100 @@ def _get_or_create_conversation(user_a, user_b):
 
 @login_required
 def inbox(request):
-    """Show one card per conversation (latest message), ordered by last activity."""
+    """
+    One card per conversation using each convo’s latest visible message
+    (i.e., not soft-deleted for the current user), ordered by last activity.
+    """
     query = request.GET.get('q', '')
 
     conversations = (
         Conversation.objects.filter(participants=request.user)
-        .annotate(last_sent=Max('messages__sent_at'))
-        .order_by('-last_sent')
         .prefetch_related(
             Prefetch(
                 'messages',
-                queryset=Message.objects.select_related('sender', 'recipient').order_by('-sent_at')
+                queryset=Message.objects
+                    .select_related('sender', 'recipient')
+                    .filter(
+                        (Q(sender=request.user) & Q(deleted_by_sender=False)) |
+                        (Q(recipient=request.user) & Q(deleted_by_recipient=False))
+                    )
+                    .order_by('-sent_at')
             ),
             'participants',
         )
     )
-
-    if query:
-        conversations = conversations.filter(
-            Q(messages__subject__icontains=query) |
-            Q(messages__body__icontains=query) |
-            Q(participants__first_name__icontains=query) |
-            Q(participants__last_name__icontains=query) |
-            Q(participants__username__icontains=query)
-        ).distinct()
 
     latest_messages = []
     for convo in conversations:
         last_msg = next(iter(convo.messages.all()), None)
         if last_msg:
             latest_messages.append(last_msg)
+
+    if query:
+        q = query.strip()
+        latest_messages = [
+            m for m in latest_messages
+            if (q.lower() in (m.subject or '').lower())
+            or (q.lower() in (m.body or '').lower())
+            or any(q.lower() in (p.first_name or '').lower()
+                   or q.lower() in (p.last_name or '').lower()
+                   or q.lower() in (p.username or '').lower()
+                   for p in convo.participants.all())
+        ]
+
     latest_messages.sort(key=lambda m: m.sent_at, reverse=True)
 
-    unread_count = Message.objects.filter(recipient=request.user, is_read=False).count()
+    unread_count = Message.objects.filter(
+        recipient=request.user, is_read=False, deleted_by_recipient=False
+    ).count()
 
-    return render(
-        request,
-        'messaging/messages.html',
-        {
-            'conversations': conversations,
-            'messages': latest_messages, 
-            'active_tab': 'inbox',
-            'unread_count': unread_count,
-            'query': query,
-        }
-    )
+    return render(request, 'messaging/messages.html', {
+        'conversations': conversations,
+        'messages': latest_messages,
+        'active_tab': 'inbox',
+        'unread_count': unread_count,
+        'query': query,
+    })
 
 
 @login_required
 def all_messages(request):
-    """Flat list of all messages to/from the user."""
+    """Flat list of all messages to/from the user (excluding soft-deleted ones for this user)."""
     query = request.GET.get('q', '')
 
     messages_qs = (
         Message.objects
-        .filter(Q(sender=request.user) | Q(recipient=request.user))
+        .filter(
+            (Q(sender=request.user) & Q(deleted_by_sender=False)) |
+            (Q(recipient=request.user) & Q(deleted_by_recipient=False))
+        )
         .select_related('sender', 'recipient', 'conversation')
         .order_by('-sent_at')
     )
 
     if query:
-        messages_qs = messages_qs.filter(
-            Q(subject__icontains=query) | Q(body__icontains=query)
-        )
+        messages_qs = messages_qs.filter(Q(subject__icontains=query) | Q(body__icontains=query))
 
-    unread_count = Message.objects.filter(recipient=request.user, is_read=False).count()
+    unread_count = Message.objects.filter(
+        recipient=request.user, is_read=False, deleted_by_recipient=False
+    ).count()
 
-    return render(
-        request,
-        'messaging/messages.html',
-        {
-            'messages': messages_qs,
-            'active_tab': 'all',
-            'unread_count': unread_count,
-            'query': query,
-        }
-    )
+    return render(request, 'messaging/messages.html', {
+        'messages': messages_qs,
+        'active_tab': 'all',
+        'unread_count': unread_count,
+        'query': query,
+    })
 
 
 @login_required
 def sent_messages(request):
-    """Flat list of messages the user has sent."""
+    """Flat list of messages the user has sent (excluding those they soft-deleted)."""
     query = request.GET.get('q', '')
+
     messages_qs = (
         Message.objects
-        .filter(sender=request.user)
+        .filter(sender=request.user, deleted_by_sender=False)
         .select_related('sender', 'recipient', 'conversation')
         .order_by('-sent_at')
     )
@@ -185,31 +196,37 @@ def sent_messages(request):
             Q(recipient__username__icontains=query)
         )
 
-    unread_count = Message.objects.filter(recipient=request.user, is_read=False).count()
+    unread_count = Message.objects.filter(
+        recipient=request.user, is_read=False, deleted_by_recipient=False
+    ).count()
 
-    return render(
-        request,
-        'messaging/messages.html',
-        {
-            'messages': messages_qs, 
-            'active_tab': 'sent',
-            'unread_count': unread_count,
-            'query': query
-        }
-    )
+    return render(request, 'messaging/messages.html', {
+        'messages': messages_qs,
+        'active_tab': 'sent',
+        'unread_count': unread_count,
+        'query': query
+    })
 
 
 @login_required
 def message_detail(request, pk):
-    """Show a message; if it has a conversation, also show the thread."""
+    """Show a message; if it has a conversation, also show the thread — but hide items the user deleted."""
     message = get_object_or_404(
         Message.objects.select_related('conversation', 'sender', 'recipient'),
         pk=pk
     )
 
+    # Must be participant - KR 10/08/2025
     if request.user not in (message.sender, message.recipient):
         return redirect('messages')
 
+    # Don’t allow opening items the current user soft-deleted - KR 10/08/2025
+    if (request.user == message.sender and getattr(message, 'deleted_by_sender', False)) or \
+       (request.user == message.recipient and getattr(message, 'deleted_by_recipient', False)):
+        messages.info(request, "That message was deleted.")
+        return redirect('messages')
+
+    # Auto-mark read - KR 10/08/2025
     if message.recipient_id == request.user.id and not message.is_read:
         message.is_read = True
         message.save(update_fields=['is_read'])
@@ -218,29 +235,35 @@ def message_detail(request, pk):
     if message.conversation_id:
         thread_messages = (
             message.conversation.messages
+            .filter(
+                (Q(sender=request.user) & Q(deleted_by_sender=False)) |
+                (Q(recipient=request.user) & Q(deleted_by_recipient=False))
+            )
             .select_related('sender', 'recipient')
             .prefetch_related('attachments')
             .order_by('sent_at')
         )
 
-    return render(
-        request,
-        'messaging/message_detail.html',
-        {
-            'message': message,
-            'thread_messages': thread_messages,
-        }
-    )
+    return render(request, 'messaging/message_detail.html', {
+        'message': message,
+        'thread_messages': thread_messages,
+    })
 
 
 @login_required
 def conversation_detail(request, pk):
-    """Jump to the latest message in a conversation (and reuse message_detail)."""
+    """Jump to the latest visible message in a conversation (reusing message_detail)."""
     convo = get_object_or_404(
         Conversation.objects.prefetch_related(
             Prefetch(
                 'messages',
-                queryset=Message.objects.select_related('sender', 'recipient').order_by('-sent_at')
+                queryset=Message.objects
+                    .select_related('sender', 'recipient')
+                    .filter(
+                        (Q(sender=request.user) & Q(deleted_by_sender=False)) |
+                        (Q(recipient=request.user) & Q(deleted_by_recipient=False))
+                    )
+                    .order_by('-sent_at')
             ),
             'participants'
         ),
@@ -275,11 +298,7 @@ def compose_message(request):
                 msg.conversation = convo
                 msg.save()
 
-                files = (
-                    form.cleaned_data.get('attachments') or
-                    request.FILES.getlist('attachments') or
-                    ([request.FILES['attachments']] if 'attachments' in request.FILES else [])
-                )
+                files = form.cleaned_data.get('attachments') or []
                 for f in files:
                     if not f:
                         continue
@@ -330,11 +349,7 @@ def reply_message(request, pk):
                 reply.conversation = convo
                 reply.save()
 
-                files = (
-                    form.cleaned_data.get('attachments') or
-                    request.FILES.getlist('attachments') or
-                    ([request.FILES['attachments']] if 'attachments' in request.FILES else [])
-                )
+                files = form.cleaned_data.get('attachments') or []
                 for f in files:
                     if not f:
                         continue
@@ -362,11 +377,28 @@ def reply_message(request, pk):
 @login_required
 @require_POST
 def delete_message(request, pk):
-    """Allow sender or recipient to delete a message."""
+    """Soft-delete for the current user; hard-delete only when both have deleted."""
     message = get_object_or_404(
         Message,
         Q(pk=pk) & (Q(sender=request.user) | Q(recipient=request.user))
     )
-    message.delete()
-    messages.success(request, "Message deleted successfully.")
+
+    # Mark as deleted for this user - KR 10/08/2025
+    changed = False
+    if hasattr(message, 'deleted_by_sender') and request.user == message.sender and not message.deleted_by_sender:
+        message.deleted_by_sender = True
+        changed = True
+    if hasattr(message, 'deleted_by_recipient') and request.user == message.recipient and not message.deleted_by_recipient:
+        message.deleted_by_recipient = True
+        changed = True
+
+    # If both deleted, remove permanently - KR 10/08/2025
+    if getattr(message, 'deleted_by_sender', False) and getattr(message, 'deleted_by_recipient', False):
+        message.delete()
+        messages.success(request, "Message removed.")
+        return redirect('messages')
+
+    if changed:
+        message.save(update_fields=['deleted_by_sender', 'deleted_by_recipient'])
+    messages.success(request, "Message deleted for you.")
     return redirect('messages')
