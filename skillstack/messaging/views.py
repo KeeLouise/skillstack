@@ -4,9 +4,72 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
 from django.db.models import Q, Max, Prefetch
 from django.db import transaction
+from django.urls import reverse
+
+from django.http import JsonResponse, HttpResponseBadRequest
+from django.utils.dateparse import parse_datetime
+from django.utils.timezone import make_aware
 
 from .models import Message, Conversation, MessageAttachment
 from .forms import MessageForm
+
+
+@login_required
+def api_unread_count(request):
+    count = Message.objects.filter(recipient=request.user, is_read=False).count()
+    return JsonResponse({"unread": count})
+
+
+@login_required
+def api_inbox_latest(request):
+    """
+    Return latest 10 messages to/from the user.
+    Optional ?since=ISO-8601 to only return newer ones.
+    """
+    qs = (
+        Message.objects
+        .filter(Q(sender=request.user) | Q(recipient=request.user))
+        .select_related('sender', 'recipient')
+        .order_by('-sent_at')
+    )
+
+    since = request.GET.get('since')
+    if since:
+        dt = parse_datetime(since)
+        if dt is None:
+            return HttpResponseBadRequest("Invalid 'since'")
+        if dt.tzinfo is None:
+            dt = make_aware(dt)
+        qs = qs.filter(sent_at__gt=dt)
+
+    data = []
+    for m in qs[:10]:
+        data.append({
+            "id": m.pk,
+            "subject": m.subject or "(no subject)",
+            "snippet": (m.body or "")[:140],
+            "sender": m.sender.get_full_name() or m.sender.username,
+            "recipient": m.recipient.get_full_name() or m.recipient.username,
+            "is_read": m.is_read,
+            "importance": m.importance,
+            "sent_at": m.sent_at.isoformat(),
+            "detail_url": request.build_absolute_uri(
+                reverse("message_detail", args=[m.pk])
+            ),
+        })
+    return JsonResponse({"messages": data})
+
+
+@login_required
+@require_POST
+def api_mark_read(request, pk):
+    msg = get_object_or_404(Message, pk=pk)
+    if msg.recipient_id != request.user.id:
+        return JsonResponse({"ok": False, "error": "Not allowed"}, status=403)
+    if not msg.is_read:
+        msg.is_read = True
+        msg.save(update_fields=['is_read'])
+    return JsonResponse({"ok": True})
 
 
 def _get_or_create_conversation(user_a, user_b):
@@ -64,7 +127,7 @@ def inbox(request):
         'messaging/messages.html',
         {
             'conversations': conversations,
-            'messages': latest_messages,
+            'messages': latest_messages, 
             'active_tab': 'inbox',
             'unread_count': unread_count,
             'query': query,
@@ -128,7 +191,7 @@ def sent_messages(request):
         request,
         'messaging/messages.html',
         {
-            'messages': messages_qs,
+            'messages': messages_qs, 
             'active_tab': 'sent',
             'unread_count': unread_count,
             'query': query
@@ -212,13 +275,11 @@ def compose_message(request):
                 msg.conversation = convo
                 msg.save()
 
-                # Collect attachments robustly
                 files = (
                     form.cleaned_data.get('attachments') or
                     request.FILES.getlist('attachments') or
                     ([request.FILES['attachments']] if 'attachments' in request.FILES else [])
                 )
-
                 for f in files:
                     if not f:
                         continue
@@ -274,7 +335,6 @@ def reply_message(request, pk):
                     request.FILES.getlist('attachments') or
                     ([request.FILES['attachments']] if 'attachments' in request.FILES else [])
                 )
-
                 for f in files:
                     if not f:
                         continue
