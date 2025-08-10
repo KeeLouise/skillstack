@@ -62,7 +62,8 @@ def inbox(request):
         'messaging/messages.html',
         {
             'conversations': conversations,
-            'message_list': latest_messages,
+            'messages': latest_messages,      
+            'message_list': latest_messages,  
             'active_tab': 'inbox',
             'unread_count': unread_count,
             'query': query,
@@ -93,6 +94,7 @@ def all_messages(request):
         request,
         'messaging/messages.html',
         {
+            'messages': messages_qs,
             'message_list': messages_qs,
             'active_tab': 'all',
             'unread_count': unread_count,
@@ -126,7 +128,8 @@ def sent_messages(request):
         request,
         'messaging/messages.html',
         {
-            'message_list': messages_qs,      # <-- consistent key
+            'messages': messages_qs,
+            'message_list': messages_qs,
             'active_tab': 'sent',
             'unread_count': unread_count,
             'query': query
@@ -210,11 +213,14 @@ def compose_message(request):
             msg.conversation = convo
             msg.save()
 
-            for f in request.FILES.getlist('attachments'):
-                kw = dict(message=msg, file=f, original_name=getattr(f, 'name', ''))
-                if hasattr(MessageAttachment, 'uploaded_by'):
-                    kw['uploaded_by'] = request.user
-                MessageAttachment.objects.create(**kw)
+            files = form.cleaned_data.get('attachments', [])
+            for f in files:
+                MessageAttachment.objects.create(
+                    message=msg,
+                    file=f,
+                    uploaded_by=getattr(request.user, 'pk', None) and request.user or None,
+                    original_name=getattr(f, 'name', '')
+                )
 
             messages.success(request, "Message sent.")
             return redirect('messages')
@@ -229,7 +235,6 @@ def reply_message(request, pk):
     """Reply to a specific message; always stays in the same conversation."""
     original = get_object_or_404(Message, pk=pk)
 
-    # Permission: only participants can reply
     if request.user not in (original.sender, original.recipient):
         messages.error(request, "You can't reply to this message.")
         return redirect('messages')
@@ -254,7 +259,8 @@ def reply_message(request, pk):
             reply.conversation = convo
             reply.save()
 
-            for f in request.FILES.getlist('attachments'):
+            files = form.cleaned_data.get('attachments', [])
+            for f in files:
                 kw = dict(message=reply, file=f, original_name=getattr(f, 'name', ''))
                 if hasattr(MessageAttachment, 'uploaded_by'):
                     kw['uploaded_by'] = request.user
