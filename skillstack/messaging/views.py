@@ -198,9 +198,7 @@ def conversation_detail(request, pk):
     return redirect('message_detail', pk=last_msg.pk)
 
 
-@login_required
 def compose_message(request):
-    """Create a new message; auto‑attach to existing 2‑party thread or create one."""
     if request.method == 'POST':
         form = MessageForm(request.POST, request.FILES, user=request.user)
         if form.is_valid():
@@ -213,12 +211,11 @@ def compose_message(request):
             msg.conversation = convo
             msg.save()
 
-            files = form.cleaned_data.get('attachments', [])
-            for f in files:
+            for f in request.FILES.getlist('attachments'):
                 MessageAttachment.objects.create(
                     message=msg,
                     file=f,
-                    uploaded_by=getattr(request.user, 'pk', None) and request.user or None,
+                    uploaded_by=getattr(request.user, "pk", None) and request.user,
                     original_name=getattr(f, 'name', '')
                 )
 
@@ -230,11 +227,8 @@ def compose_message(request):
     return render(request, 'messaging/compose.html', {'form': form})
 
 
-@login_required
 def reply_message(request, pk):
-    """Reply to a specific message; always stays in the same conversation."""
     original = get_object_or_404(Message, pk=pk)
-
     if request.user not in (original.sender, original.recipient):
         messages.error(request, "You can't reply to this message.")
         return redirect('messages')
@@ -244,9 +238,8 @@ def reply_message(request, pk):
         original.conversation = convo
         original.save(update_fields=['conversation'])
 
-    default_recipient = original.sender if request.user == original.recipient else original.recipient
     initial = {
-        'recipient': default_recipient,
+        'recipient': original.sender if request.user == original.recipient else original.recipient,
         'subject': f"Re: {original.subject}",
         'conversation': convo.id,
     }
@@ -259,23 +252,20 @@ def reply_message(request, pk):
             reply.conversation = convo
             reply.save()
 
-            files = form.cleaned_data.get('attachments', [])
-            for f in files:
-                kw = dict(message=reply, file=f, original_name=getattr(f, 'name', ''))
-                if hasattr(MessageAttachment, 'uploaded_by'):
-                    kw['uploaded_by'] = request.user
-                MessageAttachment.objects.create(**kw)
+            for f in request.FILES.getlist('attachments'):
+                MessageAttachment.objects.create(
+                    message=reply,
+                    file=f,
+                    uploaded_by=getattr(request.user, "pk", None) and request.user,
+                    original_name=getattr(f, 'name', '')
+                )
 
             messages.success(request, "Reply sent.")
             return redirect('messages')
     else:
         form = MessageForm(user=request.user, initial=initial)
 
-    return render(request, 'messaging/compose.html', {
-        'form': form,
-        'is_reply': True,
-        'original_msg': original,
-    })
+    return render(request, 'messaging/compose.html', {'form': form, 'is_reply': True, 'original_msg': original})
 
 
 @login_required

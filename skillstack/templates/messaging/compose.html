@@ -17,8 +17,11 @@
 
       <form method="post" enctype="multipart/form-data" novalidate>
         {% csrf_token %}
-        {# No manual hidden input here; the form provides conversation as a hidden field #}
         {% crispy form %}
+
+        <div class="d-grid mt-3">
+          <button type="submit" class="btn btn-primary">Send Message</button>
+        </div>
       </form>
     </div>
   </div>
