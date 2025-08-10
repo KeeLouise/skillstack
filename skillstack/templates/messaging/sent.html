@@ -3,17 +3,44 @@
 
 {% block content %}
 <div class="container mt-5">
-  <h2 class="mb-4">Sent Messages</h2>
-  <ul class="list-group">
-    {% for msg in messages %}
-      <li class="list-group-item">
-        <strong>To:</strong> {{ msg.recipient.username }}<br>
-        <a href="{% url 'message_detail' msg.pk %}">{{ msg.subject }}</a>
-        <small class="text-muted d-block">Sent: {{ msg.sent_at }}</small>
-      </li>
-    {% empty %}
-      <li class="list-group-item">You haven’t sent any messages yet.</li>
-    {% endfor %}
-  </ul>
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">Sent Messages</h2>
+    <a href="{% url 'compose' %}" class="btn btn-dark">New Message</a>
+  </div>
+
+  {% with items=message_list|default:messages %}
+    {% if items %}
+      <ul class="list-group">
+        {% for msg in items %}
+          <li class="list-group-item">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="pe-3">
+                <a href="{% url 'message_detail' msg.pk %}" class="fw-semibold text-decoration-none">{{ msg.subject|default:"(no subject)" }}</a>
+                <div class="small text-muted">To: {{ msg.recipient.get_full_name|default:msg.recipient.username }}</div>
+              </div>
+              <div class="text-end">
+                <span class="badge {% if msg.importance == 'high' %}bg-danger{% elif msg.importance == 'normal' %}bg-primary{% else %}bg-secondary{% endif %}">
+                  {{ msg.get_importance_display }}
+                </span>
+                <div class="small text-muted mt-1">{{ msg.sent_at|date:"M d, Y H:i" }}</div>
+              </div>
+            </div>
+            {% if msg.body %}
+              <p class="mb-2 mt-2 text-muted">{{ msg.body|truncatechars:140 }}</p>
+            {% endif %}
+            <div class="d-flex gap-2">
+              <a href="{% url 'message_detail' msg.pk %}" class="btn btn-outline-primary btn-sm">View</a>
+              <form method="POST" action="{% url 'delete_message' msg.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Delete this message?');">Delete</button>
+              </form>
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <div class="alert alert-info">You haven’t sent any messages yet.</div>
+    {% endif %}
+  {% endwith %}
 </div>
 {% endblock %}

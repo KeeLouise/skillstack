@@ -55,6 +55,7 @@ def inbox(request):
         last_msg = next(iter(convo.messages.all()), None)
         if last_msg:
             latest_messages.append(last_msg)
+    latest_messages.sort(key=lambda m: m.sent_at, reverse=True)
 
     unread_count = Message.objects.filter(recipient=request.user, is_read=False).count()
 
@@ -63,7 +64,8 @@ def inbox(request):
         'messaging/messages.html',
         {
             'conversations': conversations,
-            'messages': latest_messages,      
+            'messages': latest_messages,
+            'message_list': latest_messages,
             'active_tab': 'inbox',
             'unread_count': unread_count,
             'query': query,
@@ -95,6 +97,7 @@ def all_messages(request):
         'messaging/messages.html',
         {
             'messages': messages_qs,
+            'message_list': messages_qs,
             'active_tab': 'all',
             'unread_count': unread_count,
             'query': query,
@@ -109,7 +112,7 @@ def sent_messages(request):
     messages_qs = (
         Message.objects
         .filter(sender=request.user)
-        .select_related('recipient', 'conversation')
+        .select_related('sender', 'recipient', 'conversation')
         .order_by('-sent_at')
     )
 
@@ -128,6 +131,7 @@ def sent_messages(request):
         'messaging/messages.html',
         {
             'messages': messages_qs,
+            'message_list': messages_qs,
             'active_tab': 'sent',
             'unread_count': unread_count,
             'query': query
@@ -138,10 +142,9 @@ def sent_messages(request):
 @login_required
 def message_detail(request, pk):
     """Show a message; if it has a conversation, also show the thread."""
-    message = (
-        Message.objects
-        .select_related('conversation', 'sender', 'recipient')
-        .get(pk=pk)
+    message = get_object_or_404(
+        Message.objects.select_related('conversation', 'sender', 'recipient'),
+        pk=pk
     )
 
     if request.user not in (message.sender, message.recipient):
@@ -212,11 +215,10 @@ def compose_message(request):
                 msg.conversation = convo
                 msg.save()
 
+                # Collect attachments (works for single or multiple inputs)
                 files = request.FILES.getlist('attachments')
-                if not files:
-                    # Fallback in case a single file field is used without `multiple`
-                    single = request.FILES.get('attachments')
-                    files = [single] if single else []
+                if not files and 'attachments' in request.FILES:
+                    files = [request.FILES['attachments']]
 
                 for f in files:
                     if not f:
@@ -232,6 +234,9 @@ def compose_message(request):
 
             messages.success(request, "Message sent.")
             return redirect('messages')
+        else:
+            # Optional: surface form errors for debugging
+            messages.error(request, "There was a problem sending your message. Please check the form and try again.")
     else:
         form = MessageForm(user=request.user)
 
@@ -265,10 +270,10 @@ def reply_message(request, pk):
                 reply.conversation = convo
                 reply.save()
 
+                # Collect attachments (works for single or multiple inputs)
                 files = request.FILES.getlist('attachments')
-                if not files:
-                    single = request.FILES.get('attachments')
-                    files = [single] if single else []
+                if not files and 'attachments' in request.FILES:
+                    files = [request.FILES['attachments']]
 
                 for f in files:
                     if not f:
