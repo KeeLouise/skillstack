@@ -8,7 +8,7 @@
     <a href="{% url 'compose' %}" class="btn btn-dark">New Message</a>
   </div>
 
-  {% with items=message_list|default:messages %}
+  {% with items=messages|default:messages %}
     {% if items %}
       <ul class="list-group">
         {% for msg in items %}

@@ -44,11 +44,9 @@ class MessageForm(forms.ModelForm):
             self.fields['conversation'].queryset = Conversation.objects.none()
 
         self.helper = FormHelper()
-        self.helper.form_enctype = 'multipart/form-data'
-        # Prevent Crispy from rendering it's own form - KR 10/08/2025
-        self.helper.form_tag = False
+        self.helper.form_tag = False  # we'll provide the <form> tag in the template
         self.helper.form_method = 'post'
-        self.helper.add_input(Submit('submit', 'Send Message', css_class='btn btn-primary w-100 mt-3'))
+        self.helper.form_enctype = 'multipart/form-data'
 
     def clean_attachments(self):
         """Return a list of uploaded files (or an empty list). Avoids the
