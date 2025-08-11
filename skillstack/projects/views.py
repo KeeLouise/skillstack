@@ -59,22 +59,21 @@ def create_project(request):
             project.save()
             form.save_m2m()
 
-            # Handles collaborator invitations – KR 31/07/2025
             invite_emails = form.cleaned_data.get('invite_emails', '')
-            emails = [email.strip() for email in invite_emails.split(',') if email.strip()]
-
+            emails = [e.strip() for e in invite_emails.split(',') if e.strip()]
             for email in emails:
                 try:
                     user = User.objects.get(email=email)
                     project.collaborators.add(user)
                     notify_existing_collaborator(user, project)
-                    logger.info(f"Added existing user {email} as collaborator.")
                 except User.DoesNotExist:
                     Invitation.objects.create(email=email, project=project, invited_by=request.user)
                     send_invite_email(email, project)
 
             messages.success(request, 'Project created and collaborators invited.')
             return redirect('dashboard')
+        else:
+            messages.error(request, 'Please correct the errors below.')
     else:
         form = ProjectForm()
 
@@ -95,7 +94,6 @@ def project_detail(request, pk):
 def edit_project(request, pk):
     project = get_object_or_404(Project, pk=pk)
 
-    # Only allow the owner to edit their project - KR 31/07/2025
     if request.user != project.owner:
         messages.error(request, "You don't have permission to edit this project.")
         return redirect('dashboard')
@@ -105,7 +103,9 @@ def edit_project(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, 'Project updated successfully.')
-            return redirect('project_detail', pk=project.pk)
+            return redirect('project_detail', project_id=project.pk)
+        else:
+            messages.error(request, 'Please correct the errors below.')
     else:
         form = ProjectForm(instance=project)
 

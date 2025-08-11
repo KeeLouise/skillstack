@@ -27,14 +27,16 @@
           <p><strong class="text-muted">Owner:</strong> {{ project.owner.username }}</p>
 
           {% if project.collaborators.all %}
-          <p>
-          <strong class="text-muted">Collaborators:</strong>
-          {% for user in project.collaborators.all %}
-          <span class="badge bg-secondary">
+            {% if project.collaborators.count %}
+             <p>
+      <strong class="text-muted">Collaborators:</strong>
+      {% for user in project.collaborators.all %}
+        <span class="badge bg-secondary">
           {{ user.get_full_name|default:user.username }}
-          </span>{% if not forloop.last %}, {% endif %}
-          {% endfor %}
-          </p>
+        </span>{% if not forloop.last %} {% endif %}
+      {% endfor %}
+    </p>
+  {% endif %}
 {% endif %}
         </div>
       </div>
