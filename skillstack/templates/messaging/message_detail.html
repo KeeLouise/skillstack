@@ -252,13 +252,13 @@
               </button>
             </form>
           {% endif %}
-
-          <a href="{% url 'messages' %}" class="btn btn-outline-secondary">Back to Inbox</a>
+<a href="{% url 'messages' %}" class="btn btn-outline-secondary">Back to Inbox</a>
         </div>
       </div>
     </div>
   {% endif %}
 </div>
+{% endblock content %}
 
 {% block extra_scripts %}
   <script src="{% static 'js/messages.js' %}"></script>
