@@ -10,6 +10,7 @@ urlpatterns = [
     path('<int:pk>/reply/', views.reply_message, name='reply_message'), # Message Replies
     path('<int:pk>/delete/', views.delete_message, name='delete_message'), # Delete Message
     path('conversations/<int:pk>/', views.conversation_detail, name='conversation_detail'), # Conversation Detail
+     path("attachments/<int:pk>/download/", views.download_attachment, name="download_attachment"), #Attachment Downloads (Protected)
 
      # --- NEW JSON API endpoints ---
     path('api/unread-count/', views.api_unread_count, name='api_unread_count'),

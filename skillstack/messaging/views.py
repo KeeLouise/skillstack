@@ -5,7 +5,7 @@ from django.views.decorators.http import require_POST
 from django.db.models import Q, Max, Prefetch
 from django.db import transaction
 from django.urls import reverse
-from django.http import JsonResponse, HttpResponseBadRequest
+from django.http import JsonResponse, HttpResponseBadRequest, FileResponse, Http404
 from django.utils.dateparse import parse_datetime
 from django.utils.timezone import make_aware
 
@@ -407,3 +407,24 @@ def delete_message(request, pk):
     if convo_id:
         return redirect('conversation_detail', pk=convo_id)
     return redirect('messages')
+
+@login_required
+def download_attachment(request, pk):
+    a = get_object_or_404(
+        MessageAttachment.objects.select_related('message__sender', 'message__recipient'),
+        pk=pk
+    )
+    msg = a.message
+    if request.user not in (msg.sender, msg.recipient):
+        raise Http404("Not found")
+
+    if not a.file:
+        raise Http404("File not available")
+
+    try:
+        f = a.file.open("rb")
+    except Exception:
+        raise Http404("File not available")
+
+    filename = a.original_name or a.file.name
+    return FileResponse(f, as_attachment=True, filename=filename)
