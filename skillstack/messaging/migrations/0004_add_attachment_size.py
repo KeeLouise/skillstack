@@ -11,16 +11,6 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name='message',
-            name='deleted_by_recipient',
-            field=models.BooleanField(default=False),
-        ),
-        migrations.AddField(
-            model_name='message',
-            name='deleted_by_sender',
-            field=models.BooleanField(default=False),
-        ),
-        migrations.AddField(
             model_name='messageattachment',
             name='size',
             field=models.BigIntegerField(blank=True, null=True),
