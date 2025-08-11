@@ -9,13 +9,6 @@
     <div class="col-md-8">
       <h2 class="mb-4 text-center">Create a New Project</h2>
 
-      {# flash messages (success/error) #}
-      {% if messages %}
-        {% for message in messages %}
-          <div class="alert alert-{{ message.tags }} mb-3">{{ message }}</div>
-        {% endfor %}
-      {% endif %}
-
       {# non-field errors summary (e.g., date validation) #}
       {% if form.non_field_errors %}
         <div class="alert alert-danger mb-3">
