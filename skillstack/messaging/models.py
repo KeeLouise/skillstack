@@ -29,6 +29,7 @@ class Message(models.Model):
     is_read = models.BooleanField(default=False)
     deleted_by_sender = models.BooleanField(default=False)
     deleted_by_recipient = models.BooleanField(default=False)
+    archived = models.BooleanField(default=False)  # Message archiving
 
     class Meta:
         ordering = ['-sent_at']
