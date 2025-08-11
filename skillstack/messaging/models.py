@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from cloudinary_storage.storage import RawMediaCloudinaryStorage
 
 class Conversation(models.Model):
     participants = models.ManyToManyField(User, related_name='conversations')
@@ -38,7 +39,7 @@ class Message(models.Model):
 
 class MessageAttachment(models.Model):
     message = models.ForeignKey(Message, related_name='attachments', on_delete=models.CASCADE)
-    file = models.FileField(upload_to='message_attachments/')
+    file = models.FileField(upload_to='message_attachments/',storage=RawMediaCloudinaryStorage())
     original_name = models.CharField(max_length=255, blank=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
     size = models.BigIntegerField(null=True, blank=True)
