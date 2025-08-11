@@ -132,6 +132,8 @@
                     {{ a.original_name|default:a.file.name }}
                   </a>
                   <span class="text-muted small">({{ a.file.size|filesizeformat }})</span>
+                  <a href="{% url 'download_attachment' a.pk %}"
+   class="btn btn-sm btn-outline-secondary ms-2">Download</a>
 
                   {% with u=a.file.url|lower %}
                     {% if '.png' in u or '.jpg' in u or '.jpeg' in u or '.gif' in u or '.webp' in u %}
@@ -151,13 +153,6 @@
 
         <div class="d-flex flex-wrap gap-2 mt-4">
           <a href="{% url 'reply_message' message.pk %}" class="btn btn-outline-secondary">Reply</a>
-          {% if message.sender == user or message.recipient == user %}
-            <form method="POST" action="{% url 'delete_message' message.pk %}">
-              {% csrf_token %}
-              <button type="submit" class="btn btn-danger"
-                      onclick="return confirm('Delete this message?');">Delete Message</button>
-            </form>
-          {% endif %}
           <a href="{% url 'messages' %}" class="btn btn-outline-secondary">Back to Inbox</a>
         </div>
       </div>
