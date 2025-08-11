@@ -383,8 +383,8 @@ def delete_message(request, pk):
         Message,
         Q(pk=pk) & (Q(sender=request.user) | Q(recipient=request.user))
     )
+    convo_id = message.conversation_id
 
-    # Mark as deleted for this user - KR 10/08/2025
     changed = False
     if hasattr(message, 'deleted_by_sender') and request.user == message.sender and not message.deleted_by_sender:
         message.deleted_by_sender = True
@@ -393,13 +393,17 @@ def delete_message(request, pk):
         message.deleted_by_recipient = True
         changed = True
 
-    # If both deleted, remove permanently - KR 10/08/2025
+    # If both deleted, remove permanently - KR 11/08/2025
     if getattr(message, 'deleted_by_sender', False) and getattr(message, 'deleted_by_recipient', False):
         message.delete()
         messages.success(request, "Message removed.")
+        if convo_id:
+            return redirect('conversation_detail', pk=convo_id)
         return redirect('messages')
 
     if changed:
         message.save(update_fields=['deleted_by_sender', 'deleted_by_recipient'])
     messages.success(request, "Message deleted for you.")
+    if convo_id:
+        return redirect('conversation_detail', pk=convo_id)
     return redirect('messages')

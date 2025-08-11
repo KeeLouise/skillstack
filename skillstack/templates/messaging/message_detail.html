@@ -76,6 +76,17 @@
               </ul>
             </div>
           {% endif %}
+          <div class="mt-3 d-flex gap-2">
+            {% if m.sender == user or m.recipient == user %}
+              <form method="POST" action="{% url 'delete_message' m.pk %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-danger"
+                        onclick="return confirm('Delete this message for you?');">
+                  Delete
+                </button>
+              </form>
+            {% endif %}
+          </div>
         </div>
       </div>
     {% endfor %}
