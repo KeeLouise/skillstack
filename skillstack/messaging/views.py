@@ -384,6 +384,7 @@ def delete_message(request, pk):
         Q(pk=pk) & (Q(sender=request.user) | Q(recipient=request.user))
     )
     convo_id = message.conversation_id
+    next_url = request.POST.get('next')
 
     changed = False
     if hasattr(message, 'deleted_by_sender') and request.user == message.sender and not message.deleted_by_sender:
@@ -397,6 +398,8 @@ def delete_message(request, pk):
     if getattr(message, 'deleted_by_sender', False) and getattr(message, 'deleted_by_recipient', False):
         message.delete()
         messages.success(request, "Message removed.")
+        if next_url:
+            return redirect(next_url)
         if convo_id:
             return redirect('conversation_detail', pk=convo_id)
         return redirect('messages')
@@ -404,6 +407,9 @@ def delete_message(request, pk):
     if changed:
         message.save(update_fields=['deleted_by_sender', 'deleted_by_recipient'])
     messages.success(request, "Message deleted for you.")
+
+    if next_url:
+        return redirect(next_url)
     if convo_id:
         return redirect('conversation_detail', pk=convo_id)
     return redirect('messages')
