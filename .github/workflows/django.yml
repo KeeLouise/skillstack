@@ -1,10 +1,9 @@
-name: Django Tests
+name: Django CI
 
 on:
   push:
     branches: [ main ]
   pull_request:
-    branches: [ main ]
 
 jobs:
   test:
@@ -12,40 +11,80 @@ jobs:
 
     services:
       postgres:
-        image: postgres:14
+        image: postgres:16
         env:
           POSTGRES_DB: skillstack
           POSTGRES_USER: skillstack_user
-          POSTGRES_PASSWORD: Skill2025***
+          POSTGRES_PASSWORD: skillstack_pass
         ports:
           - 5432:5432
         options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+          --health-cmd="pg_isready -U skillstack_user -d skillstack"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      DJANGO_SETTINGS_MODULE: skillstack.settings
+      SECRET_KEY: ci-secret-key
+      DATABASE_URL: postgres://skillstack_user:skillstack_pass@localhost:5432/skillstack
+      
+      CLOUDINARY_CLOUD_NAME: demo
+      CLOUDINARY_API_KEY: "000000000000000"
+      CLOUDINARY_API_SECRET: demo
+      
+      DISABLE_COLLECTSTATIC: "1"
 
     steps:
-    - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
-    - name: Run migrations
-      env:
-        DATABASE_URL: postgres://skillstack_user:Skill2025***@localhost:5432/skillstack
-      run: |
-        python manage.py migrate
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          # if psycopg2 isn't in requirements, add the binary build:
+          python - <<'PY'
+          import importlib.util, sys, subprocess
+          def missing(mod):
+            return importlib.util.find_spec(mod) is None
+          if missing("psycopg2") and missing("psycopg2_binary"):
+              subprocess.check_call([sys.executable, "-m", "pip", "install", "psycopg2-binary"])
+          PY
 
-    - name: Run tests
-      env:
-        DATABASE_URL: postgres://skillstack_user:Skill2025***@localhost:5432/skillstack
-      run: |
-        python manage.py test
+      - name: Wait for Postgres
+        run: |
+          for i in {1..30}; do
+            pg_isready -h localhost -p 5432 -U skillstack_user && break
+            sleep 1
+          done
+
+      - name: Show tree (debug)
+        run: |
+          echo "Repo root:"
+          ls -la
+          echo "First skillstack dir:"
+          ls -la skillstack
+
+      - name: Run migrations
+        working-directory: ./skillstack
+        run: |
+          python manage.py migrate --noinput
+
+      - name: Run tests
+        working-directory: ./skillstack
+        run: |
+          python manage.py test
