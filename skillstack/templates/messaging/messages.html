@@ -127,7 +127,7 @@
   <a href="{% url 'message_detail' msg.pk %}" class="btn btn-outline-primary btn-sm">View</a>
   {# Archive in Inbox/Sent/All #}
   {% if active_tab != 'archived' %}
-    <form method="POST" action="{% url 'archive_message' msg.pk %}" class="d-inline">
+    <form method="POST" action="{% url 'archive_message' msg.pk %}" class="d-inline" data-no-card-click>
       {% csrf_token %}
       <input type="hidden" name="next" value="{{ request.get_full_path }}">
       <button type="submit" class="btn btn-sm btn-outline-secondary"
@@ -137,7 +137,7 @@
 
   {# Unarchive in Archived tab #}
   {% if active_tab == 'archived' %}
-    <form method="POST" action="{% url 'unarchive_message' msg.pk %}" class="d-inline">
+    <form method="POST" action="{% url 'unarchive_message' msg.pk %}" class="d-inline" data-no-card-click>
       {% csrf_token %}
       <input type="hidden" name="next" value="{{ request.get_full_path }}">
       <button type="submit" class="btn btn-sm btn-outline-secondary"
@@ -146,7 +146,7 @@
   {% endif %}
 
   {% if active_tab == 'sent' and msg.sender_id == user.id %}
-    <form method="POST" action="{% url 'delete_message' msg.pk %}" class="d-inline">
+    <form method="POST" action="{% url 'delete_message' msg.pk %}" class="d-inline" data-no-card-click>
       {% csrf_token %}
       <input type="hidden" name="next" value="{% url 'sent' %}">
       <button type="submit" class="btn btn-sm btn-outline-danger"
@@ -156,7 +156,7 @@
     </form>
 
   {% elif active_tab == 'inbox' and msg.recipient_id == user.id %}
-    <form method="POST" action="{% url 'delete_message' msg.pk %}" class="d-inline">
+    <form method="POST" action="{% url 'delete_message' msg.pk %}" class="d-inline" data-no-card-click>
       {% csrf_token %}
       <input type="hidden" name="next" value="{% url 'messages' %}">
       <button type="submit" class="btn btn-sm btn-outline-danger"
@@ -167,7 +167,7 @@
 
   {% elif active_tab == 'all' %}
     {% if msg.sender_id == user.id or msg.recipient_id == user.id %}
-      <form method="POST" action="{% url 'delete_message' msg.pk %}" class="d-inline">
+      <form method="POST" action="{% url 'delete_message' msg.pk %}" class="d-inline" data-no-card-click>
         {% csrf_token %}
         <input type="hidden" name="next" value="{% url 'all_messages' %}">
         <button type="submit" class="btn btn-sm btn-outline-danger"

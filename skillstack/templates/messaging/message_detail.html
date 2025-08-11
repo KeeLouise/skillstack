@@ -95,13 +95,13 @@
             {# Archive / Unarchive #}
             {% if user == m.sender %}
               {% if m.archived_by_sender %}
-                <form method="POST" action="{% url 'unarchive_message' m.pk %}" class="d-inline">
+                <form method="POST" action="{% url 'unarchive_message' m.pk %}" class="d-inline" data-no-card-click>
                   {% csrf_token %}
                   <input type="hidden" name="next" value="{{ request.get_full_path }}">
                   <button type="submit" class="btn btn-sm btn-outline-secondary">Unarchive</button>
                 </form>
               {% else %}
-                <form method="POST" action="{% url 'archive_message' m.pk %}" class="d-inline">
+                <form method="POST" action="{% url 'archive_message' m.pk %}" class="d-inline" data-no-card-click>
                   {% csrf_token %}
                   <input type="hidden" name="next" value="{{ request.get_full_path }}">
                   <button type="submit" class="btn btn-sm btn-outline-secondary">Archive</button>
@@ -109,13 +109,13 @@
               {% endif %}
             {% elif user == m.recipient %}
               {% if m.archived_by_recipient %}
-                <form method="POST" action="{% url 'unarchive_message' m.pk %}" class="d-inline">
+                <form method="POST" action="{% url 'unarchive_message' m.pk %}" class="d-inline" data-no-card-click>
                   {% csrf_token %}
                   <input type="hidden" name="next" value="{{ request.get_full_path }}">
                   <button type="submit" class="btn btn-sm btn-outline-secondary">Unarchive</button>
                 </form>
               {% else %}
-                <form method="POST" action="{% url 'archive_message' m.pk %}" class="d-inline">
+                <form method="POST" action="{% url 'archive_message' m.pk %}" class="d-inline" data-no-card-click>
                   {% csrf_token %}
                   <input type="hidden" name="next" value="{{ request.get_full_path }}">
                   <button type="submit" class="btn btn-sm btn-outline-secondary">Archive</button>
@@ -125,7 +125,7 @@
 
             {# Delete (soft delete per user) #}
             {% if m.sender == user or m.recipient == user %}
-              <form method="POST" action="{% url 'delete_message' m.pk %}" class="d-inline">
+              <form method="POST" action="{% url 'delete_message' m.pk %}" class="d-inline" data-no-card-click>
                 {% csrf_token %}
                 <input type="hidden" name="next" value="{{ request.get_full_path }}">
                 <button type="submit" class="btn btn-sm btn-danger"
@@ -217,13 +217,13 @@
           {# Archive / Unarchive #}
           {% if user == message.sender %}
             {% if message.archived_by_sender %}
-              <form method="POST" action="{% url 'unarchive_message' message.pk %}" class="d-inline">
+              <form method="POST" action="{% url 'unarchive_message' message.pk %}" class="d-inline" data-no-card-click>
                 {% csrf_token %}
                 <input type="hidden" name="next" value="{% url 'archived_messages' %}">
                 <button type="submit" class="btn btn-outline-secondary">Unarchive</button>
               </form>
             {% else %}
-              <form method="POST" action="{% url 'archive_message' message.pk %}" class="d-inline">
+              <form method="POST" action="{% url 'archive_message' message.pk %}" class="d-inline" data-no-card-click>
                 {% csrf_token %}
                 <input type="hidden" name="next" value="{{ request.get_full_path }}">
                 <button type="submit" class="btn btn-outline-secondary">Archive</button>
@@ -231,13 +231,13 @@
             {% endif %}
           {% elif user == message.recipient %}
             {% if message.archived_by_recipient %}
-              <form method="POST" action="{% url 'unarchive_message' message.pk %}" class="d-inline">
+              <form method="POST" action="{% url 'unarchive_message' message.pk %}" class="d-inline" data-no-card-click>
                 {% csrf_token %}
                 <input type="hidden" name="next" value="{% url 'archived_messages' %}">
                 <button type="submit" class="btn btn-outline-secondary">Unarchive</button>
               </form>
             {% else %}
-              <form method="POST" action="{% url 'archive_message' message.pk %}" class="d-inline">
+              <form method="POST" action="{% url 'archive_message' message.pk %}" class="d-inline" data-no-card-click>
                 {% csrf_token %}
                 <input type="hidden" name="next" value="{{ request.get_full_path }}">
                 <button type="submit" class="btn btn-outline-secondary">Archive</button>
@@ -247,7 +247,7 @@
 
           {# Delete #}
           {% if message.sender == user or message.recipient == user %}
-            <form method="POST" action="{% url 'delete_message' message.pk %}" class="d-inline">
+            <form method="POST" action="{% url 'delete_message' message.pk %}" class="d-inline" data-no-card-click>
               {% csrf_token %}
               <input type="hidden" name="next" value="{{ request.get_full_path }}">
               <button type="submit" class="btn btn-danger"
