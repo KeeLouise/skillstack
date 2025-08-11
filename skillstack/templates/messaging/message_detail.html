@@ -96,13 +96,6 @@
 
     <div class="d-flex flex-wrap gap-2 mt-3">
       <a href="{% url 'reply_message' message.pk %}" class="btn btn-outline-secondary">Reply</a>
-      {% if message.sender == user or message.recipient == user %}
-        <form method="POST" action="{% url 'delete_message' message.pk %}">
-          {% csrf_token %}
-          <button type="submit" class="btn btn-danger"
-                  onclick="return confirm('Delete this message?');">Delete Message</button>
-        </form>
-      {% endif %}
       <a href="{% url 'messages' %}" class="btn btn-outline-secondary">Back to Inbox</a>
     </div>
 
