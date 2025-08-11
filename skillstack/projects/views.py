@@ -109,7 +109,7 @@ def edit_project(request, pk):
     else:
         form = ProjectForm(instance=project)
 
-    return render(request, 'projects/edit_project.html', {'form': form, 'project': project})
+    return render(request, 'projects/create_project.html', {'form': form, 'project': project})
 
 @login_required
 @require_POST

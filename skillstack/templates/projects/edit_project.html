@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Edit Project{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <h2 class="mb-4 text-center">Edit Project</h2>
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }} mb-3">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger mb-3">
+          {% for err in form.non_field_errors %}
+            <div>{{ err }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <form method="POST" novalidate>
+        {% csrf_token %}
+        {{ form|crispy }}
+        <div class="d-flex gap-2 mt-3">
+          <a href="{% url 'project_detail' project_id=project.pk %}" class="btn btn-outline-secondary">Cancel</a>
+          <button type="submit" class="btn btn-dark">Save changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
