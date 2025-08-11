@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        RunSQL(
+        migrations.RunSQL(
             sql=(
                 "ALTER TABLE messaging_message "
                 "DROP COLUMN IF EXISTS archived;"
