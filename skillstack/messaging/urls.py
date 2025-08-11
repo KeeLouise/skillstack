@@ -1,20 +1,29 @@
 from django.urls import path
-from . import views
+from .views import (
+    inbox, all_messages, sent_messages, archived_messages,
+    message_detail, conversation_detail, compose_message, reply_message,
+    delete_message, download_attachment, api_unread_count, api_inbox_latest,
+    api_mark_read, archive_message, unarchive_message
+)
 
 urlpatterns = [
-    path('', views.inbox, name='messages'),                  # Inbox
-    path('all/', views.all_messages, name='all_messages'),   # All Messages
-    path('sent/', views.sent_messages, name='sent'),         # Sent
-    path('compose/', views.compose_message, name='compose'), # Compose
-    path('<int:pk>/', views.message_detail, name='message_detail'), # Message Detail
-    path('<int:pk>/reply/', views.reply_message, name='reply_message'), # Message Replies
-    path('<int:pk>/delete/', views.delete_message, name='delete_message'), # Delete Message
-    path('conversations/<int:pk>/', views.conversation_detail, name='conversation_detail'), # Conversation Detail
-    path("attachments/<int:pk>/download/", views.download_attachment, name="download_attachment"), #Attachment Downloads (Protected)
-    path('archive/<int:pk>/', views.archive_message, name='archive_message'),
+    path('', inbox, name='messages'),
+    path('all/', all_messages, name='all_messages'),
+    path('sent/', sent_messages, name='sent'),
+    path('archived/', archived_messages, name='archived_messages'),
 
-     # --- NEW JSON API endpoints ---
-    path('api/unread-count/', views.api_unread_count, name='api_unread_count'),
-    path('api/inbox-latest/', views.api_inbox_latest, name='api_inbox_latest'),
-    path('api/mark-read/<int:pk>/', views.api_mark_read, name='api_mark_read'),
+    path('compose/', compose_message, name='compose'),
+    path('<int:pk>/', message_detail, name='message_detail'),
+    path('conversation/<int:pk>/', conversation_detail, name='conversation_detail'),
+    path('<int:pk>/reply/', reply_message, name='reply_message'),
+
+    path('<int:pk>/delete/', delete_message, name='delete_message'),
+    path('<int:pk>/archive/', archive_message, name='archive_message'),
+    path('<int:pk>/unarchive/', unarchive_message, name='unarchive_message'),
+
+    path('attachment/<int:pk>/download/', download_attachment, name='download_attachment'),
+
+    path('api/unread/', api_unread_count, name='api_unread_count'),
+    path('api/latest/', api_inbox_latest, name='api_inbox_latest'),
+    path('api/<int:pk>/mark-read/', api_mark_read, name='api_mark_read'),
 ]
