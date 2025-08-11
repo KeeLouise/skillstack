@@ -303,7 +303,7 @@ def compose_message(request):
                     if not f:
                         continue
                     kwargs = {
-                        'message': msg_or_reply,
+                        'message': msg,
                         'file': f,
                         'original_name': getattr(f, 'name', '') or '',
                         'size': getattr(f, 'size', None),
