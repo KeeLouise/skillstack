@@ -41,6 +41,13 @@ class MessageAttachment(models.Model):
     file = models.FileField(upload_to='message_attachments/')
     original_name = models.CharField(max_length=255, blank=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
+    size = models.PositiveBigIntegerField(null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        # Store file size at save time (fix for file not found error) - KR 11/08/2025
+        if self.file and hasattr(self.file, 'size'):
+            self.size = self.file.size
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.original_name or self.file.name

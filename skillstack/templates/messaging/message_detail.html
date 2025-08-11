@@ -57,14 +57,16 @@
                        download="{{ a.original_name|default:a.file.name }}">
                       {{ a.original_name|default:a.file.name }}
                     </a>
-                    <span class="text-muted small">({{ a.file.size|filesizeformat }})</span>
+                    {% if a.size %}
+                      <span class="text-muted small">({{ a.size|filesizeformat }})</span>
+                    {% endif %}
 
                     {% with u=a.file.url|lower %}
                       {% if '.png' in u or '.jpg' in u or '.jpeg' in u or '.gif' in u or '.webp' in u %}
                         <div class="mt-2">
                           <a href="{{ a.file.url }}" target="_blank" rel="noopener">
                             <img src="{{ a.file.url }}" alt="{{ a.original_name|default:a.file.name }}"
-                                 class="img-fluid rounded" style="max-height: 160px;">
+                                 class="img-fluid rounded">
                           </a>
                         </div>
                       {% endif %}
@@ -125,7 +127,7 @@
                       <div class="mt-2">
                         <a href="{{ a.file.url }}" target="_blank" rel="noopener">
                           <img src="{{ a.file.url }}" alt="{{ a.original_name|default:a.file.name }}"
-                               class="img-fluid rounded" style="max-height: 160px;">
+                               class="img-fluid rounded">
                         </a>
                       </div>
                     {% endif %}

@@ -303,9 +303,10 @@ def compose_message(request):
                     if not f:
                         continue
                     kwargs = {
-                        'message': msg,
+                        'message': msg_or_reply,
                         'file': f,
                         'original_name': getattr(f, 'name', '') or '',
+                        'size': getattr(f, 'size', None),
                     }
                     if hasattr(MessageAttachment, 'uploaded_by'):
                         kwargs['uploaded_by'] = request.user
