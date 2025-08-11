@@ -54,38 +54,38 @@ p, p.lead{
 }
 
 .messages-wrap {
-  max-width: 980px;
-  margin: 0 auto;
+  max-width: 980px !important;
+  margin: 0 auto !important;
 }
 
 .msg-card {
-  border: 1px solid #e9ecef;
-  border-radius: 16px;
-  transition: transform .06s ease, box-shadow .2s ease, background-color .2s ease;
+  border: 1px solid #e9ecef !important;
+  border-radius: 16px !important;
+  transition: transform .06s ease, box-shadow .2s ease, background-color .2s ease !important;
 }
 .msg-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0,0,0,.06);
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,.06) !important;
 }
 
 .msg-unread {
-  background: linear-gradient(0deg,#f9fafb,#fff);
-  border-color: #cfe2ff;
+  background: linear-gradient(0deg,#f9fafb,#fff) !important;
+  border-color: #cfe2ff !important;
 }
 .msg-dot {
-  display: inline-block;
-  width: .6rem; height: .6rem;
-  border-radius: 50%;
-  background: #0d6efd;
-  margin-right: .5rem;
+  display: inline-block !important;
+  width: .6rem; height: .6rem !important;
+  border-radius: 50% !important;
+  background: #0d6efd !important;
+  margin-right: .5rem !important;
 }
 
 .msg-title {
-  font-weight: 600;
-  color: #0c0d0e;
+  font-weight: 600 !important;
+  color: #0c0d0e !important;
 }
 .msg-snippet {
-  color: #6c757d;
+  color: #6c757d !important;
 }
 
 .badge-importance-high { background: #dc3545; }
@@ -93,41 +93,41 @@ p, p.lead{
 .badge-importance-low { background: #6c757d; }
 
 .badge-meta {
-  background: #f1f3f5;
-  color: #495057;
+  background: #f1f3f5 !important;
+  color: #495057 !important;
 }
 
 .nav-tabs .nav-link {
-  border: none;
-  color: #495057;
+  border: none !important;
+  color: #495057 !important;
 }
 .nav-tabs .nav-link.active {
-  color: #0d6efd;
-  border-bottom: 2px solid #0d6efd;
-  background: transparent;
+  color: #0d6efd !important;
+  border-bottom: 2px solid #0d6efd !important;
+  background: transparent !important;
 }
 
 .btn-soft {
-  background: #f8f9fa;
-  border-color: #e9ecef;
+  background: #f8f9fa !important;
+  border-color: #e9ecef !important;
 }
 .btn-soft:hover {
-  background: #f1f3f5;
+  background: #f1f3f5 !important;
 }
 
 .attachments-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: .75rem;
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
+  gap: .75rem !important;
 }
 .attachment-tile {
-  border: 1px dashed #dee2e6;
-  border-radius: 10px;
-  padding: .75rem;
-  background: #fff;
+  border: 1px dashed #dee2e6 !important;
+  border-radius: 10px !important;
+  padding: .75rem !important;
+  background: #fff !important;
 }
 .attachment-tile:hover {
-  border-color: #0d6efd;
+  border-color: #0d6efd !important;
 }
 
 .text-muted-2 { color: #8a94a6; }
