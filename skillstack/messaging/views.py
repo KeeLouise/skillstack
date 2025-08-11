@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
-from django.db.models import Q, Max, Prefetch
+from django.db.models import Q, Prefetch
 from django.db import transaction
 from django.urls import reverse
 from django.http import JsonResponse, HttpResponseBadRequest, FileResponse, Http404
@@ -12,30 +12,22 @@ from django.utils.timezone import make_aware
 from .models import Message, Conversation, MessageAttachment
 from .forms import MessageForm
 
-
+# --- Utility for unread count ---
 @login_required
 def api_unread_count(request):
     count = Message.objects.filter(
-        recipient=request.user, is_read=False, deleted_by_recipient=False
+        recipient=request.user, is_read=False,
+        deleted_by_recipient=False, archived_by_recipient=False
     ).count()
     return JsonResponse({"unread": count})
 
-
+# --- API for fetching latest messages ---
 @login_required
 def api_inbox_latest(request):
-    """
-    Latest 10 messages to/from the user (excluding items the user deleted).
-    Optional ?since=ISO-8601 to only return newer ones.
-    """
-    qs = (
-        Message.objects
-        .filter(
-            (Q(sender=request.user) & Q(deleted_by_sender=False)) |
-            (Q(recipient=request.user) & Q(deleted_by_recipient=False))
-        )
-        .select_related('sender', 'recipient')
-        .order_by('-sent_at')
-    )
+    qs = Message.objects.filter(
+        (Q(sender=request.user) & Q(deleted_by_sender=False) & Q(archived_by_sender=False)) |
+        (Q(recipient=request.user) & Q(deleted_by_recipient=False) & Q(archived_by_recipient=False))
+    ).select_related('sender', 'recipient').order_by('-sent_at')
 
     since = request.GET.get('since')
     if since:
@@ -60,7 +52,7 @@ def api_inbox_latest(request):
 
     return JsonResponse({"messages": data})
 
-
+# --- API mark read ---
 @login_required
 @require_POST
 def api_mark_read(request, pk):
@@ -73,68 +65,76 @@ def api_mark_read(request, pk):
     return JsonResponse({"ok": True})
 
 
-
+# --- Conversation utilities ---
 def _get_or_create_conversation(user_a, user_b):
-    """Return an existing 2‑party conversation or create a new one."""
-    convo = (
-        Conversation.objects
-        .filter(participants=user_a)
-        .filter(participants=user_b)
-        .first()
-    )
+    convo = Conversation.objects.filter(participants=user_a).filter(participants=user_b).first()
     if not convo:
         convo = Conversation.objects.create()
         convo.participants.add(user_a, user_b)
     return convo
 
+# --- Archive / Unarchive message ---
+@login_required
+@require_POST
+def archive_message(request, pk):
+    m = get_object_or_404(Message, pk=pk, sender=request.user) if request.user == Message.objects.filter(pk=pk).first().sender else get_object_or_404(Message, pk=pk, recipient=request.user)
+    if request.user == m.sender and not m.archived_by_sender:
+        m.archived_by_sender = True
+        m.save(update_fields=['archived_by_sender'])
+    elif request.user == m.recipient and not m.archived_by_recipient:
+        m.archived_by_recipient = True
+        m.save(update_fields=['archived_by_recipient'])
+
+    messages.success(request, "Message archived.")
+    return redirect(request.POST.get('next') or 'messages')
 
 @login_required
-def inbox(request):
-    """
-    One card per conversation using each convo’s latest visible message
-    (i.e., not soft-deleted for the current user), ordered by last activity.
-    """
-    query = request.GET.get('q', '')
+@require_POST
+def unarchive_message(request, pk):
+    m = get_object_or_404(Message, pk=pk, sender=request.user) if request.user == Message.objects.filter(pk=pk).first().sender else get_object_or_404(Message, pk=pk, recipient=request.user)
+    if request.user == m.sender and m.archived_by_sender:
+        m.archived_by_sender = False
+        m.save(update_fields=['archived_by_sender'])
+    elif request.user == m.recipient and m.archived_by_recipient:
+        m.archived_by_recipient = False
+        m.save(update_fields=['archived_by_recipient'])
 
-    conversations = (
-        Conversation.objects.filter(participants=request.user)
-        .prefetch_related(
-            Prefetch(
-                'messages',
-                queryset=Message.objects
-                    .select_related('sender', 'recipient')
-                    .filter(
-                        (Q(sender=request.user) & Q(deleted_by_sender=False)) |
-                        (Q(recipient=request.user) & Q(deleted_by_recipient=False))
-                    )
-                    .order_by('-sent_at')
-            ),
-            'participants',
-        )
+    messages.success(request, "Message unarchived.")
+    return redirect(request.POST.get('next') or 'archived_messages')
+
+# --- Views with archived filtering ---
+@login_required
+def inbox(request):
+    conversations = Conversation.objects.filter(participants=request.user).prefetch_related(
+        Prefetch(
+            'messages',
+            queryset=Message.objects.select_related('sender', 'recipient')
+                .filter(
+                    (Q(sender=request.user) & Q(deleted_by_sender=False) & Q(archived_by_sender=False)) |
+                    (Q(recipient=request.user) & Q(deleted_by_recipient=False) & Q(archived_by_recipient=False))
+                )
+                .order_by('-sent_at')
+        ),
+        'participants',
     )
 
-    latest_messages = []
-    for convo in conversations:
-        last_msg = next(iter(convo.messages.all()), None)
-        if last_msg:
-            latest_messages.append(last_msg)
+    latest_messages = [next(iter(convo.messages.all()), None) for convo in conversations]
+    latest_messages = [m for m in latest_messages if m]
 
+    query = request.GET.get('q', '').strip()
     if query:
-        q = query.strip()
+        query_lower = query.lower()
         latest_messages = [
             m for m in latest_messages
-            if (q.lower() in (m.subject or '').lower())
-            or (q.lower() in (m.body or '').lower())
-            or any(q.lower() in (p.first_name or '').lower()
-                   or q.lower() in (p.last_name or '').lower()
-                   or q.lower() in (p.username or '').lower()
-                   for p in convo.participants.all())
+            if (query_lower in (m.subject or '').lower()) or
+               (query_lower in (m.body or '').lower()) or
+               any(query_lower in (p.get_full_name() or p.username).lower() for p in m.conversation.participants.all())
         ]
-
     latest_messages.sort(key=lambda m: m.sent_at, reverse=True)
 
     unread_count = Message.objects.filter(
-        recipient=request.user, is_read=False, deleted_by_recipient=False
+        recipient=request.user, is_read=False,
+        deleted_by_recipient=False, archived_by_recipient=False
     ).count()
 
     return render(request, 'messaging/messages.html', {
@@ -145,27 +145,20 @@ def inbox(request):
         'query': query,
     })
 
-
 @login_required
 def all_messages(request):
-    """Flat list of all messages to/from the user (excluding soft-deleted ones for this user)."""
-    query = request.GET.get('q', '')
+    messages_qs = Message.objects.filter(
+        (Q(sender=request.user) & Q(deleted_by_sender=False) & Q(archived_by_sender=False)) |
+        (Q(recipient=request.user) & Q(deleted_by_recipient=False) & Q(archived_by_recipient=False))
+    ).select_related('sender', 'recipient', 'conversation').order_by('-sent_at')
 
-    messages_qs = (
-        Message.objects
-        .filter(
-            (Q(sender=request.user) & Q(deleted_by_sender=False)) |
-            (Q(recipient=request.user) & Q(deleted_by_recipient=False))
-        )
-        .select_related('sender', 'recipient', 'conversation')
-        .order_by('-sent_at')
-    )
-
+    query = request.GET.get('q', '').strip()
     if query:
         messages_qs = messages_qs.filter(Q(subject__icontains=query) | Q(body__icontains=query))
 
     unread_count = Message.objects.filter(
-        recipient=request.user, is_read=False, deleted_by_recipient=False
+        recipient=request.user, is_read=False,
+        deleted_by_recipient=False, archived_by_recipient=False
     ).count()
 
     return render(request, 'messaging/messages.html', {
@@ -175,19 +168,13 @@ def all_messages(request):
         'query': query,
     })
 
-
 @login_required
 def sent_messages(request):
-    """Flat list of messages the user has sent (excluding those they soft-deleted)."""
-    query = request.GET.get('q', '')
+    messages_qs = Message.objects.filter(
+        sender=request.user, deleted_by_sender=False, archived_by_sender=False
+    ).select_related('sender', 'recipient', 'conversation').order_by('-sent_at')
 
-    messages_qs = (
-        Message.objects
-        .filter(sender=request.user, deleted_by_sender=False)
-        .select_related('sender', 'recipient', 'conversation')
-        .order_by('-sent_at')
-    )
-
+    query = request.GET.get('q', '').strip()
     if query:
         messages_qs = messages_qs.filter(
             Q(subject__icontains=query) |
@@ -197,78 +184,93 @@ def sent_messages(request):
         )
 
     unread_count = Message.objects.filter(
-        recipient=request.user, is_read=False, deleted_by_recipient=False
+        recipient=request.user, is_read=False,
+        deleted_by_recipient=False, archived_by_recipient=False
     ).count()
 
     return render(request, 'messaging/messages.html', {
         'messages': messages_qs,
         'active_tab': 'sent',
         'unread_count': unread_count,
-        'query': query
+        'query': query,
     })
 
+@login_required
+def archived_messages(request):
+    messages_qs = Message.objects.filter(
+        Q(sender=request.user, archived_by_sender=True, deleted_by_sender=False) |
+        Q(recipient=request.user, archived_by_recipient=True, deleted_by_recipient=False)
+    ).select_related('sender', 'recipient', 'conversation').order_by('-sent_at')
+
+    query = request.GET.get('q', '').strip()
+    if query:
+        messages_qs = messages_qs.filter(Q(subject__icontains=query) | Q(body__icontains=query))
+
+    unread_count = Message.objects.filter(
+        recipient=request.user, is_read=False,
+        deleted_by_recipient=False, archived_by_recipient=False
+    ).count()
+
+    return render(request, 'messaging/messages.html', {
+        'messages': messages_qs,
+        'active_tab': 'archived',
+        'unread_count': unread_count,
+        'query': query,
+    })
 
 @login_required
 def message_detail(request, pk):
-    """Show a message; if it has a conversation, also show the thread — but hide items the user deleted."""
     message = get_object_or_404(
         Message.objects.select_related('conversation', 'sender', 'recipient'),
         pk=pk
     )
 
-    # Must be participant - KR 10/08/2025
     if request.user not in (message.sender, message.recipient):
         return redirect('messages')
 
-    # Don’t allow opening items the current user soft-deleted - KR 10/08/2025
-    if (request.user == message.sender and getattr(message, 'deleted_by_sender', False)) or \
-       (request.user == message.recipient and getattr(message, 'deleted_by_recipient', False)):
+    # Hide deleted
+    if (request.user == message.sender and message.deleted_by_sender) or (
+        request.user == message.recipient and message.deleted_by_recipient
+    ):
         messages.info(request, "That message was deleted.")
         return redirect('messages')
 
-    # Auto-mark read - KR 10/08/2025
-    if message.recipient_id == request.user.id and not message.is_read:
+    # Hide archived
+    if (request.user == message.sender and message.archived_by_sender) or (
+        request.user == message.recipient and message.archived_by_recipient
+    ):
+        messages.info(request, "This message is archived.")
+        return redirect('archived_messages')
+
+    if request.user == message.recipient and not message.is_read:
         message.is_read = True
         message.save(update_fields=['is_read'])
 
     thread_messages = None
     if message.conversation_id:
-        thread_messages = (
-            message.conversation.messages
-            .filter(
-                (Q(sender=request.user) & Q(deleted_by_sender=False)) |
-                (Q(recipient=request.user) & Q(deleted_by_recipient=False))
-            )
-            .select_related('sender', 'recipient')
-            .prefetch_related('attachments')
-            .order_by('sent_at')
-        )
+        thread_messages = message.conversation.messages.filter(
+            (Q(sender=request.user) & Q(deleted_by_sender=False) & Q(archived_by_sender=False)) |
+            (Q(recipient=request.user) & Q(deleted_by_recipient=False) & Q(archived_by_recipient=False))
+        ).select_related('sender', 'recipient').order_by('sent_at')
 
     return render(request, 'messaging/message_detail.html', {
         'message': message,
         'thread_messages': thread_messages,
     })
 
-
 @login_required
 def conversation_detail(request, pk):
-    """Jump to the latest visible message in a conversation (reusing message_detail)."""
-    convo = get_object_or_404(
-        Conversation.objects.prefetch_related(
-            Prefetch(
-                'messages',
-                queryset=Message.objects
-                    .select_related('sender', 'recipient')
-                    .filter(
-                        (Q(sender=request.user) & Q(deleted_by_sender=False)) |
-                        (Q(recipient=request.user) & Q(deleted_by_recipient=False))
-                    )
-                    .order_by('-sent_at')
-            ),
-            'participants'
+    convo = get_object_or_404(Conversation.objects.prefetch_related(
+        Prefetch(
+            'messages',
+            queryset=Message.objects.select_related('sender', 'recipient')
+                .filter(
+                    (Q(sender=request.user) & Q(deleted_by_sender=False) & Q(archived_by_sender=False)) |
+                    (Q(recipient=request.user) & Q(deleted_by_recipient=False) & Q(archived_by_recipient=False))
+                ).order_by('-sent_at')
         ),
-        pk=pk,
-    )
+        'participants'
+    ), pk=pk)
 
     if not convo.participants.filter(id=request.user.id).exists():
         messages.error(request, "You don't have access to that conversation.")
@@ -281,10 +283,8 @@ def conversation_detail(request, pk):
 
     return redirect('message_detail', pk=last_msg.pk)
 
-
 @login_required
 def compose_message(request):
-    """Create a new message; auto‑attach to existing 2‑party thread or create one."""
     if request.method == 'POST':
         form = MessageForm(request.POST, request.FILES, user=request.user)
         if form.is_valid():
@@ -300,8 +300,7 @@ def compose_message(request):
 
                 files = form.cleaned_data.get('attachments') or []
                 for f in files:
-                    if not f:
-                        continue
+                    if not f: continue
                     kwargs = {
                         'message': msg,
                         'file': f,
@@ -321,10 +320,8 @@ def compose_message(request):
 
     return render(request, 'messaging/compose.html', {'form': form})
 
-
 @login_required
 def reply_message(request, pk):
-    """Reply to a specific message; always stays in the same conversation."""
     original = get_object_or_404(Message, pk=pk)
     if request.user not in (original.sender, original.recipient):
         messages.error(request, "You can't reply to this message.")
@@ -352,8 +349,7 @@ def reply_message(request, pk):
 
                 files = form.cleaned_data.get('attachments') or []
                 for f in files:
-                    if not f:
-                        continue
+                    if not f: continue
                     kwargs = {
                         'message': reply,
                         'file': f,
@@ -375,63 +371,41 @@ def reply_message(request, pk):
     })
 
 @login_required
-def archive_message(request, pk):
-    message = get_object_or_404(Message, pk=pk, recipient=request.user)
-    message.archived = True
-    message.save()
-    messages.success(request, "Message archived successfully.")
-    return redirect('messages')
-
-
-@login_required
 @require_POST
 def delete_message(request, pk):
-    """Soft-delete for the current user; hard-delete only when both have deleted."""
+    """Soft-delete for current user; hard-delete only if both have deleted."""
     message = get_object_or_404(
         Message,
         Q(pk=pk) & (Q(sender=request.user) | Q(recipient=request.user))
     )
     convo_id = message.conversation_id
     next_url = request.POST.get('next')
-
     changed = False
-    if hasattr(message, 'deleted_by_sender') and request.user == message.sender and not message.deleted_by_sender:
+
+    if request.user == message.sender and not message.deleted_by_sender:
         message.deleted_by_sender = True
         changed = True
-    if hasattr(message, 'deleted_by_recipient') and request.user == message.recipient and not message.deleted_by_recipient:
+    if request.user == message.recipient and not message.deleted_by_recipient:
         message.deleted_by_recipient = True
         changed = True
 
-    # If both deleted, remove permanently - KR 11/08/2025
-    if getattr(message, 'deleted_by_sender', False) and getattr(message, 'deleted_by_recipient', False):
+    if message.deleted_by_sender and message.deleted_by_recipient:
         message.delete()
         messages.success(request, "Message removed.")
-        if next_url:
-            return redirect(next_url)
-        if convo_id:
-            return redirect('conversation_detail', pk=convo_id)
-        return redirect('messages')
+        return redirect(next_url or ('conversation_detail' if convo_id else 'messages'))
 
     if changed:
         message.save(update_fields=['deleted_by_sender', 'deleted_by_recipient'])
     messages.success(request, "Message deleted for you.")
 
-    if next_url:
-        return redirect(next_url)
-    if convo_id:
-        return redirect('conversation_detail', pk=convo_id)
-    return redirect('messages')
+    return redirect(next_url or ('conversation_detail', convo_id) if convo_id else 'messages')
 
 @login_required
 def download_attachment(request, pk):
-    a = get_object_or_404(
-        MessageAttachment.objects.select_related('message__sender', 'message__recipient'),
-        pk=pk
-    )
+    a = get_object_or_404(MessageAttachment.objects.select_related('message__sender', 'message__recipient'), pk=pk)
     msg = a.message
     if request.user not in (msg.sender, msg.recipient):
         raise Http404("Not found")
-
     if not a.file:
         raise Http404("File not available")
 
