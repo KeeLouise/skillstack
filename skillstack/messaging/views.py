@@ -105,18 +105,23 @@ def unarchive_message(request, pk):
 # --- Views with archived filtering ---
 @login_required
 def inbox(request):
-    conversations = Conversation.objects.filter(participants=request.user).prefetch_related(
+    conversations = (
+    Conversation.objects.filter(participants=request.user)
+    .prefetch_related(
         Prefetch(
             'messages',
-            queryset=Message.objects.select_related('sender', 'recipient')
+            queryset=Message.objects
+                .select_related('sender', 'recipient')
                 .filter(
-                    (Q(sender=request.user) & Q(deleted_by_sender=False) & Q(archived_by_sender=False)) |
-                    (Q(recipient=request.user) & Q(deleted_by_recipient=False) & Q(archived_by_recipient=False))
+                    Q(recipient=request.user),               
+                    Q(deleted_by_recipient=False),
+                    Q(archived_by_recipient=False),
                 )
                 .order_by('-sent_at')
         ),
         'participants',
     )
+)
 
     latest_messages = [next(iter(convo.messages.all()), None) for convo in conversations]
     latest_messages = [m for m in latest_messages if m]
