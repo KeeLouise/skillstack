@@ -14,7 +14,7 @@ def backfill_sizes(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('messaging', '0003_remove_message_reply_to_alter_message_subject_and_more.py'),
+        ('messaging', '0003_remove_message_reply_to_alter_message_subject_and_more'),
     ]
 
     operations = [
