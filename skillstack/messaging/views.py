@@ -374,6 +374,14 @@ def reply_message(request, pk):
         'original_msg': original,
     })
 
+@login_required
+def archive_message(request, pk):
+    message = get_object_or_404(Message, pk=pk, recipient=request.user)
+    message.archived = True
+    message.save()
+    messages.success(request, "Message archived successfully.")
+    return redirect('messages')
+
 
 @login_required
 @require_POST
