@@ -117,3 +117,44 @@ body.messages-dark {
   background:#0b1220; border-color:#1f2937; color:#e5e7eb;
 }
 .messages-dark .form-control::placeholder{ color:#64748b; }
+
+.avatar-circle {
+  width: 40px;
+  height: 40px;
+  background: #0b1220;
+  border: 1px solid #1f2937;
+  border-radius: 50%;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  font-weight: 600;
+}
+
+.list-chip {
+  background: #e5e7eb;
+  border-radius: 20px;
+  padding: 2px 8px;
+  font-size: 0.8rem;
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.1);
+}
+
+.badge.accent {
+  background-color: #0d6efd;
+  color: #fff;
+}
+
+.badge.danger {
+  background-color: #dc3545;
+  color: #fff;
+}
+
+.badge.success {
+  background-color: #198754;
+  color: #fff;
+}
