@@ -11,14 +11,27 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunSQL(
-            sql=(
-                "ALTER TABLE messaging_message "
-                "DROP COLUMN IF EXISTS archived;"
-            ),
-            reverse_sql=""
+        migrations.SeparateDatabaseAndState(
+            database_operations=[
+                migrations.RunSQL(
+                    sql=(
+                        "ALTER TABLE messaging_message "
+                        "DROP COLUMN IF EXISTS archived;"
+                    ),
+                    reverse_sql=(
+                        "ALTER TABLE messaging_message "
+                        "ADD COLUMN IF NOT EXISTS archived boolean DEFAULT false;"
+                    ),
+                ),
+            ],
+            state_operations=[
+                migrations.RemoveField(
+                    model_name='message',
+                    name='archived',
+                ),
+            ],
         ),
-        
+
         migrations.AddField(
             model_name='message',
             name='archived_by_recipient',
@@ -29,12 +42,13 @@ class Migration(migrations.Migration):
             name='archived_by_sender',
             field=models.BooleanField(default=False),
         ),
+
         migrations.AlterField(
             model_name='messageattachment',
             name='file',
             field=models.FileField(
                 upload_to='message_attachments/',
-                storage=cloudinary_storage.storage.RawMediaCloudinaryStorage()
+                storage=cloudinary_storage.storage.RawMediaCloudinaryStorage(),
             ),
         ),
     ]
