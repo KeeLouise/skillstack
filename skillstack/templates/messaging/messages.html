@@ -121,16 +121,16 @@
                   {% endif %}
                 </div>
                 <div class="d-flex gap-2">
-                  <a href="{% url 'message_detail' msg.pk %}" class="btn btn-outline-primary btn-sm">View</a>
-                  {% if msg.sender_id == user.id or msg.recipient_id == user.id %}
-                    <form method="POST" action="{% url 'delete_message' msg.pk %}" class="d-inline">
-                      {% csrf_token %}
-                      <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this message?');">
-                        Delete
-                      </button>
-                    </form>
-                  {% endif %}
-                </div>
+  <a href="{% url 'message_detail' msg.pk %}" class="btn btn-outline-primary btn-sm">View</a>
+  {% if msg.sender_id == user.id or msg.recipient_id == user.id %}
+    <form method="POST" action="{% url 'delete_message' msg.pk %}" class="d-inline">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this message?');">
+        Delete
+      </button>
+    </form>
+  {% endif %}
+</div>
               </div>
 
             </div>
