@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}{{ project.title }}{% endblock %}
+
 {% block content %}
 <div class="container py-5">
   <div class="card shadow-lg border-0">
@@ -26,20 +28,63 @@
           <p><strong class="text-muted">Category:</strong> {{ project.category }}</p>
           <p><strong class="text-muted">Owner:</strong> {{ project.owner.username }}</p>
 
-          {% if project.collaborators.all %}
-            {% if project.collaborators.count %}
-             <p>
-      <strong class="text-muted">Collaborators:</strong>
-      {% for user in project.collaborators.all %}
-        <span class="badge bg-secondary">
-          {{ user.get_full_name|default:user.username }}
-        </span>{% if not forloop.last %} {% endif %}
-      {% endfor %}
-    </p>
-  {% endif %}
-{% endif %}
+          {% if project.collaborators.count %}
+            <p>
+              <strong class="text-muted">Collaborators:</strong>
+              {% for user in project.collaborators.all %}
+                <span class="badge bg-secondary">
+                  {{ user.get_full_name|default:user.username }}
+                </span>{% if not forloop.last %} {% endif %}
+              {% endfor %}
+            </p>
+          {% endif %}
         </div>
       </div>
+
+      <hr class="mt-4">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h5 class="mb-0">Attachments</h5>
+        {% if user == project.owner or user in project.collaborators.all %}
+          <form action="{% url 'upload_project_attachments' project.pk %}" method="post" enctype="multipart/form-data" class="d-flex align-items-center gap-2">
+            {% csrf_token %}
+            <input type="file" name="files" multiple class="form-control" style="max-width: 320px;">
+            <button type="submit" class="btn btn-outline-primary">Upload</button>
+          </form>
+        {% endif %}
+      </div>
+
+      {% if attachments %}
+        <ul class="list-group list-group-flush">
+          {% for att in attachments %}
+            <li class="list-group-item d-flex justify-content-between align-items-start">
+              <div class="me-3">
+                <a href="{% url 'download_project_attachment' att.pk %}" class="fw-semibold text-decoration-none">
+                  {{ att.original_name|default:att.file.name }}
+                </a>
+                <div class="small text-muted">
+                  {% if att.size %}{{ att.size|filesizeformat }} · {% endif %}
+                  Uploaded by {{ att.uploaded_by.get_full_name|default:att.uploaded_by.username }} ·
+                  {{ att.created_at|date:"M d, Y H:i" }}
+                </div>
+              </div>
+
+              <div class="d-flex gap-2">
+                <a href="{% url 'download_project_attachment' att.pk %}" class="btn btn-sm btn-outline-secondary">Download</a>
+                {% if user == project.owner or user == att.uploaded_by %}
+                  <form action="{% url 'delete_project_attachment' att.pk %}" method="post" onsubmit="return confirm('Delete this attachment?');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                  </form>
+                {% endif %}
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="alert alert-light border d-flex align-items-center">
+          <div>No attachments yet.</div>
+        </div>
+      {% endif %}
     </div>
 
     <div class="card-footer bg-transparent border-top-0 d-flex justify-content-between">

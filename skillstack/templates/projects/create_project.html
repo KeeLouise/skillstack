@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
-
 {% block title %}New Project{% endblock %}
 
 {% block content %}
@@ -17,21 +16,14 @@
         </div>
       {% endif %}
 
-      {# IMPORTANT: enctype added for file uploads #}
       <form method="POST" enctype="multipart/form-data" novalidate>
         {% csrf_token %}
         {{ form|crispy }}
 
         <div class="mb-3">
-          <label for="attachments" class="form-label">Attachments (optional)</label>
-          <input
-            type="file"
-            id="attachments"
-            name="attachments"
-            class="form-control"
-            multiple
-          >
-          <div class="form-text">You can select multiple files (docs, images, PDFs, etc.).</div>
+          <label for="id_attachments" class="form-label fw-semibold">Attachments</label>
+          <input type="file" name="attachments" id="id_attachments" class="form-control" multiple>
+          <div class="form-text">You can select multiple files.</div>
         </div>
 
         <button type="submit" class="btn btn-dark w-100 mt-3">Create Project</button>

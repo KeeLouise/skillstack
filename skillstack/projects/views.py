@@ -53,13 +53,11 @@ def notify_existing_collaborator(user, project):
     )
 
 
-
 @login_required
 def create_project(request):
     if request.method == 'POST':
         form = ProjectForm(request.POST)
         if form.is_valid():
-            
             project = form.save(commit=False)
             project.owner = request.user
             project.save()
@@ -76,6 +74,7 @@ def create_project(request):
                     size=getattr(f, 'size', None),
                 )
 
+            # Invite collaborators (existing users get added; non-users get invitations) - KR 12/08/2025
             invite_emails = form.cleaned_data.get('invite_emails', '')
             emails = [e.strip() for e in invite_emails.split(',') if e.strip()]
             for email in emails:
@@ -126,7 +125,23 @@ def edit_project(request, pk):
     if request.method == 'POST':
         form = ProjectForm(request.POST, instance=project)
         if form.is_valid():
-            form.save()
+            with transaction.atomic():
+                form.save()
+
+                files = request.FILES.getlist('attachments')
+                for f in files:
+                    if not f:
+                        continue
+                    kwargs = {
+                        'project': project,
+                        'file': f,
+                        'original_name': getattr(f, 'name', '') or '',
+                        'size': getattr(f, 'size', None),
+                    }
+                    if hasattr(ProjectAttachment, 'uploaded_by'):
+                        kwargs['uploaded_by'] = request.user
+                    ProjectAttachment.objects.create(**kwargs)
+
             messages.success(request, 'Project updated successfully.')
             return redirect('project_detail', pk=project.pk)
         else:
@@ -134,7 +149,7 @@ def edit_project(request, pk):
     else:
         form = ProjectForm(instance=project)
 
-    return render(request, 'projects/create_project.html', {'form': form, 'project': project})
+    return render(request, 'projects/edit_project.html', {'form': form, 'project': project})
 
 
 @login_required
@@ -149,6 +164,7 @@ def delete_project(request, pk):
     project.delete()
     messages.success(request, "Project deleted successfully.")
     return redirect('dashboard')
+
 
 @login_required
 @require_POST
