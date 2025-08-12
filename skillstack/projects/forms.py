@@ -2,6 +2,12 @@ from django import forms
 from django.core.exceptions import ValidationError
 from .models import Project
 
+class MultiFileInput(forms.ClearableFileInput):
+    allow_multiple_selected = True
+    class Meta:
+        model = Project
+        fields = ['title', 'description', 'start_date', 'end_date', 'status', 'category', 'invite_emails', 'attachments']
+
 class InviteCollaboratorForm(forms.Form):
     email = forms.EmailField(
         label="Collaborator's Email",
@@ -48,9 +54,3 @@ class ProjectAttachmentUploadForm(forms.Form):
         required=True,
         widget=forms.ClearableFileInput(attrs={"multiple": True})
     )
-
-class MultiFileInput(forms.ClearableFileInput):
-    allow_multiple_selected = True
-    class Meta:
-        model = Project
-        fields = ['title', 'description', 'start_date', 'end_date', 'status', 'category', 'invite_emails', 'attachments']
