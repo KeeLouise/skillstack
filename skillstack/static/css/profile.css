@@ -266,11 +266,8 @@ hr {
 .project-status-in-progress .project-card-header {
   background: linear-gradient(90deg, #facc15, #fcd34d);
 }
-.project-status-pending .project-card-header {
+.project-status-ongoing .project-card-header {
   background: linear-gradient(90deg, #f97316, #fb923c);
-}
-.project-status-cancelled .project-card-header {
-  background: linear-gradient(90deg, #ef4444, #f87171);
 }
 
 .project-card:not([class*="project-status-"]) .project-card-header {
