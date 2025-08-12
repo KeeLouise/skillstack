@@ -100,7 +100,6 @@ def create_project(request):
 def project_detail(request, pk):
     project = get_object_or_404(Project, pk=pk)
 
-    # Permission: owner or collaborator may view
     if not (
         request.user == project.owner
         or project.collaborators.filter(pk=request.user.pk).exists()
@@ -108,23 +107,16 @@ def project_detail(request, pk):
         messages.error(request, "You do not have permission to view this project.")
         return redirect('dashboard')
 
-    can_upload = (
-        request.user == project.owner
-        or project.collaborators.filter(pk=request.user.pk).exists()
-    )
     upload_form = ProjectAttachmentUploadForm()
     attachments = project.attachments.select_related('uploaded_by').all()
+    can_upload = (request.user == project.owner) or project.collaborators.filter(pk=request.user.pk).exists()
 
-    return render(
-        request,
-        'projects/project_detail.html',
-        {
-            'project': project,
-            'upload_form': upload_form,
-            'attachments': attachments,
-            'can_upload': can_upload,
-        },
-    )
+    return render(request, 'projects/project_detail.html', {
+        'project': project,
+        'upload_form': upload_form,
+        'attachments': attachments,
+        'can_upload': can_upload,
+})
 
 
 @login_required
@@ -184,16 +176,17 @@ def delete_project(request, pk):
 def upload_project_attachments(request, pk):
     project = get_object_or_404(Project, pk=pk)
 
-    if request.user != project.owner and request.user not in project.collaborators.all():
+    if not (request.user == project.owner or project.collaborators.filter(pk=request.user.pk).exists()):
         messages.error(request, "You don't have permission to upload files to this project.")
         return redirect('project_detail', pk=project.pk)
 
     form = ProjectAttachmentUploadForm(request.POST, request.FILES)
-    if not form.is_valid():
+
+    files = request.FILES.getlist('files')
+    if not files:
         messages.error(request, "Please choose at least one file.")
         return redirect('project_detail', pk=project.pk)
 
-    files = request.FILES.getlist('files')
     created = 0
     with transaction.atomic():
         for f in files:
@@ -204,7 +197,7 @@ def upload_project_attachments(request, pk):
                 file=f,
                 original_name=getattr(f, 'name', '') or '',
                 size=getattr(f, 'size', None),
-                uploaded_by=request.user
+                uploaded_by=request.user,
             )
             created += 1
 
