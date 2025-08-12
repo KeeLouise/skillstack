@@ -31,3 +31,7 @@
 .min-h-96 {
   min-height: 96px;
 }
+
+.profile-bio {
+  min-height: 6rem;
+}

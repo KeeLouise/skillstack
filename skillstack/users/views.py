@@ -80,28 +80,34 @@ def email_login_view(request):
 
     return render(request, 'users/login.html', {'form': form})
 
-#Profile view
 @login_required
 def profile_view(request):
+    """Read-only profile page."""
+    profile, _ = Profile.objects.get_or_create(user=request.user)
+    return render(request, "users/profile.html", {"profile": profile})
+
+@login_required
+def edit_profile_view(request):
+    """Edit form page (uses users/edit_profile.html)."""
     profile, _ = Profile.objects.get_or_create(user=request.user)
 
-    if request.method == 'POST':
+    if request.method == "POST":
         u_form = UserUpdateForm(request.POST, instance=request.user)
         p_form = ProfileForm(request.POST, request.FILES, instance=profile)
         if u_form.is_valid() and p_form.is_valid():
             u_form.save()
             p_form.save()
-            messages.success(request, 'Your profile has been updated successfully!')
-            return redirect('profile')
+            messages.success(request, "Your profile has been updated successfully!")
+            return redirect("profile")
     else:
         u_form = UserUpdateForm(instance=request.user)
         p_form = ProfileForm(instance=profile)
 
-    return render(request, 'users/edit_profile.html', {
-        'u_form': u_form,
-        'p_form': p_form,
-        'profile': profile,
-    })
+    return render(
+        request,
+        "users/edit_profile.html",
+        {"u_form": u_form, "p_form": p_form, "profile": profile},
+    )
 
 # Send 2FA Verification Email
 from django.utils.timezone import now
@@ -112,7 +118,7 @@ from django.contrib.auth import login, get_backends
 import random
 import logging
 
-logger = logging.getLogger(__name__)  # for optional logging
+logger = logging.getLogger(__name__) 
 
 def send_verification_email(user):
     try:
