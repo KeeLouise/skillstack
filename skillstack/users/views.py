@@ -10,6 +10,7 @@ from .forms import CustomUserRegistrationForm, EmailLoginForm, UserUpdateForm, P
 from datetime import timedelta
 from .models import Profile
 import random
+from django.db.models import Q
 
 from .forms import CustomUserRegistrationForm, EmailLoginForm
 from .models import EmailVerificationCode
@@ -82,10 +83,33 @@ def email_login_view(request):
 
 @login_required
 def profile_view(request):
-    """Read-only profile page."""
+    """Read-only profile page with recent projects."""
     profile, _ = Profile.objects.get_or_create(user=request.user)
-    return render(request, "users/profile.html", {"profile": profile})
 
+    order_fields = []
+    if hasattr(Project, "updated_at"):
+        order_fields.append("-updated_at")
+    if hasattr(Project, "created_at"):
+        order_fields.append("-created_at")
+    if not order_fields:
+        order_fields = ["-id"]
+
+    project_list = (
+        Project.objects
+        .filter(Q(owner=request.user) | Q(collaborators=request.user))
+        .select_related("owner")
+        .prefetch_related("collaborators")
+        .order_by(*order_fields)[:4]
+    )
+
+    return render(
+        request,
+        "users/profile.html",
+        {
+            "profile": profile,
+            "project_list": project_list,
+        },
+    )
 @login_required
 def edit_profile_view(request):
     """Edit form page (uses users/edit_profile.html)."""
