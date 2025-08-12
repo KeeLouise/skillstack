@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import FileExtensionValidator 
+from cloudinary_storage.storage import RawMediaCloudinaryStorage 
 
 class Project(models.Model):
     CATEGORY_CHOICES = [
@@ -46,18 +47,14 @@ def project_attachment_upload_to(instance, filename):
     return f"projects/{instance.project_id}/attachments/{filename}"
 
 class ProjectAttachment(models.Model):
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="attachments")
+    project = models.ForeignKey('Project', related_name='attachments', on_delete=models.CASCADE)
     file = models.FileField(
-        upload_to=project_attachment_upload_to,
-        validators=[FileExtensionValidator(allowed_extensions=[
-            "pdf", "doc", "docx", "xls", "xlsx", "csv",
-            "png", "jpg", "jpeg", "gif", "webp",
-            "zip", "txt", "ppt", "pptx"
-        ])]
+        upload_to='project_attachments/',
+        storage=RawMediaCloudinaryStorage()
     )
     original_name = models.CharField(max_length=255, blank=True)
-    size = models.PositiveBigIntegerField(null=True, blank=True)
-    uploaded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="project_uploads")
+    size = models.BigIntegerField(null=True, blank=True)
+    uploaded_by = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL)
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
