@@ -24,11 +24,20 @@ body {
 .profile-cover {
   min-height: 180px;
   background: 
-    radial-gradient(1200px 400px at -10% -10%, rgba(79, 125, 187, 0.25) 0%, transparent 60%),
-    radial-gradient(1000px 400px at 110% 10%, rgba(79, 125, 187, 0.25) 0%, transparent 60%),
-    linear-gradient(135deg, #000000 0%, #1a2a3d 40%, #6bb1d6 100%);
+    linear-gradient(
+      to right,
+      rgba(0, 0, 0, 0.4) 0%,
+      rgba(0, 0, 0, 0) 25%
+    ),
+    linear-gradient(90deg, #4f7dbb, #7ad1c4);
   color: #fff;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.profile-cover h3,
+.profile-cover div,
+.profile-cover .badge {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
 }
 
 .avatar {
