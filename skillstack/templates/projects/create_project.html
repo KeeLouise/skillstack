@@ -9,7 +9,6 @@
     <div class="col-md-8">
       <h2 class="mb-4 text-center">Create a New Project</h2>
 
-      {# non-field errors summary (e.g., date validation) #}
       {% if form.non_field_errors %}
         <div class="alert alert-danger mb-3">
           {% for err in form.non_field_errors %}
@@ -18,9 +17,23 @@
         </div>
       {% endif %}
 
-      <form method="POST" novalidate>
+      {# IMPORTANT: enctype added for file uploads #}
+      <form method="POST" enctype="multipart/form-data" novalidate>
         {% csrf_token %}
         {{ form|crispy }}
+
+        <div class="mb-3">
+          <label for="attachments" class="form-label">Attachments (optional)</label>
+          <input
+            type="file"
+            id="attachments"
+            name="attachments"
+            class="form-control"
+            multiple
+          >
+          <div class="form-text">You can select multiple files (docs, images, PDFs, etc.).</div>
+        </div>
+
         <button type="submit" class="btn btn-dark w-100 mt-3">Create Project</button>
       </form>
     </div>

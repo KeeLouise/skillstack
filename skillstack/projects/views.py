@@ -5,8 +5,12 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.urls import reverse
 from django.views.decorators.http import require_POST
+from django.db import transaction
+from django.http import FileResponse, Http404
+
 from .forms import InviteCollaboratorForm, ProjectForm
-from .models import Invitation, Project
+from .forms import ProjectAttachmentUploadForm
+from .models import Invitation, Project, ProjectAttachment
 
 import logging
 logger = logging.getLogger(__name__)
@@ -49,15 +53,29 @@ def notify_existing_collaborator(user, project):
     )
 
 
+
 @login_required
 def create_project(request):
     if request.method == 'POST':
         form = ProjectForm(request.POST)
         if form.is_valid():
+            
             project = form.save(commit=False)
             project.owner = request.user
             project.save()
             form.save_m2m()
+
+            files = request.FILES.getlist('attachments')
+            for f in files:
+                if not f:
+                    continue
+                ProjectAttachment.objects.create(
+                    project=project,
+                    file=f,
+                    original_name=getattr(f, 'name', '') or '',
+                    size=getattr(f, 'size', None),
+                    uploaded_by=request.user,
+                )
 
             invite_emails = form.cleaned_data.get('invite_emails', '')
             emails = [e.strip() for e in invite_emails.split(',') if e.strip()]
@@ -88,7 +106,15 @@ def project_detail(request, pk):
         messages.error(request, "You do not have permission to view this project.")
         return redirect('dashboard')
 
-    return render(request, 'projects/project_detail.html', {'project': project})
+    upload_form = ProjectAttachmentUploadForm()
+    attachments = project.attachments.select_related('uploaded_by').all()
+
+    return render(request, 'projects/project_detail.html', {
+        'project': project,
+        'upload_form': upload_form,
+        'attachments': attachments
+    })
+
 
 @login_required
 def edit_project(request, pk):
@@ -103,13 +129,14 @@ def edit_project(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, 'Project updated successfully.')
-            return redirect('project_detail', project_id=project.pk)
+            return redirect('project_detail', pk=project.pk)
         else:
             messages.error(request, 'Please correct the errors below.')
     else:
         form = ProjectForm(instance=project)
 
     return render(request, 'projects/create_project.html', {'form': form, 'project': project})
+
 
 @login_required
 @require_POST
@@ -123,3 +150,79 @@ def delete_project(request, pk):
     project.delete()
     messages.success(request, "Project deleted successfully.")
     return redirect('dashboard')
+
+@login_required
+@require_POST
+def upload_project_attachments(request, pk):
+    project = get_object_or_404(Project, pk=pk)
+
+    if request.user != project.owner and request.user not in project.collaborators.all():
+        messages.error(request, "You don't have permission to upload files to this project.")
+        return redirect('project_detail', pk=project.pk)
+
+    form = ProjectAttachmentUploadForm(request.POST, request.FILES)
+    if not form.is_valid():
+        messages.error(request, "Please choose at least one file.")
+        return redirect('project_detail', pk=project.pk)
+
+    files = request.FILES.getlist('files')
+    created = 0
+    with transaction.atomic():
+        for f in files:
+            if not f:
+                continue
+            ProjectAttachment.objects.create(
+                project=project,
+                file=f,
+                original_name=getattr(f, 'name', '') or '',
+                size=getattr(f, 'size', None),
+                uploaded_by=request.user
+            )
+            created += 1
+
+    if created:
+        messages.success(request, f"Uploaded {created} file{'s' if created != 1 else ''}.")
+    else:
+        messages.info(request, "No files were uploaded.")
+    return redirect('project_detail', pk=project.pk)
+
+
+@login_required
+def download_project_attachment(request, att_pk):
+    att = get_object_or_404(
+        ProjectAttachment.objects.select_related('project', 'uploaded_by'),
+        pk=att_pk
+    )
+    project = att.project
+
+    if request.user != project.owner and request.user not in project.collaborators.all():
+        raise Http404("Not found")
+
+    if not att.file:
+        raise Http404("File not available")
+
+    try:
+        f = att.file.open('rb')
+    except Exception:
+        raise Http404("File not available")
+
+    filename = att.original_name or att.file.name
+    return FileResponse(f, as_attachment=True, filename=filename)
+
+
+@login_required
+@require_POST
+def delete_project_attachment(request, att_pk):
+    att = get_object_or_404(
+        ProjectAttachment.objects.select_related('project', 'uploaded_by'),
+        pk=att_pk
+    )
+    project = att.project
+
+    if request.user != project.owner and request.user != att.uploaded_by:
+        messages.error(request, "You don't have permission to delete this attachment.")
+        return redirect('project_detail', pk=project.pk)
+
+    att.delete()
+    messages.success(request, "Attachment deleted.")
+    return redirect('project_detail', pk=project.pk)

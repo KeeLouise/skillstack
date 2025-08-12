@@ -38,3 +38,9 @@ class ProjectForm(forms.ModelForm):
         if start and end and end < start:
             self.add_error('end_date', "End date cannot be earlier than start date.")
         return cleaned
+
+class ProjectAttachmentUploadForm(forms.Form):
+    files = forms.FileField(
+        required=True,
+        widget=forms.ClearableFileInput(attrs={"multiple": True})
+    )
