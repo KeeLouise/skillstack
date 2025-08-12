@@ -44,6 +44,16 @@
 
         <div class="card-body p-4 p-md-5">
 
+          <div class="profile-progress mb-4">
+            <div class="d-flex justify-content-between mb-1">
+              <span class="text-muted">Profile completeness</span>
+              <span class="text-muted"><span id="profileProgressPercent">0</span>%</span>
+            </div>
+            <div class="profile-progress-container">
+              <div class="profile-progress-bar" id="profileProgressBar" aria-label="Profile completion"></div>
+            </div>
+          </div>
+
           <div class="row g-4">
             <div class="col-md-6">
               <div class="list-group list-group-flush">
@@ -73,25 +83,40 @@
           {% if project_list %}
           <hr class="my-4">
           <div>
-            <h5 class="mb-3">Recent Projects</h5>
-            <div class="row g-3">
-              {% for p in project_list %}
-                <div class="col-md-6 col-lg-4">
-                  <a class="card h-100 text-decoration-none hover-lift" href="{% url 'project_detail' p.pk %}">
-                    <div class="card-body">
-                      <div class="d-flex justify-content-between align-items-start">
-                        <h6 class="mb-1 text-truncate" title="{{ p.title }}">{{ p.title }}</h6>
-                        <span class="badge text-bg-light border">{{ p.get_status_display|default:p.status }}</span>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h5 class="mb-0">Recent Projects</h5>
+              <button
+                class="btn btn-sm btn-outline-secondary profile-toggle-btn"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#recentProjects"
+                aria-expanded="true"
+                aria-controls="recentProjects">
+                Toggle
+              </button>
+            </div>
+
+            <div id="recentProjects" class="collapse show">
+              <div class="row g-3">
+                {% for p in project_list %}
+                  <div class="col-md-6 col-lg-4">
+                    <a class="card h-100 text-decoration-none hover-lift" href="{% url 'project_detail' p.pk %}">
+                      <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                          <h6 class="mb-1 text-truncate" title="{{ p.title }}">{{ p.title }}</h6>
+                          <span class="badge text-bg-light border">{{ p.get_status_display|default:p.status }}</span>
+                        </div>
+                        <div class="small text-muted">{{ p.category|title }}</div>
                       </div>
-                      <div class="small text-muted">{{ p.category|title }}</div>
-                    </div>
-                  </a>
-                </div>
-              {% endfor %}
+                    </a>
+                  </div>
+                {% endfor %}
+              </div>
             </div>
           </div>
           {% endif %}
         </div>
+
       </div>
     </div>
   </div>
