@@ -83,16 +83,24 @@ class CustomUserRegistrationForm(UserCreationForm):
 
 class UserUpdateForm(forms.ModelForm):
     first_name = forms.CharField(label='Full Name')
+
     class Meta:
         model = User
         fields = ['first_name', 'email']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['email'].required = True
         self.helper = FormHelper()
         self.helper.form_method = 'post'
         self.helper.add_input(Submit('submit', 'Update Profile'))
 
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if email:
+            if User.objects.exclude(pk=self.instance.pk).filter(email=email).exists():
+                raise forms.ValidationError("This email address is already in use.")
+        return email
 
 class ProfileForm(forms.ModelForm):
     class Meta:
