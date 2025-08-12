@@ -4,8 +4,6 @@
 <link rel="stylesheet" href="{% static 'css/messages.css' %}">
 {% endblock %}
 {% block title %}Messages{% endblock %}
-
-
 {% block content %}
 <div class="container mt-5">
   <div class="d-flex justify-content-between align-items-center mb-4">
@@ -233,6 +231,7 @@
     </div>
   {% endif %}
 </div>
+{% endblock content %}
 {% block extra_scripts %}
 <script src="{% static 'js/messages.js' %}"></script>
 {% endblock %}
