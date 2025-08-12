@@ -14,6 +14,12 @@ class InviteCollaboratorForm(forms.Form):
         })
     )
 
+class ProjectAttachmentUploadForm(forms.Form):
+    files = forms.FileField(
+        widget=MultiFileInput(attrs={"class": "form-control", "multiple": True}),
+        required=False
+    )
+
 class ProjectForm(forms.ModelForm):
     start_date = forms.DateField(
         widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
@@ -45,9 +51,3 @@ class ProjectForm(forms.ModelForm):
         if start and end and end < start:
             self.add_error('end_date', "End date cannot be earlier than start date.")
         return cleaned
-
-class ProjectAttachmentUploadForm(forms.Form):
-    files = forms.FileField(
-        widget=MultiFileInput(attrs={"multiple": True, "class": "form-control"}),
-        required=False,
-    )
