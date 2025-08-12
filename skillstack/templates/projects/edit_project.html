@@ -1,97 +1,84 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+{% load static %}
 {% load crispy_forms_tags %}
 
-{% block title %}Edit Project{% endblock %}
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+
+{% block title %}Edit Profile{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
+<div class="container py-5">
   <div class="row justify-content-center">
     <div class="col-lg-10 col-xl-9">
-      <h2 class="mb-4 text-center">Edit Project</h2>
+      <div class="card profile-card shadow-sm border-0">
 
-      {% if form.non_field_errors %}
-        <div class="alert alert-danger mb-3">
-          {% for err in form.non_field_errors %}
-            <div>{{ err }}</div>
-          {% endfor %}
-        </div>
-      {% endif %}
-
-      <div class="card shadow-sm mb-4">
-        <div class="card-body">
-          <form method="POST" novalidate>
-            {% csrf_token %}
-            {{ form|crispy }}
-            <div class="d-flex gap-2">
-              <a href="{% url 'project_detail' pk=project.pk %}" class="btn btn-outline-secondary">Cancel</a>
-              <button type="submit" class="btn btn-dark">Save changes</button>
+        <div class="profile-cover d-flex align-items-end p-4">
+          <div class="d-flex align-items-center w-100 flex-wrap gap-3 gap-md-4">
+            <div class="avatar avatar-xl flex-shrink-0">
+              {% if profile.profile_picture %}
+                <img src="{{ profile.profile_picture.url }}" alt="Profile picture" class="avatar-img" id="avatarPreview">
+              {% else %}
+                <div class="avatar-fallback" id="avatarFallback">
+                  {{ user.first_name|default:user.username|first|upper }}
+                </div>
+              {% endif %}
             </div>
-          </form>
+
+            <div class="flex-grow-1 text-white">
+              <h3 class="mb-1">{{ user.first_name|default:user.username }}</h3>
+              <div>{{ user.email }}</div>
+              {% if profile.company %}
+                <div class="mt-1">
+                  <span class="badge bg-light text-dark">{{ profile.company }}</span>
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="ms-auto d-flex flex-wrap gap-2">
+              <a href="{% url 'profile' %}" class="btn btn-outline-light">Cancel</a>
+              <button type="submit" class="btn btn-light" form="editProfileForm">Save Changes</button>
+            </div>
+          </div>
         </div>
-      </div>
 
-      <div class="card shadow-sm mb-4">
-        <div class="card-body">
-          <h5 class="mb-3">Upload attachments</h5>
+        <div class="card-body p-4 p-md-5">
 
-          {% if upload_form.non_field_errors %}
-            <div class="alert alert-danger mb-3">
-              {% for err in upload_form.non_field_errors %}<div>{{ err }}</div>{% endfor %}
+          {% if u_form.non_field_errors or p_form.non_field_errors %}
+            <div class="alert alert-danger mb-4">
+              {% for err in u_form.non_field_errors %}<div>{{ err }}</div>{% endfor %}
+              {% for err in p_form.non_field_errors %}<div>{{ err }}</div>{% endfor %}
             </div>
           {% endif %}
 
-          <form method="POST" action="{% url 'upload_project_attachments' project.pk %}" enctype="multipart/form-data">
+          <form id="editProfileForm" method="POST" enctype="multipart/form-data" novalidate>
             {% csrf_token %}
-            <input type="file" name="files" class="form-control" multiple accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.zip">
-            <div class="form-text">You can select multiple files.</div>
-            <button type="submit" class="btn btn-outline-primary mt-3">Upload</button>
+
+            <div class="row g-4">
+              <div class="col-md-6">
+                <h5 class="mb-3">Account</h5>
+                {{ u_form.first_name|as_crispy_field }}
+                {{ u_form.email|as_crispy_field }}
+                {{ p_form.company|as_crispy_field }}
+              </div>
+
+              <div class="col-md-6">
+                <h5 class="mb-3">Profile</h5>
+                {{ p_form.profile_picture|as_crispy_field }}
+                {{ p_form.bio|as_crispy_field }}
+              </div>
+            </div>
           </form>
+
         </div>
+
       </div>
-
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <h5 class="mb-3">Existing attachments</h5>
-
-          {% if project.attachments.exists %}
-            <ul class="list-group list-group-flush">
-              {% for att in project.attachments.all %}
-                <li class="list-group-item d-flex justify-content-between align-items-start">
-                  <div class="me-3">
-                    <div class="fw-semibold">
-                      {{ att.original_name|default:att.file.name }}
-                      {% if att.size %}
-                        <span class="text-muted fw-normal">({{ att.size|filesizeformat }})</span>
-                      {% endif %}
-                    </div>
-                    {% if att.uploaded_by %}
-                      <div class="text-muted small">Uploaded by: {{ att.uploaded_by.get_full_name|default:att.uploaded_by.username }}</div>
-                    {% endif %}
-                  </div>
-
-                  <div class="d-flex gap-2">
-                    <a href="{% url 'download_project_attachment' att.pk %}" class="btn btn-sm btn-outline-primary">Download</a>
-
-                    {% if user == project.owner or user == att.uploaded_by %}
-                      <form method="POST" action="{% url 'delete_project_attachment' att.pk %}">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-sm btn-outline-danger"
-                                onclick="return confirm('Delete this attachment?');">
-                          Delete
-                        </button>
-                      </form>
-                    {% endif %}
-                  </div>
-                </li>
-              {% endfor %}
-            </ul>
-          {% else %}
-            <div class="alert alert-info mb-0">No attachments yet.</div>
-          {% endif %}
-        </div>
-      </div>
-
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'js/profile.js' %}"></script>
 {% endblock %}
