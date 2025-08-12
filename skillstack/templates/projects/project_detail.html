@@ -45,12 +45,12 @@
         <h5 class="mb-0">Attachments</h5>
 
         {% if can_upload %}
-          <form action="{% url 'upload_project_attachments' project.pk %}" method="post" enctype="multipart/form-data" class="d-flex align-items-center gap-2 project-upload-form">
-            {% csrf_token %}
-            <input type="file" name="files" multiple class="form-control project-file-input" accept="*/*">
-            <button type="submit" class="btn btn-outline-primary">Upload</button>
-          </form>
-        {% endif %}
+  <form action="{% url 'upload_project_attachments' project.pk %}" method="post" enctype="multipart/form-data" class="d-flex align-items-center gap-2 project-upload-form">
+    {% csrf_token %}
+    <input type="file" name="files" multiple class="form-control project-file-input" accept="*/*">
+    <button type="submit" class="btn btn-outline-primary">Upload</button>
+  </form>
+{% endif %}
       </div>
 
       {% if attachments %}
