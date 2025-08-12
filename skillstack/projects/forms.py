@@ -51,6 +51,6 @@ class ProjectForm(forms.ModelForm):
 
 class ProjectAttachmentUploadForm(forms.Form):
     files = forms.FileField(
+        widget=forms.ClearableMultipleFileInput(attrs={"class": "form-control"}),
         required=True,
-        widget=forms.ClearableFileInput(attrs={"multiple": True})
     )
