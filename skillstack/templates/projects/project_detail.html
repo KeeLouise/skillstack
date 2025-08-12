@@ -31,9 +31,9 @@
           {% if project.collaborators.count %}
             <p>
               <strong class="text-muted">Collaborators:</strong>
-              {% for user in project.collaborators.all %}
+              {% for collaborator in project.collaborators.all %}
                 <span class="badge bg-secondary">
-                  {{ user.get_full_name|default:user.username }}
+                  {{ collaborator.get_full_name|default:collaborator.username }}
                 </span>{% if not forloop.last %} {% endif %}
               {% endfor %}
             </p>
@@ -71,7 +71,12 @@
                     <span class="text-muted small">({{ att.size|filesizeformat }})</span>
                   {% endif %}
                   <div class="small text-muted">
-                    Uploaded by: {{ att.uploaded_by.get_full_name|default:att.uploaded_by.username }}
+                    Uploaded by:
+                    {% if att.uploaded_by %}
+                      {{ att.uploaded_by.get_full_name|default:att.uploaded_by.username }}
+                    {% else %}
+                      Unknown
+                    {% endif %}
                   </div>
                 </div>
 
