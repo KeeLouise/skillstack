@@ -14,7 +14,6 @@
     on(input, 'change', function (e) {
       const file = e.target.files && e.target.files[0];
       if (!file) return;
-
       if (!file.type || !/^image\//i.test(file.type)) return;
 
       const reader = new FileReader();
@@ -44,7 +43,16 @@
   // Bio Character Counter - KR 12/08/2025
   (function bioCounter() {
     const bio = document.querySelector('textarea[name$="bio"]');
-    const counter = document.getElementById('bio-counter');
+    let counter = document.getElementById('bio-counter');
+
+    // Insert counter if missing - KR 12/08/2025
+    if (bio && !counter) {
+      counter = document.createElement('div');
+      counter.id = 'bio-counter';
+      counter.className = 'text-muted small mt-1';
+      bio.parentNode.appendChild(counter);
+    }
+
     if (!bio || !counter) return;
 
     const max = Number(bio.getAttribute('maxlength')) || Number(counter.getAttribute('data-max')) || 300;
@@ -59,43 +67,11 @@
     render();
   })();
 
-  // Collapsible Recent Projects - KR 12/08/2025
-  (function recentProjectsToggle() {
-    const wrap = document.getElementById('recent-projects');
-    const btn = document.getElementById('toggle-projects');
-    if (!wrap || !btn) return;
-
-    function isHidden() {
-      return wrap.classList.contains('d-none') || wrap.style.display === 'none';
-    }
-
-    function show() {
-      wrap.classList.remove('d-none');
-      wrap.style.display = '';
-      btn.setAttribute('aria-expanded', 'true');
-      btn.textContent = btn.getAttribute('data-label-hide') || 'Hide Projects';
-    }
-
-    function hide() {
-      wrap.classList.add('d-none');
-      btn.setAttribute('aria-expanded', 'false');
-      btn.textContent = btn.getAttribute('data-label-show') || 'Show Projects';
-    }
-
-    on(btn, 'click', function (e) {
-      e.preventDefault();
-      if (isHidden()) show(); else hide();
-    });
-
-    if (btn.getAttribute('data-start-collapsed') === 'true') {
-      hide();
-    }
-  })();
-
   // Profile completion progress - KR 12/08/2025
   (function profileCompletion() {
-    const bar = document.getElementById('profile-progress');
-    if (!bar) return;
+    const bar = document.getElementById('profileProgressBar');
+    const percentText = document.getElementById('profileProgressPercent');
+    if (!bar || !percentText) return;
 
     function hasValue(v) {
       return v !== undefined && v !== null && String(v).trim() !== '';
@@ -111,19 +87,11 @@
       const companyEl = document.querySelector('[data-field="company"]');
       const bioEl = document.querySelector('[data-field="bio"]');
 
-      // Fallback to form fields if data-field spans aren’t present - KR 12/08/2025
-      const nameVal =
-        (nameEl && nameEl.textContent) ||
-        (document.querySelector('input[name$="first_name"]') || {}).value;
-      const emailVal =
-        (emailEl && emailEl.textContent) ||
-        (document.querySelector('input[name$="email"]') || {}).value;
-      const companyVal =
-        (companyEl && companyEl.textContent) ||
-        (document.querySelector('input[name$="company"]') || {}).value;
-      const bioVal =
-        (bioEl && bioEl.textContent) ||
-        (document.querySelector('textarea[name$="bio"]') || {}).value;
+      // Fallback to form fields if spans aren’t present - KR 12/08/2025
+      const nameVal = (nameEl && nameEl.textContent) || (document.querySelector('input[name$="first_name"]') || {}).value;
+      const emailVal = (emailEl && emailEl.textContent) || (document.querySelector('input[name$="email"]') || {}).value;
+      const companyVal = (companyEl && companyEl.textContent) || (document.querySelector('input[name$="company"]') || {}).value;
+      const bioVal = (bioEl && bioEl.textContent) || (document.querySelector('textarea[name$="bio"]') || {}).value;
 
       const checks = [
         avatarSet,
@@ -137,20 +105,13 @@
       const total = checks.length;
       const pct = Math.round((complete / total) * 100);
 
-      return { pct, complete, total };
+      return pct;
     }
 
     function render() {
-      const { pct } = compute();
-      const inner = bar.querySelector('.progress-bar');
-      if (inner) {
-        inner.style.width = pct + '%';
-        inner.setAttribute('aria-valuenow', pct);
-        inner.textContent = pct + '%';
-      } else {
-        bar.style.width = pct + '%';
-        bar.textContent = pct + '%';
-      }
+      const pct = compute();
+      bar.style.width = pct + '%';
+      percentText.textContent = pct;
     }
 
     // Re-render on inputs that affect completion - KR 12/08/2025

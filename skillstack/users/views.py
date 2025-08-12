@@ -86,6 +86,18 @@ def profile_view(request):
     """Read-only profile page with recent projects."""
     profile, _ = Profile.objects.get_or_create(user=request.user)
 
+    # Calculate profile completeness - KR 12/08/2025
+    fields_to_check = [
+        request.user.first_name,
+        request.user.email,
+        profile.company,
+        profile.bio,
+        profile.profile_picture
+    ]
+    filled_fields = sum(1 for field in fields_to_check if field)
+    completeness_percentage = int((filled_fields / len(fields_to_check)) * 100)
+
+    # Recent projects ordering logic - KR 12/08/2025
     order_fields = []
     if hasattr(Project, "updated_at"):
         order_fields.append("-updated_at")
@@ -108,8 +120,10 @@ def profile_view(request):
         {
             "profile": profile,
             "project_list": project_list,
+            "completeness_percentage": completeness_percentage,
         },
     )
+
 @login_required
 def edit_profile_view(request):
     """Edit form page (uses users/edit_profile.html)."""
