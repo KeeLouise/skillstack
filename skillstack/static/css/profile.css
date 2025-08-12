@@ -1,78 +1,129 @@
-.avatar {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #dee2e6;
-  font-size: 48px;
-  font-weight: bold;
-  color: #6c757d;
+:root{
+  --ss-primary:#0d6efd;
+  --ss-primary-2:#6f42c1;
+  --ss-ink:#0b1020;
+  --ss-ink-2:#1a2030;
+  --ss-border:#e9ecef;
+  --ss-soft:#f7f9fc;
+  --ss-muted:#6c757d;
 }
 
-.avatar img.avatar-img {
+body{
+  background: linear-gradient(180deg,#f8faff 0%,#ffffff 140%);
+}
+
+.profile-card{
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(13,110,253,.08), 0 2px 8px rgba(0,0,0,.05);
+}
+
+.profile-cover{
+  height: 160px;
+  background:
+    radial-gradient(1000px 300px at -20% -20%, rgba(255,255,255,.25) 0%, rgba(255,255,255,0) 60%),
+    linear-gradient(135deg,var(--ss-primary) 0%, var(--ss-primary-2) 100%);
+}
+
+.avatar{
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  position: relative;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  box-shadow: 0 6px 20px rgba(13,110,253,.18);
+  outline: 6px solid rgba(13,110,253,.08);
+}
+.avatar-xl{ width: 112px; height: 112px; }
+.avatar-img{
   width: 100%;
   height: 100%;
+  border-radius: 50%;
   object-fit: cover;
 }
-
-.avatar-fallback {
+.avatar-fallback{
   width: 100%;
   height: 100%;
-  text-align: center;
-  line-height: 120px;
+  border-radius: 50%;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg,var(--ss-primary),var(--ss-primary-2));
+  display: grid;
+  place-items: center;
+  font-size: 32px;
 }
 
-.profile-header h3 {
-  font-weight: 600;
+.profile-card .card-body h3{
+  color: var(--ss-ink);
+  letter-spacing: .2px;
+}
+.profile-card .text-muted{ color: var(--ss-muted)!important; }
+
+.badge.text-bg-light{
+  background: #fff !important;
+  color: var(--ss-ink) !important;
+  border: 1px solid var(--ss-border) !important;
 }
 
-.profile-header p {
-  font-size: 0.9rem;
-  color: #6c757d;
+.list-group-item{
+  background: transparent;
+  border: 0;
+  padding: .75rem 0;
+}
+.list-group-item + .list-group-item{
+  border-top: 1px dashed rgba(27,38,49,.15);
 }
 
-.card {
-  border-radius: 0.75rem;
+.profile-bio{
+  background: linear-gradient(180deg,#ffffff 0%, #f5f7ff 100%);
+  border: 1px solid var(--ss-border);
+  border-radius: 12px;
+  color: var(--ss-ink-2);
 }
 
-.card-body {
-  padding: 2rem;
+.hover-lift{
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  border: 1px solid var(--ss-border);
+  border-radius: 14px;
+}
+.hover-lift:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(13,110,253,.12);
+  border-color: rgba(13,110,253,.3);
+}
+.hover-lift .card-body .text-muted{ color: var(--ss-muted)!important; }
+
+.btn-primary{
+  background: linear-gradient(135deg,var(--ss-primary),var(--ss-primary-2));
+  border: 0;
+  box-shadow: 0 6px 18px rgba(13,110,253,.25);
+}
+.btn-primary:hover{
+  filter: brightness(.98);
+  box-shadow: 0 8px 20px rgba(13,110,253,.28);
+}
+.btn-outline-secondary{
+  border-color: rgba(27,38,49,.25);
+  color: var(--ss-ink-2);
+}
+.btn-outline-secondary:hover{
+  background: rgba(13,110,253,.06);
+  border-color: var(--ss-primary);
+  color: var(--ss-ink);
 }
 
-.profile-bio {
-  font-size: 0.95rem;
-  line-height: 1.5;
+hr{
+  border: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(13,110,253,.25), transparent);
+  opacity: 1;
 }
 
-form .form-text {
-  font-size: 0.85rem;
-  color: #6c757d;
-}
+.text-primary{ color: var(--ss-primary)!important; }
 
-.btn-outline-secondary {
-  min-width: 100px;
-}
-
-.btn-success {
-  background-color: #28a745;
-  border-color: #28a745;
-}
-
-.btn-success:hover {
-  background-color: #218838;
-  border-color: #1e7e34;
-}
-
-@media (max-width: 576px) {
-  .avatar {
-    width: 90px;
-    height: 90px;
-    font-size: 36px;
-  }
-  .avatar-fallback {
-    line-height: 90px;
-  }
+@media (max-width: 576px){
+  .avatar-xl{ width:96px; height:96px; }
+  .profile-cover{ height:130px; }
 }
