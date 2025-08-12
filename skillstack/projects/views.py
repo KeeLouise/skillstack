@@ -74,7 +74,6 @@ def create_project(request):
                     file=f,
                     original_name=getattr(f, 'name', '') or '',
                     size=getattr(f, 'size', None),
-                    uploaded_by=request.user,
                 )
 
             invite_emails = form.cleaned_data.get('invite_emails', '')

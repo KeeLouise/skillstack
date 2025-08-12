@@ -20,6 +20,10 @@ class ProjectForm(forms.ModelForm):
         widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
         required=False
     )
+    attachments = forms.FileField(
+        required=False,
+        widget=MultiFileInput(attrs={"multiple": True, "class": "form-control"})
+    )
     invite_emails = forms.CharField(
         required=False,
         label="Invite Collaborators (comma-separated emails)",
@@ -44,3 +48,9 @@ class ProjectAttachmentUploadForm(forms.Form):
         required=True,
         widget=forms.ClearableFileInput(attrs={"multiple": True})
     )
+
+class MultiFileInput(forms.ClearableFileInput):
+    allow_multiple_selected = True
+    class Meta:
+        model = Project
+        fields = ['title', 'description', 'start_date', 'end_date', 'status', 'category', 'invite_emails', 'attachments']
