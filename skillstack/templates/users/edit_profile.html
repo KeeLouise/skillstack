@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 {% load static %}
+{% load crispy_forms_tags %}
 
 {% block extra_head %}
-  {# Use a light profile stylesheet (omit the dark background) #}
-  <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
 {% endblock %}
 
 {% block title %}Edit Profile{% endblock %}
@@ -25,6 +25,7 @@
                 </div>
               {% endif %}
             </div>
+
             <div class="flex-grow-1 text-white">
               <h3 class="mb-1">{{ user.first_name|default:user.username }}</h3>
               <div>{{ user.email }}</div>
@@ -34,8 +35,10 @@
                 </div>
               {% endif %}
             </div>
-            <div class="ms-auto">
+
+            <div class="ms-auto d-flex flex-wrap gap-2">
               <a href="{% url 'profile' %}" class="btn btn-outline-light">Cancel</a>
+              <button type="submit" class="btn btn-light" form="editProfileForm">Save Changes</button>
             </div>
           </div>
         </div>
@@ -48,55 +51,37 @@
             </div>
           {% endif %}
 
-          <form method="POST" enctype="multipart/form-data" novalidate>
+          <form id="editProfileForm" method="POST" enctype="multipart/form-data" novalidate>
             {% csrf_token %}
 
-            <h5 class="mb-3">Account</h5>
-            <div class="row g-3">
+            <div class="row g-4">
               <div class="col-md-6">
-                <label class="form-label" for="{{ u_form.first_name.id_for_label }}">Full name</label>
-                {{ u_form.first_name }}
-                {% if u_form.first_name.errors %}
-                  <div class="invalid-feedback d-block">{% for e in u_form.first_name.errors %}{{ e }}{% if not forloop.last %}<br>{% endif %}{% endfor %}</div>
-                {% endif %}
+                <h5 class="mb-3">Account</h5>
+                <div class="mb-3">
+                  <label class="form-label" for="{{ u_form.first_name.id_for_label }}">Full name</label>
+                  {{ u_form.first_name|as_crispy_field }}
+                </div>
+                <div class="mb-0">
+                  <label class="form-label" for="{{ u_form.email.id_for_label }}">Email</label>
+                  {{ u_form.email|as_crispy_field }}
+                </div>
               </div>
-              <div class="col-md-6">
-                <label class="form-label" for="{{ u_form.email.id_for_label }}">Email</label>
-                {{ u_form.email }}
-                {% if u_form.email.errors %}
-                  <div class="invalid-feedback d-block">{% for e in u_form.email.errors %}{{ e }}{% if not forloop.last %}<br>{% endif %}{% endfor %}</div>
-                {% endif %}
-              </div>
-            </div>
 
-            <hr class="my-4">
-            <h5 class="mb-3">Profile</h5>
-            <div class="row g-3">
               <div class="col-md-6">
-                <label class="form-label" for="{{ p_form.company.id_for_label }}">Company</label>
-                {{ p_form.company }}
-                {% if p_form.company.errors %}
-                  <div class="invalid-feedback d-block">{% for e in p_form.company.errors %}{{ e }}{% if not forloop.last %}<br>{% endif %}{% endfor %}</div>
-                {% endif %}
+                <h5 class="mb-3">Profile</h5>
+                <div class="mb-3">
+                  <label class="form-label" for="{{ p_form.company.id_for_label }}">Company</label>
+                  {{ p_form.company|as_crispy_field }}
+                </div>
+                <div class="mb-3">
+                  <label class="form-label" for="{{ p_form.profile_picture.id_for_label }}">Profile picture</label>
+                  {{ p_form.profile_picture|as_crispy_field }}
+                </div>
+                <div class="mb-0">
+                  <label class="form-label" for="{{ p_form.bio.id_for_label }}">Bio</label>
+                  {{ p_form.bio|as_crispy_field }}
+                </div>
               </div>
-              <div class="col-md-6">
-                <label class="form-label" for="{{ p_form.profile_picture.id_for_label }}">Profile picture</label>
-                {{ p_form.profile_picture }}
-                {% if p_form.profile_picture.errors %}
-                  <div class="invalid-feedback d-block">{% for e in p_form.profile_picture.errors %}{{ e }}{% if not forloop.last %}<br>{% endif %}{% endfor %}</div>
-                {% endif %}
-              </div>
-              <div class="col-12">
-                <label class="form-label" for="{{ p_form.bio.id_for_label }}">Bio</label>
-                {{ p_form.bio }}
-                {% if p_form.bio.errors %}
-                  <div class="invalid-feedback d-block">{% for e in p_form.bio.errors %}{{ e }}{% if not forloop.last %}<br>{% endif %}{% endfor %}</div>
-                {% endif %}
-              </div>
-            </div>
-
-            <div class="d-flex justify-content-end mt-4">
-              <button type="submit" class="btn btn-dark px-4">Save Changes</button>
             </div>
           </form>
         </div>
@@ -108,5 +93,5 @@
 {% endblock %}
 
 {% block extra_scripts %}
-  <script src="{% static 'js/profile.js' %}"></script>
+<script src="{% static 'js/profile.js' %}"></script>
 {% endblock %}
