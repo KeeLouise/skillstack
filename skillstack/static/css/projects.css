@@ -58,11 +58,11 @@
 
 .project-category {
   display: inline-block;
-  font-size: .78rem;
+  font-size: .85rem;
   padding: .2rem .5rem;
   border-radius: 999px;
-  background: rgba(15, 23, 42, 0.05);
-  color: var(--proj-text);
+  background: linear-gradient(90deg, #4f7dbb, #7ad1c4);
+  color: #fff;
   border: 1px solid rgba(15, 23, 42, 0.08);
 }
 
