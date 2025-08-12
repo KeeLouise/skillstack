@@ -4,9 +4,6 @@ from .models import Project
 
 class MultiFileInput(forms.ClearableFileInput):
     allow_multiple_selected = True
-    class Meta:
-        model = Project
-        fields = ['title', 'description', 'start_date', 'end_date', 'status', 'category', 'invite_emails', 'attachments']
 
 class InviteCollaboratorForm(forms.Form):
     email = forms.EmailField(
@@ -51,6 +48,6 @@ class ProjectForm(forms.ModelForm):
 
 class ProjectAttachmentUploadForm(forms.Form):
     files = forms.FileField(
-        widget=forms.ClearableMultipleFileInput(attrs={"class": "form-control"}),
-        required=True,
+        widget=MultiFileInput(attrs={"multiple": True, "class": "form-control"}),
+        required=False,
     )

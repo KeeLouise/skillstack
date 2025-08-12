@@ -100,18 +100,31 @@ def create_project(request):
 def project_detail(request, pk):
     project = get_object_or_404(Project, pk=pk)
 
-    if request.user != project.owner and request.user not in project.collaborators.all():
+    # Permission: owner or collaborator may view
+    if not (
+        request.user == project.owner
+        or project.collaborators.filter(pk=request.user.pk).exists()
+    ):
         messages.error(request, "You do not have permission to view this project.")
         return redirect('dashboard')
 
+    can_upload = (
+        request.user == project.owner
+        or project.collaborators.filter(pk=request.user.pk).exists()
+    )
     upload_form = ProjectAttachmentUploadForm()
     attachments = project.attachments.select_related('uploaded_by').all()
 
-    return render(request, 'projects/project_detail.html', {
-        'project': project,
-        'upload_form': upload_form,
-        'attachments': attachments
-    })
+    return render(
+        request,
+        'projects/project_detail.html',
+        {
+            'project': project,
+            'upload_form': upload_form,
+            'attachments': attachments,
+            'can_upload': can_upload,
+        },
+    )
 
 
 @login_required
