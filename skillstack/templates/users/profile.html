@@ -9,14 +9,15 @@
 {% block title %}Profile{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
+<div class="container py-5">
   <div class="row justify-content-center">
-    <div class="col-lg-8 col-xl-7">
-      <div class="card shadow-sm border-0">
-        <div class="card-body">
+    <div class="col-lg-10 col-xl-9">
+      <div class="card profile-card shadow-sm border-0">
+        <div class="profile-cover"></div>
 
-          <div class="profile-header text-center mb-4">
-            <div class="avatar avatar-lg mx-auto">
+        <div class="card-body p-4 p-md-5">
+          <div class="d-flex align-items-center gap-3 gap-md-4 flex-wrap">
+            <div class="avatar avatar-xl flex-shrink-0">
               {% if profile.profile_picture %}
                 <img src="{{ profile.profile_picture.url }}" alt="Profile picture" class="avatar-img" id="avatarPreview">
               {% else %}
@@ -25,34 +26,70 @@
                 </div>
               {% endif %}
             </div>
-            <h3 class="mt-3 mb-0">{{ user.first_name|default:user.username }}</h3>
-            <p class="text-muted mb-0">{{ user.email }}</p>
+
+            <div class="flex-grow-1">
+              <h3 class="mb-1">{{ user.first_name|default:user.username }}</h3>
+              <div class="text-muted">{{ user.email }}</div>
+              {% if profile.company %}
+                <div class="mt-1"><span class="badge text-bg-light border">{{ profile.company }}</span></div>
+              {% endif %}
+            </div>
+
+            <div class="ms-auto d-flex flex-wrap gap-2">
+              <a href="{% url 'edit_profile' %}" class="btn btn-primary">Edit Profile</a>
+              <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Dashboard</a>
+            </div>
           </div>
 
-          <div class="row g-3 mt-4">
+          <hr class="my-4">
+
+          <div class="row g-4">
             <div class="col-md-6">
               <div class="list-group list-group-flush">
-                <div class="list-group-item px-0 d-flex justify-content-between">
-                  <span class="text-muted">Username</span><span>{{ user.username }}</span>
+                <div class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                  <span class="text-muted">Username</span>
+                  <span class="fw-medium">{{ user.username }}</span>
                 </div>
-                <div class="list-group-item px-0 d-flex justify-content-between">
-                  <span class="text-muted">Full Name</span><span>{{ user.first_name }}</span>
+                <div class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                  <span class="text-muted">Full Name</span>
+                  <span class="fw-medium">{{ user.first_name|default:"—" }}</span>
                 </div>
-                <div class="list-group-item px-0 d-flex justify-content-between">
-                  <span class="text-muted">Company</span><span>{{ profile.company|default:"—" }}</span>
+                <div class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                  <span class="text-muted">Company</span>
+                  <span class="fw-medium">{{ profile.company|default:"—" }}</span>
                 </div>
               </div>
             </div>
+
             <div class="col-md-6">
-              <p class="text-muted mb-1">Bio</p>
-              <div class="border rounded p-3 bg-light profile-bio">
+              <p class="text-muted mb-2">Bio</p>
+              <div class="profile-bio card card-body p-3 bg-light-subtle">
                 {{ profile.bio|default:"No bio yet." }}
               </div>
             </div>
           </div>
 
-          <a href="{% url 'edit_profile' %}" class="btn btn-primary w-100 mt-4">Edit Profile</a>
-
+          {% if project_list %}
+          <hr class="my-4">
+          <div>
+            <h5 class="mb-3">Recent Projects</h5>
+            <div class="row g-3">
+              {% for p in project_list %}
+                <div class="col-md-6 col-lg-4">
+                  <a class="card h-100 text-decoration-none hover-lift" href="{% url 'project_detail' p.pk %}">
+                    <div class="card-body">
+                      <div class="d-flex justify-content-between align-items-start">
+                        <h6 class="mb-1 text-truncate" title="{{ p.title }}">{{ p.title }}</h6>
+                        <span class="badge text-bg-light border">{{ p.get_status_display|default:p.status }}</span>
+                      </div>
+                      <div class="small text-muted">{{ p.category|title }}</div>
+                    </div>
+                  </a>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
         </div>
       </div>
     </div>
