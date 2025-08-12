@@ -70,7 +70,7 @@ def create_project(request):
                     Invitation.objects.create(email=email, project=project, invited_by=request.user)
                     send_invite_email(email, project)
 
-            messages.success(request, 'Project created and collaborators invited.')
+            messages.success(request, 'Project created and any collaborators included have been invited.')
             return redirect('dashboard')
         else:
             messages.error(request, 'Please correct the errors below.')
