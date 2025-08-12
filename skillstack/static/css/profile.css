@@ -23,12 +23,8 @@ body {
 
 .profile-cover {
   min-height: 180px;
-  background: 
-    linear-gradient(
-      to right,
-      rgba(0, 0, 0, 0.4) 0%,
-      rgba(0, 0, 0, 0) 25%
-    ),
+  background:
+    linear-gradient(to right, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 25%),
     linear-gradient(90deg, #4f7dbb, #7ad1c4);
   color: #fff;
   border-bottom: 1px solid rgba(255,255,255,0.08);
@@ -157,12 +153,7 @@ hr {
   width: 0%;
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(
-    90deg,
-    var(--profile-grad-1),
-    var(--profile-grad-2),
-    var(--profile-grad-3)
-  );
+  background: linear-gradient(90deg, var(--profile-grad-1), var(--profile-grad-2), var(--profile-grad-3));
   transition: width 0.4s ease;
 }
 
@@ -177,6 +168,19 @@ hr {
   color: #0f172a;
 }
 
+.profile-cover .btn-light,
+.profile-cover .btn-outline-light {
+  background-color: #000;
+  border-color: #000;
+  color: #fff;
+}
+.profile-cover .btn-light:hover,
+.profile-cover .btn-outline-light:hover {
+  background-color: #222;
+  border-color: #222;
+  color: #fff;
+}
+
 .btn-light {
   background: #ffffff;
   color: #0f172a;
@@ -187,13 +191,33 @@ hr {
   border-color: rgba(15, 23, 42, 0.18);
 }
 
-.profile-card {
-  border-radius: var(--profile-card-radius);
+.profile-cover .btn-cancel {
+  background-color: #ff7f50;
+  border-color: #ff7f50;
+  color: #fff;
 }
+.profile-cover .btn-cancel:hover {
+  background-color: #e56e40;
+  border-color: #e56e40;
+  color: #fff;
+}
+.profile-cover .btn-save {
+  background-color: #28a745;
+  border-color: #28a745;
+  color: #fff;
+}
+.profile-cover .btn-save:hover {
+  background-color: #218838;
+  border-color: #218838;
+  color: #fff;
+}
+
+.profile-card { border-radius: var(--profile-card-radius); }
 .profile-cover {
   border-top-left-radius: var(--profile-card-radius);
   border-top-right-radius: var(--profile-card-radius);
 }
+
 @media (max-width: 576px) {
   .avatar { width: 76px; height: 76px; }
   .avatar-xl { width: 88px; height: 88px; }
