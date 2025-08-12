@@ -3,7 +3,6 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.db import transaction
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils import timezone
@@ -96,23 +95,19 @@ def edit_profile_view(request):
         u_form = UserUpdateForm(request.POST, instance=request.user)
         p_form = ProfileForm(request.POST, request.FILES, instance=profile)
         if u_form.is_valid() and p_form.is_valid():
-            with transaction.atomic():
-                u_form.save()
-                p_form.save()
+            u_form.save()
+            p_form.save()
             messages.success(request, "Your profile has been updated successfully!")
             return redirect("profile")
     else:
         u_form = UserUpdateForm(instance=request.user)
         p_form = ProfileForm(instance=profile)
 
-    context = {
-        "u_form": u_form,
-        "p_form": p_form,
-        "profile": profile,
-        "user_form": u_form,
-        "profile_form": p_form,
-    }
-    return render(request, "users/edit_profile.html", context)
+    return render(
+        request,
+        "users/edit_profile.html",
+        {"u_form": u_form, "p_form": p_form, "profile": profile},
+    )
 
 # Send 2FA Verification Email
 from django.utils.timezone import now
@@ -123,7 +118,7 @@ from django.contrib.auth import login, get_backends
 import random
 import logging
 
-logger = logging.getLogger(__name__) 
+logger = logging.getLogger(__name__)  # for optional logging
 
 def send_verification_email(user):
     try:

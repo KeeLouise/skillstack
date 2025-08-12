@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 {% load static %}
-{% load crispy_forms_tags %}
 
 {% block extra_head %}
-<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+  {# Use a light profile stylesheet (omit the dark background) #}
+  <link rel="stylesheet" href="{% static 'css/profile-light.css' %}">
 {% endblock %}
 
 {% block title %}Edit Profile{% endblock %}
@@ -39,11 +39,63 @@
             </div>
           </div>
         </div>
+
         <div class="card-body p-4 p-md-5">
+          {% if u_form.non_field_errors or p_form.non_field_errors %}
+            <div class="alert alert-danger mb-4">
+              {% for err in u_form.non_field_errors %}<div>{{ err }}</div>{% endfor %}
+              {% for err in p_form.non_field_errors %}<div>{{ err }}</div>{% endfor %}
+            </div>
+          {% endif %}
+
           <form method="POST" enctype="multipart/form-data" novalidate>
             {% csrf_token %}
-            {{ form|crispy }}
-            <div class="d-flex justify-content-end mt-3">
+
+            <h5 class="mb-3">Account</h5>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label" for="{{ u_form.first_name.id_for_label }}">Full name</label>
+                {{ u_form.first_name }}
+                {% if u_form.first_name.errors %}
+                  <div class="invalid-feedback d-block">{% for e in u_form.first_name.errors %}{{ e }}{% if not forloop.last %}<br>{% endif %}{% endfor %}</div>
+                {% endif %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="{{ u_form.email.id_for_label }}">Email</label>
+                {{ u_form.email }}
+                {% if u_form.email.errors %}
+                  <div class="invalid-feedback d-block">{% for e in u_form.email.errors %}{{ e }}{% if not forloop.last %}<br>{% endif %}{% endfor %}</div>
+                {% endif %}
+              </div>
+            </div>
+
+            <hr class="my-4">
+            <h5 class="mb-3">Profile</h5>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label" for="{{ p_form.company.id_for_label }}">Company</label>
+                {{ p_form.company }}
+                {% if p_form.company.errors %}
+                  <div class="invalid-feedback d-block">{% for e in p_form.company.errors %}{{ e }}{% if not forloop.last %}<br>{% endif %}{% endfor %}</div>
+                {% endif %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="{{ p_form.profile_picture.id_for_label }}">Profile picture</label>
+                {{ p_form.profile_picture }}
+                {% if p_form.profile_picture.errors %}
+                  <div class="invalid-feedback d-block">{% for e in p_form.profile_picture.errors %}{{ e }}{% if not forloop.last %}<br>{% endif %}{% endfor %}</div>
+                {% endif %}
+              </div>
+              <div class="col-12">
+                <label class="form-label" for="{{ p_form.bio.id_for_label }}">Bio</label>
+                {{ p_form.bio }}
+                {% if p_form.bio.errors %}
+                  <div class="invalid-feedback d-block">{% for e in p_form.bio.errors %}{{ e }}{% if not forloop.last %}<br>{% endif %}{% endfor %}</div>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-end mt-4">
               <button type="submit" class="btn btn-dark px-4">Save Changes</button>
             </div>
           </form>
@@ -56,5 +108,5 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<script src="{% static 'js/profile.js' %}"></script>
+  <script src="{% static 'js/profile.js' %}"></script>
 {% endblock %}
