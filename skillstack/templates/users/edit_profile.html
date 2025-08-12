@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags static %}
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+
+{% block title %}Edit Profile{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row g-4 justify-content-center">
+    <div class="col-12 col-md-4">
+      <div class="card shadow-sm border-0">
+        <div class="card-body text-center">
+          <div class="d-flex justify-content-center mb-3">
+            <div class="profile-avatar">
+              {% if profile.profile_picture %}
+                <img id="avatarPreview" src="{{ profile.profile_picture.url }}" alt="Profile picture" class="rounded-circle img-fluid">
+              {% else %}
+                <img id="avatarPreview" src="{% static 'img/avatar-placeholder.png' %}" alt="Profile picture" class="rounded-circle img-fluid">
+              {% endif %}
+            </div>
+          </div>
+          <h5 class="mb-1">{{ request.user.first_name|default:request.user.username }}</h5>
+          {% if profile.company %}
+            <div class="text-muted small">{{ profile.company }}</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-8">
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <h3 class="h5 mb-3">Edit your profile</h3>
+
+          {% if u_form.non_field_errors or p_form.non_field_errors %}
+            <div class="alert alert-danger">
+              {% for e in u_form.non_field_errors %}<div>{{ e }}</div>{% endfor %}
+              {% for e in p_form.non_field_errors %}<div>{{ e }}</div>{% endfor %}
+            </div>
+          {% endif %}
+
+          <form method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+
+            <div class="row g-3">
+              <div class="col-12 col-lg-6">
+                {{ u_form|crispy }}
+              </div>
+              <div class="col-12 col-lg-6">
+                {{ p_form|crispy }}
+
+                {# Ensure the picture file input has an id="id_profile_picture" from your form #}
+                {# If crispy renders it elsewhere, this still works—the preview code looks it up by id #}
+              </div>
+            </div>
+
+            <div class="d-flex gap-2 mt-3">
+              <a class="btn btn-outline-secondary" href="{% url 'profile' %}">Cancel</a>
+              <button type="submit" class="btn btn-dark">Save changes</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      {% if profile.bio %}
+        <div class="card shadow-sm border-0 mt-3">
+          <div class="card-body">
+            <h3 class="h6 text-muted mb-2">Current Bio</h3>
+            <p class="mb-0">{{ profile.bio }}</p>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'js/profile.js' %}"></script>
+{% endblock %}
