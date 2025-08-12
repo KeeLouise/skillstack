@@ -263,10 +263,10 @@ hr {
 .project-status-completed .project-card-header {
   background: linear-gradient(90deg, #22c55e, #4ade80);
 }
-.project-status-in-progress .project-card-header {
+.project-status-ongoing .project-card-header {
   background: linear-gradient(90deg, #facc15, #fcd34d);
 }
-.project-status-ongoing .project-card-header {
+.project-status-paused .project-card-header {
   background: linear-gradient(90deg, #f97316, #fb923c);
 }
 

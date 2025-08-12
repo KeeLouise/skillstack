@@ -1,0 +1,81 @@
+:root {
+  --proj-grad-1: #4f7dbb;
+  --proj-grad-2: #7ad1c4;
+  --proj-card-radius: 16px;
+  --proj-shadow: 0 10px 30px rgba(2, 8, 23, 0.08);
+  --proj-border: 1px solid rgba(15, 23, 42, 0.08);
+  --proj-hover-shadow: 0 16px 40px rgba(2, 8, 23, 0.15);
+  --proj-text: #0f172a;
+  --proj-muted: #64748b;
+  --proj-bg: #ffffff;
+
+  --status-ongoing: #f59e0b;
+  --status-completed: #10b981;
+  --status-paused: #ef4444;
+}
+
+.projects-header .btn-primary-strong {
+  background-color: #10192d;
+  border-color: #10192d;
+  color: #fff;
+}
+.projects-header .btn-primary-strong:hover {
+  background-color: #0c1423;
+  border-color: #0c1423;
+  color: #fff;
+}
+
+.project-card {
+  display: block;
+  background: var(--proj-bg);
+  border: var(--proj-border);
+  border-radius: var(--proj-card-radius);
+  box-shadow: var(--proj-shadow);
+  overflow: hidden;
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  text-decoration: none;
+  color: inherit;
+}
+.project-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--proj-hover-shadow);
+  border-color: rgba(15, 23, 42, 0.16);
+}
+
+.project-card-header {
+  height: 6px;
+  background: linear-gradient(90deg, var(--proj-grad-1), var(--proj-grad-2));
+}
+
+.project-card-body {
+  padding: 1rem 1rem 1.1rem;
+}
+
+.project-title {
+  font-weight: 700;
+  color: var(--proj-text);
+}
+
+.project-category {
+  display: inline-block;
+  font-size: .78rem;
+  padding: .2rem .5rem;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.05);
+  color: var(--proj-text);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.badge.project-status {
+  font-size: .7rem;
+  padding: .35rem .5rem;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  color: #0b1020;
+  background: #fff;
+}
+
+.project-status-ongoing .project-card-header { background: linear-gradient(90deg, #eab308, var(--status-ongoing)); }
+.project-status-completed .project-card-header { background: linear-gradient(90deg, #34d399, var(--status-completed)); }
+.project-status-paused .project-card-header { background: linear-gradient(90deg, #f87171, var(--status-paused)); }
+
+.text-muted { color: var(--proj-muted) !important; }
