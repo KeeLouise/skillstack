@@ -1,7 +1,9 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block title %}Message{% endblock %}
-
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/messages.css' %}">
+{% endblock %}
 {% block content %}
 <div class="container mt-5">
 
@@ -261,5 +263,5 @@
 {% endblock content %}
 
 {% block extra_scripts %}
-  <script src="{% static 'js/messages.js' %}"></script>
-{% endblock extra_scripts %}
+<script src="{% static 'js/messages.js' %}"></script>
+{% endblock %}
