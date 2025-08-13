@@ -15,9 +15,17 @@ function formatBytes(bytes) {                                                   
   const form = document.querySelector('form[action*="attachments/upload"]');
   if (!form) return;
 
-  const dz = $('.upload-dropzone', form) || form;       // Dropzone area (falls back to form)
-  const fileInput = $('input[type="file"]', form);      // Real <input type="file">
+  const dz = $('.upload-dropzone', form) || form;       
+  const fileInput = $('input[type="file"]', form);      
   if (!fileInput) return;
+
+  if (!dz.hasAttribute('tabindex')) dz.setAttribute('tabindex', '0');
+  on(dz, 'keydown', (e) => {
+    if (e.key === ' ' || e.key === 'Enter') {
+      e.preventDefault();
+      fileInput.click();
+    }
+  });
 
   // Create live file list under the dropzone - KR 13/08/2025
   const list = document.createElement('div');
@@ -55,10 +63,67 @@ function formatBytes(bytes) {                                                   
   on(dz, 'drop', (e) => { // When dropped, files are put into the real input. A change event is then triggered so the list updates.
     const dt = e.dataTransfer;
     if (!dt || !dt.files || !dt.files.length) return;
-    fileInput.files = dt.files;
+
+    try {
+      fileInput.files = dt.files;
+    } catch (_) {
+      try {
+        const buf = new DataTransfer();
+        Array.from(dt.files).forEach(f => buf.items.add(f));
+        fileInput.files = buf.files;
+      } catch (_) {
+        alert('Your browser blocked dropping files here. Please click to select files instead.');
+        return;
+      }
+    }
+
     const evt = new Event('change', { bubbles: true });
     fileInput.dispatchEvent(evt);
   });
+
+  // Status dropdown AJAX - KR 13/08/2025
+(function () {
+  const dropdown = document.getElementById('statusDropdown');
+  const saveMsg = document.getElementById('statusSaveMsg');
+  if (!dropdown) return;
+
+  const projectId = window.projectId;
+
+  function showMsg(text, success = true) {
+    if (!saveMsg) return;
+    saveMsg.textContent = text;
+    saveMsg.className = `small ms-2 ${success ? 'text-success' : 'text-danger'}`;
+    setTimeout(() => { saveMsg.textContent = ''; }, 3000);
+  }
+
+  dropdown.addEventListener('change', () => {
+    const status = dropdown.value;
+    if (!status) return;
+
+    fetch(`/projects/${projectId}/update-status/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+      },
+      body: JSON.stringify({ status })
+    })
+    .then(res => {
+      if (!res.ok) throw new Error('Failed to update status');
+      return res.json();
+    })
+    .then(data => {
+      if (data.success) {
+        showMsg('Status updated');
+      } else {
+        showMsg('Error updating status', false);
+      }
+    })
+    .catch(() => {
+      showMsg('Error updating status', false);
+    });
+  });
+})();
 
   // Pre-submission checks
   on(form, 'submit', (e) => {
@@ -67,20 +132,29 @@ function formatBytes(bytes) {                                                   
 
     const MAX_FILES = 20;
     const MAX_FILE_MB = 50;
+    const MAX_TOTAL_MB = 500;
     const overs = [];
+    let totalSize = 0;
 
     Array.from(files).forEach((f) => {
+      totalSize += f.size || 0;
       if (f.size > MAX_FILE_MB * 1024 * 1024) overs.push(f.name);
     });
 
     if (files.length > MAX_FILES) {
       e.preventDefault();
-      alert('Too many files selected');
+      alert(`Too many files selected (max ${MAX_FILES}).`);
       return;
     }
     if (overs.length) {
       e.preventDefault();
       alert(`These files exceed ${MAX_FILE_MB}MB:\n- ${overs.join('\n- ')}`);
+      return;
+    }
+    if (totalSize > MAX_TOTAL_MB * 1024 * 1024) {
+      e.preventDefault();
+      alert(`Total upload size exceeds ${MAX_TOTAL_MB}MB.`);
+      return;
     }
   });
 })();

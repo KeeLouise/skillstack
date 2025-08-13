@@ -45,26 +45,42 @@
 
       <div class="row g-4">
         <div class="col-lg-6">
-          <div class="section-card">
-            <div class="d-flex align-items-center justify-content-between mb-2">
-              <h5 class="mb-0">Status</h5>
-              <div>
-                {% if project.status == 'completed' %}
-                  <span class="badge project-status-badge bg-success">Completed</span>
-                {% elif project.status == 'ongoing' %}
-                  <span class="badge project-status-badge bg-warning text-dark">Ongoing</span>
-                {% else %}
-                  <span class="badge project-status-badge bg-danger">Paused</span>
-                {% endif %}
-              </div>
-            </div>
-            <hr class="my-3">
-            <p class="text-muted small mb-2">Description</p>
-            <div class="description-box">
-              {{ project.description|linebreaks }}
-            </div>
-          </div>
-        </div>
+         <div class="section-card">
+    <div class="d-flex align-items-center justify-content-between mb-2">
+      <h5 class="mb-0">Status</h5>
+      <div id="project-status-badge-wrap">
+        {% if project.status == 'completed' %}
+          <span id="project-status-badge" class="badge project-status-badge bg-success">Completed</span>
+        {% elif project.status == 'ongoing' %}
+          <span id="project-status-badge" class="badge project-status-badge bg-warning text-dark">Ongoing</span>
+        {% else %}
+          <span id="project-status-badge" class="badge project-status-badge bg-danger">Paused</span>
+        {% endif %}
+      </div>
+    </div>
+    <hr class="my-3">
+
+    {% if user == project.owner %}
+      <div class="mb-3">
+        <label for="project-status-select" class="form-label">Change status</label>
+        <select
+          id="project-status-select"
+          class="form-select"
+          data-update-url="{% url 'update_project_status' project.pk %}">
+          {% for value,label in project._meta.get_field('status').choices %}
+            <option value="{{ value }}" {% if project.status == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+        <div class="form-text">This saves immediately.</div>
+      </div>
+    {% endif %}
+
+    <p class="text-muted small mb-2">Description</p>
+    <div class="description-box">
+      {{ project.description|linebreaks }}
+    </div>
+  </div>
+</div>
 
         <div class="col-lg-6">
           <div class="section-card">
