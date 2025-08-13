@@ -7,7 +7,7 @@ from .views import (
 urlpatterns = [
     path('create/', create_project, name='create_project'),
     path('<int:pk>/', project_detail, name='project_detail'),
-    path("projects/<int:pk>/update-status/", update_project_status, name="update_project_status"),
+    path('<int:pk>/update-status/', update_project_status, name='update_project_status'),
     path('<int:pk>/edit/', edit_project, name='edit_project'),
     path('<int:pk>/delete/', delete_project, name='delete_project'),
 

@@ -47,38 +47,40 @@
         <div class="col-lg-6">
          <div class="section-card">
     <div class="d-flex align-items-center justify-content-between mb-2">
-      <h5 class="mb-0">Status</h5>
-      <div id="project-status-badge-wrap">
-        {% if project.status == 'completed' %}
-          <span id="project-status-badge" class="badge project-status-badge bg-success">Completed</span>
-        {% elif project.status == 'ongoing' %}
-          <span id="project-status-badge" class="badge project-status-badge bg-warning text-dark">Ongoing</span>
-        {% else %}
-          <span id="project-status-badge" class="badge project-status-badge bg-danger">Paused</span>
-        {% endif %}
-      </div>
-    </div>
-    <hr class="my-3">
-
-   {% if user == project.owner %}
-    <select id="statusDropdown" class="form-select form-select-sm w-auto" data-update-url="{% url 'update_project_status' project.pk %}">
-      <option value="">Select status</option>
-      {% for value,label in status_choices %}
-        <option value="{{ value }}" {% if project.status == value %}selected{% endif %}>
-          {{ label }}
-        </option>
-      {% endfor %}
-    </select>
-    <span id="statusSaveMsg" class="small ms-2 text-muted"></span>
-  {% else %}
+  <h5 class="mb-0">Status</h5>
+  <div id="project-status-badge-wrap">
     {% if project.status == 'completed' %}
-      <span class="badge bg-success">Completed</span>
+      <span id="project-status-badge" class="badge project-status-badge bg-success">Completed</span>
     {% elif project.status == 'ongoing' %}
-      <span class="badge bg-warning text-dark">Ongoing</span>
+      <span id="project-status-badge" class="badge project-status-badge bg-warning text-dark">Ongoing</span>
     {% else %}
-      <span class="badge bg-danger">Paused</span>
+      <span id="project-status-badge" class="badge project-status-badge bg-danger">Paused</span>
     {% endif %}
+  </div>
+</div>
+<hr class="my-3">
+
+{% if user == project.owner %}
+  <select
+    id="statusDropdown"
+    class="form-select form-select-sm w-auto"
+    data-update-url="{% url 'update_project_status' project.pk %}"
+    data-current="{{ project.status }}">
+    <option value="">Select status</option>
+    {% for value,label in status_choices %}
+      <option value="{{ value }}" {% if project.status == value %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
+  <span id="statusSaveMsg" class="small ms-2 text-muted"></span>
+{% else %}
+  {% if project.status == 'completed' %}
+    <span class="badge bg-success">Completed</span>
+  {% elif project.status == 'ongoing' %}
+    <span class="badge bg-warning text-dark">Ongoing</span>
+  {% else %}
+    <span class="badge bg-danger">Paused</span>
   {% endif %}
+{% endif %}
 
     <p class="text-muted small mb-2">Description</p>
     <div class="description-box">
