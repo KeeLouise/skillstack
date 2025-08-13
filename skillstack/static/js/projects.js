@@ -85,9 +85,19 @@ function formatBytes(bytes) {                                                   
 (function () {
   const dropdown = document.getElementById('statusDropdown');
   const saveMsg = document.getElementById('statusSaveMsg');
+  const badge   = document.getElementById('project-status-badge');
   if (!dropdown) return;
 
-  const projectId = window.projectId;
+  // Read the endpoint straight from the DOM to avoid undefined IDs
+  const updateUrl = dropdown.getAttribute('data-update-url');
+
+  // Robust CSRF getter (works even if the hidden input isn't present)
+  function getCsrf() {
+    const inp = document.querySelector('input[name=csrfmiddlewaretoken]');
+    if (inp && inp.value) return inp.value;
+    const m = document.cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/);
+    return m ? decodeURIComponent(m[1]) : '';
+  }
 
   function showMsg(text, success = true) {
     if (!saveMsg) return;
@@ -96,31 +106,52 @@ function formatBytes(bytes) {                                                   
     setTimeout(() => { saveMsg.textContent = ''; }, 3000);
   }
 
+  function updateBadge(val) {
+    if (!badge) return;
+    // reset classes
+    badge.className = 'badge project-status-badge';
+    if (val === 'completed') {
+      badge.classList.add('bg-success');
+      badge.textContent = 'Completed';
+    } else if (val === 'ongoing') {
+      badge.classList.add('bg-warning', 'text-dark');
+      badge.textContent = 'Ongoing';
+    } else if (val === 'paused') {
+      badge.classList.add('bg-danger');
+      badge.textContent = 'Paused';
+    } else {
+      badge.classList.add('text-bg-light', 'border');
+      badge.textContent = 'Unknown';
+    }
+  }
+
   dropdown.addEventListener('change', () => {
     const status = dropdown.value;
-    if (!status) return;
+    if (!status || !updateUrl) return;
 
-    fetch(`/projects/${projectId}/update-status/`, {
+    updateBadge(status);
+
+    fetch(updateUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRFToken': getCsrf()
       },
       body: JSON.stringify({ status })
     })
-    .then(res => {
-      if (!res.ok) throw new Error('Failed to update status');
-      return res.json();
-    })
-    .then(data => {
-      if (data.success) {
+    .then(res => res.json().catch(() => ({})).then(data => ({ ok: res.ok, data })))
+    .then(({ ok, data }) => {
+      if (ok && data && data.success) {
         showMsg('Status updated');
       } else {
-        showMsg('Error updating status', false);
+        showMsg(data && data.error ? data.error : 'Error updating status', false);
+        updateBadge(dropdown.getAttribute('data-current') || '');
       }
     })
     .catch(() => {
       showMsg('Error updating status', false);
+      updateBadge(dropdown.getAttribute('data-current') || '');
     });
   });
 })();
