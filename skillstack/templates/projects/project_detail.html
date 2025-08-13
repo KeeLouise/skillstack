@@ -61,7 +61,7 @@
     <hr class="my-3">
 
    {% if user == project.owner %}
-    <select id="statusDropdown" class="form-select form-select-sm w-auto">
+    <select id="statusDropdown" class="form-select form-select-sm w-auto" data-update-url="{% url 'update_project_status' project.pk %}">
       <option value="">Select status</option>
       {% for value,label in status_choices %}
         <option value="{{ value }}" {% if project.status == value %}selected{% endif %}>
