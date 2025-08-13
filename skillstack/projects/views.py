@@ -95,29 +95,6 @@ def create_project(request):
 
     return render(request, 'projects/create_project.html', {'form': form})
 
-
-@login_required
-def project_detail(request, pk):
-    project = get_object_or_404(Project, pk=pk)
-
-    if not (
-        request.user == project.owner
-        or project.collaborators.filter(pk=request.user.pk).exists()
-    ):
-        messages.error(request, "You do not have permission to view this project.")
-        return redirect('dashboard')
-
-    upload_form = ProjectAttachmentUploadForm()
-    attachments = project.attachments.select_related('uploaded_by').all()
-    can_upload = (request.user == project.owner) or project.collaborators.filter(pk=request.user.pk).exists()
-
-    return render(request, 'projects/project_detail.html', {
-        'project': project,
-        'upload_form': upload_form,
-        'attachments': attachments,
-        'can_upload': can_upload,
-})
-
 @login_required
 def project_detail(request, pk):
     project = get_object_or_404(Project, pk=pk)
