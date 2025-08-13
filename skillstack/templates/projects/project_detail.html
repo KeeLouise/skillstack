@@ -64,8 +64,7 @@
   <select
     id="statusDropdown"
     class="form-select form-select-sm w-auto"
-    data-update-url="{% url 'update_project_status' project.pk %}"
-    data-current="{{ project.status }}">
+    data-update-url="{% url 'update_project_status' project.pk %}">
     <option value="">Select status</option>
     {% for value,label in status_choices %}
       <option value="{{ value }}" {% if project.status == value %}selected{% endif %}>{{ label }}</option>
