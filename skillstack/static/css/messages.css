@@ -69,3 +69,44 @@ form[method="get"] .form-control:focus {
   border-color: var(--msg-brand-grad-1);
   box-shadow: 0 0 0 .2rem rgba(79,125,187,.2);
 }
+
+/* Compose styles */
+.msg-hero {
+  min-height: 160px;
+  border-radius: 16px;
+  background:
+    linear-gradient(
+      to right,
+      rgba(0, 0, 0, 0.35) 0%,
+      rgba(0, 0, 0, 0.0) 35%
+    ),
+    linear-gradient(90deg, #4f7dbb, #7ad1c4);
+  color: #fff;
+  box-shadow: var(--msg-card-shadow-strong);
+  border: 1px solid var(--msg-border);
+}
+
+.avatar-circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #0b1020;
+  color: #fff;
+  border: 2px solid rgba(255,255,255,.9);
+  box-shadow: 0 8px 20px rgba(0,0,0,.25), inset 0 0 0 2px rgba(255,255,255,.15);
+}
+.avatar-circle.avatar-lg {
+  width: 64px;
+  height: 64px;
+  font-size: 1.1rem;
+}
+
+.msg-hero .btn {
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.msg-hero .btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(0,0,0,.15);
+}
