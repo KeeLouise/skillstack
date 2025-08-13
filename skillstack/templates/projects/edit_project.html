@@ -3,82 +3,57 @@
 {% load crispy_forms_tags %}
 
 {% block extra_head %}
-<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+<link rel="stylesheet" href="{% static 'css/projects.css' %}">
 {% endblock %}
 
-{% block title %}Edit Profile{% endblock %}
+{% block title %}Edit Project{% endblock %}
 
 {% block content %}
 <div class="container py-5">
-  <div class="row justify-content-center">
-    <div class="col-lg-10 col-xl-9">
-      <div class="card profile-card shadow-sm border-0">
+  <div class="project-detail card shadow-sm border-0 overflow-hidden">
 
-        <div class="profile-cover d-flex align-items-end p-4">
-          <div class="d-flex align-items-center w-100 flex-wrap gap-3 gap-md-4">
-            <div class="avatar avatar-xl flex-shrink-0">
-              {% if profile.profile_picture %}
-                <img src="{{ profile.profile_picture.url }}" alt="Profile picture" class="avatar-img" id="avatarPreview">
-              {% else %}
-                <div class="avatar-fallback" id="avatarFallback">
-                  {{ user.first_name|default:user.username|first|upper }}
-                </div>
-              {% endif %}
-            </div>
-
-            <div class="flex-grow-1 text-white">
-              <h3 class="mb-1">{{ user.first_name|default:user.username }}</h3>
-              <div>{{ user.email }}</div>
-              {% if profile.company %}
-                <div class="mt-1">
-                  <span class="badge bg-light text-dark">{{ profile.company }}</span>
-                </div>
-              {% endif %}
-            </div>
-
-            <div class="ms-auto d-flex flex-wrap gap-2">
-              <a href="{% url 'profile' %}" class="btn btn-outline-light">Cancel</a>
-              <button type="submit" class="btn btn-light" form="editProfileForm">Save Changes</button>
-            </div>
+    <div class="project-hero d-flex align-items-end p-4">
+      <div class="w-100 d-flex flex-wrap align-items-center gap-3 gap-md-4">
+        <div class="project-hero-mark"></div>
+        <div class="flex-grow-1 text-white">
+          <h2 class="mb-1 fw-bold">Edit Project</h2>
+          <div class="d-flex flex-wrap gap-2 mt-1">
+            <span class="meta-chip">Project: <strong>{{ project.title }}</strong></span>
+            <span class="meta-chip">Owner: <strong>{{ project.owner.get_full_name|default:project.owner.username }}</strong></span>
           </div>
         </div>
-
-        <div class="card-body p-4 p-md-5">
-
-          {% if u_form.non_field_errors or p_form.non_field_errors %}
-            <div class="alert alert-danger mb-4">
-              {% for err in u_form.non_field_errors %}<div>{{ err }}</div>{% endfor %}
-              {% for err in p_form.non_field_errors %}<div>{{ err }}</div>{% endfor %}
-            </div>
-          {% endif %}
-
-          <form id="editProfileForm" method="POST" enctype="multipart/form-data" novalidate>
-            {% csrf_token %}
-
-            <div class="row g-4">
-              <div class="col-md-6">
-                <h5 class="mb-3">Account</h5>
-                {{ u_form.full_name|as_crispy_field }}
-                {{ u_form.email|as_crispy_field }}
-                {{ p_form.company|as_crispy_field }}
-              </div>
-
-              <div class="col-md-6">
-                <h5 class="mb-3">Profile</h5>
-                {{ p_form.profile_picture|as_crispy_field }}
-                {{ p_form.bio|as_crispy_field }}
-              </div>
-            </div>
-          </form>
-
+        <div class="ms-auto d-flex flex-wrap gap-2">
+          <a href="{% url 'project_detail' project.pk %}" class="btn btn-warning">Cancel</a>
+          <button type="submit" form="editProjectForm" class="btn btn-success">Save Changes</button>
         </div>
-
       </div>
     </div>
+
+    <div class="card-body p-4 p-md-5">
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger mb-4">
+          {% for err in form.non_field_errors %}<div>{{ err }}</div>{% endfor %}
+        </div>
+      {% endif %}
+
+      <form id="editProjectForm" method="post" novalidate>
+        {% csrf_token %}
+        {{ form|crispy }}
+      </form>
+    </div>
+
+    <div class="card-footer bg-transparent border-top-0 d-flex justify-content-between">
+      <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">← Back to Dashboard</a>
+      <div class="d-flex gap-2">
+        <a href="{% url 'project_detail' project.pk %}" class="btn btn-warning">Cancel</a>
+        <button type="submit" form="editProjectForm" class="btn btn-success">Save Changes</button>
+      </div>
+    </div>
+
   </div>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
-<script src="{% static 'js/profile.js' %}"></script>
+<script src="{% static 'js/projects.js' %}"></script>
 {% endblock %}
