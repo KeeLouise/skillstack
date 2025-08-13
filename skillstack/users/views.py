@@ -147,6 +147,60 @@ def edit_profile_view(request):
         {"u_form": u_form, "p_form": p_form, "profile": profile},
     )
 
+# users/views.py
+
+@login_required
+def collaborator_profile_view(request, user_id):
+    target = get_object_or_404(User, pk=user_id)
+    profile, _ = Profile.objects.get_or_create(user=target)
+
+    if target == request.user:
+        return redirect("profile")
+
+    # Check access: must share at least one project – KR 13/08/2025
+    owner_is_target = Project.objects.filter(owner=target, collaborators=request.user)
+    owner_is_me = Project.objects.filter(owner=request.user, collaborators=target)
+    both_collabs = Project.objects.filter(collaborators=target).filter(collaborators=request.user)
+    has_shared_project = owner_is_target.exists() or owner_is_me.exists() or both_collabs.exists()
+
+    if not has_shared_project:
+        messages.error(request, "You can only view profiles of collaborators you share a project with.")
+        return redirect("dashboard")
+
+    # Recent projects *LIMITED TO SHARED BETWEEN* request.user and target – KR 13/08/2025
+    shared_q = (
+        Q(owner=target) | Q(collaborators=target)
+    ) & (
+        Q(owner=request.user) | Q(collaborators=request.user)
+    )
+
+    order_fields = []
+    if hasattr(Project, "updated_at"):
+        order_fields.append("-updated_at")
+    if hasattr(Project, "created_at"):
+        order_fields.append("-created_at")
+    if not order_fields:
+        order_fields = ["-id"]
+
+    project_list = (
+        Project.objects
+        .filter(shared_q)
+        .select_related("owner")
+        .prefetch_related("collaborators")
+        .distinct()
+        .order_by(*order_fields)[:6]
+    )
+
+    return render(
+        request,
+        "users/profile_collab.html",
+        {
+            "viewed_user": target,
+            "profile": profile,
+            "project_list": project_list,
+        },
+    )
+
 # Send 2FA Verification Email
 from django.utils.timezone import now
 from django.template.loader import render_to_string

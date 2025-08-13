@@ -93,17 +93,24 @@
             <h5 class="mb-2">People</h5>
             <hr class="my-3">
             <div class="d-flex flex-wrap gap-2">
-              <span class="badge text-bg-light border">Owner: {{ project.owner.get_full_name|default:project.owner.username }}</span>
-              {% if project.collaborators.count %}
-                {% for collaborator in project.collaborators.all %}
-                  <span class="badge text-bg-light border">
-                    {{ collaborator.get_full_name|default:collaborator.username }}
-                  </span>
-                {% endfor %}
-              {% else %}
-                <span class="text-muted small">No collaborators yet.</span>
-              {% endif %}
-            </div>
+  <span class="badge text-bg-light border">
+    <a class="text-decoration-none" href="{% url 'collab_profile' project.owner.pk %}">
+      Owner: {{ project.owner.get_full_name|default:project.owner.username }}
+    </a>
+  </span>
+
+  {% if project.collaborators.count %}
+    {% for collaborator in project.collaborators.all %}
+      <span class="badge text-bg-light border">
+        <a class="text-decoration-none" href="{% url 'collab_profile' collaborator.pk %}">
+          {{ collaborator.get_full_name|default:collaborator.username }}
+        </a>
+      </span>
+    {% endfor %}
+  {% else %}
+    <span class="text-muted small">No collaborators yet.</span>
+  {% endif %}
+</div>
           </div>
         </div>
       </div>
