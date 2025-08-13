@@ -42,4 +42,42 @@ function renderList(files){ //displays file name & its size. Also shows total si
     list.innerHTML = html;
 }
 
-on(fileInput, 'change', e => renderList(e.target.files)); //When files are picked through the standard input, they will render on the list.
+on(fileInput, 'change', e => renderList(e.target.files));                      //When files are picked through the standard input, they will render on the list.
+
+//Drag & drop styling
+['dragenter', 'dragover'].forEach(ev => on(dz, ev, (e) =>{
+    e.preventDefault(); e.stopPropagation();
+    dz.classList.add('is-dragging');
+}));
+['dragleave', 'dragend', 'drop'].forEach(ev => on(dz, ev, (e) =>{
+    e.preventDefault(); e.stopPropagation();
+    dz.classList.remove('is-dragging');
+}));                                                                           //Adds/removes a CSS class while dragging files over dropzone and prevents browser from opening the file if dropped.
+
+on(dz, 'drop', (e) =>{                                                        //When dropped, files are put into the real input. A change event is then triggered so the list updates.
+    const dt = e.dataTranfer;
+    if (!dt || !dt.files || !dt.files.length) return;
+    fileInput.files = dt.files;
+    const evt = new Event('change', { bubbles: true});
+    fileInput.dispatchEvent(evt);
+});
+
+//Pre-submission checks
+on(form, 'submit', (e) => { 
+    const files = fileInput.files || [];
+    if (!files.length) return;
+
+    const MAX_FILES = 20;
+    const MAX_FILE_MB = 50;
+    let overs = [];
+
+    Array.from(files).forEach((f) => {
+        if (f.size > MAX_FILE_MB * 1024 * 1024) overs.push(f.name);
+    });
+
+    if (files.length > MAX_FILES){
+        e.preventDefault();
+        alaert('Too many files selected');
+    }
+
+});
