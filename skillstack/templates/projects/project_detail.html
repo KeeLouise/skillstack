@@ -108,35 +108,35 @@
       {% endif %}
 
       {% if attachments %}
-      <div class="section-card mt-4">
-        <div class="d-flex align-items-center justify-content-between mb-2">
-          <h5 class="mb-0">Attachments</h5>
-        </div>
-        <hr class="my-3">
+  <div class="section-card mt-4">
+    <div class="d-flex align-items-center justify-content-between mb-2">
+      <h5 class="mb-0">Attachments</h5>
+    </div>
+    <hr class="my-3">
 
-        <ul class="attachment-list list-unstyled mb-0">
-          {% for att in attachments %}
-          <li class="attachment-item">
-            <div class="d-flex align-items-center gap-3">
-              <div class="file-pill" aria-hidden="true"></div>
-              <div class="flex-grow-1">
-                <a class="attachment-link" href="{% url 'download_project_attachment' att.pk %}">
-                  {{ att.original_name|default:att.file.name }}
-                </a>
-                {% if att.size %}
-                  <span class="text-muted small">({{ att.size|filesizeformat }})</span>
+    <ul class="attachment-list list-unstyled mb-0">
+      {% for att in attachments %}
+        <li class="attachment-item">
+          <div class="d-flex align-items-center gap-3">
+            <div class="file-pill" aria-hidden="true"></div>
+            <div class="flex-grow-1">
+              <a class="attachment-link" href="{% url 'download_project_attachment' att.pk %}">
+                {{ att.original_name|default:att.file.name }}
+              </a>
+              {% if att.size %}
+                <span class="text-muted small">({{ att.size|filesizeformat }})</span>
+              {% endif %}
+              <div class="small text-muted">
+                Uploaded by:
+                {% if att.uploaded_by %}
+                  {{ att.uploaded_by.get_full_name|default:att.uploaded_by.username }}
+                {% else %}
+                  Unknown
                 {% endif %}
-                <div class="small text-muted">
-                  Uploaded by:
-                  {% if att.uploaded_by %}
-                    {{ att.uploaded_by.get_full_name|default:att.uploaded_by.username }}
-                  {% else %}
-                    Unknown
-                  {% endif %}
-                </div>
               </div>
+            </div>
 
-              {% if user == project.owner or user == att.uploaded_by %}
+            {% if user == project.owner or user == att.uploaded_by %}
               <form method="post" action="{% url 'delete_project_attachment' att.pk %}">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-sm btn-outline-danger"
@@ -144,13 +144,20 @@
                   Delete
                 </button>
               </form>
-              {% endif %}
-            </div>
-          </li>
-          {% endfor %}
-        </ul>
-      </div>
-      {% endif %}
+            {% endif %}
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+{% else %}
+  <div class="section-card mt-4 text-center text-muted py-5">
+    <div class="mb-2">No attachments yet.</div>
+    {% if can_upload %}
+      <small>Use the upload section above to add files.</small>
+    {% endif %}
+  </div>
+{% endif %}
     </div>
 
     <div class="card-footer bg-transparent border-top-0 d-flex justify-content-between">
