@@ -51,12 +51,12 @@
                   <h5 class="mb-1 text-truncate">{{ m.subject|default:"(no subject)" }}</h5>
                   <div class="small text-muted">
                     <strong>From:</strong>
-                    <a href="{% url 'collaborator_profile' m.sender.id %}" class="text-decoration-none">
+                    <a href="{% url 'collab_profile' m.sender.id %}" class="text-decoration-none">
                    {{ m.sender.get_full_name|default:m.sender.username }}
                     </a>
                     &nbsp;•&nbsp;
                     <strong>To:</strong>
-                    <a href="{% url 'collaborator_profile' m.recipient.id %}" class="text-decoration-none">
+                    <a href="{% url 'collab_profile' m.recipient.id %}" class="text-decoration-none">
                     {{ m.recipient.get_full_name|default:m.recipient.username }}
                     </a>
                   </div>
