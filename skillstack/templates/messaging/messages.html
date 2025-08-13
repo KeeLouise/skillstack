@@ -134,10 +134,14 @@
                     </h5>
                     <div class="small text-muted mt-1">
                       {% if msg.sender_id == user.id %}
-                        <span class="list-chip">To: {{ msg.recipient.get_full_name|default:msg.recipient.username }}</span>
+                        <a href="{% url 'collaborator_profile' msg.recipient.id %}" class="list-chip text-decoration-none">
+                        To: {{ msg.recipient.get_full_name|default:msg.recipient.username }}
+                        </a>
                         <span class="list-chip">Sent</span>
                       {% else %}
-                        <span class="list-chip">From: {{ msg.sender.get_full_name|default:msg.sender.username }}</span>
+                        <a href="{% url 'collaborator_profile' msg.sender.id %}" class="list-chip text-decoration-none">
+                          From: {{ msg.sender.get_full_name|default:msg.sender.username }}
+                        </a>
                         <span class="list-chip">Received</span>
                         {% if not msg.is_read %}
                           <span class="list-chip">Unread</span>
