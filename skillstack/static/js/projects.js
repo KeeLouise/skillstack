@@ -1,83 +1,86 @@
+// Helper functions - KR 13/08/2025
+function $(sel, ctx) { return (ctx || document).querySelector(sel); } // Selects first element on the page that matches the CSS selector given.
+function $all(sel, ctx) { return Array.prototype.slice.call((ctx || document).querySelectorAll(sel)); } // Selects all matching elements and returns them as an array.
+function on(el, ev, fn, opts) { if (el) el.addEventListener(ev, fn, opts || false); } // Adds event listener.
+function formatBytes(bytes) {                                                       // Takes a file size in bytes and turns it into mb, gb or tb.
+  if (!Number.isFinite(bytes)) return '0 B';
+  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+  let i = 0, v = bytes;
+  while (v >= 1024 && i < units.length - 1) { v /= 1024; i++; }
+  return v.toFixed(v >= 10 || i === 0 ? 0 : 1) + ' ' + units[i];
+}
 
-//Helper functions - KR 13/08/2025
-function $(sel, ctx) {return (ctx || document).querySelector(sel); } //Selects first element on the page that matches the CSS selector given.
-function $all(sel, ctx) {return Array.prototype.slice.call((ctx || document).querySelectorAll(sel)); } //Selects all matching elements and returns them as an array.
-function on(el, ev, fn, opts){if (el) el.addEventListener(ev, fn, opts || false); } //Adds event listener.
-function formatBytes(bytes){                                                       //Takes a file size in bytes and turns it into mb, gb or tb.
-    if (!Number.isFinite(bytes)) return '0 B';
-    const units = ['B', 'KB', 'MB', 'TB'];
-    let i = 0, v = bytes;
-    while (v>= 1024 && i < units.length - 1) {v /=1024; i++; }
-    return v.toFixed(v >= 10 || i === 0 ? 0 : 1) + ' ' + units[i];
-} 
+// Drag & drop upload - KR 13/08/2025
+(function uploadEnhancements() { // Looks for the upload form. Script stops running if it doesn't exist.
+  const form = document.querySelector('form[action*="attachments/upload"]');
+  if (!form) return;
 
-//Drag & drop upload - KR 13/08/2025
-(function uploadEnhancements(){ //Looks for the upload form. Script stops running if it doesn't exist.
-    const form = document.querySelector('form[action*="attachments/upload"]');
-    if (!form) return;
-    const dz = $('.upload-dropzone'. form) || form;
-    const fileinput = $('input[type="file"]', form);
-    if (!fileinput) return;
+  const dz = $('.upload-dropzone', form) || form;       // Dropzone area (falls back to form)
+  const fileInput = $('input[type="file"]', form);      // Real <input type="file">
+  if (!fileInput) return;
 
-})
+  // Create live file list under the dropzone - KR 13/08/2025
+  const list = document.createElement('div');
+  list.className = 'upload-file-list small text-muted';
+  dz.insertAdjacentElement('afterend', list); // Creates section after dropzone to show the selected file & total size.
 
-//Create live file list under the dropzone - KR 13/08/2025
-let list = document.createElement('div');
-list.className = 'upload-file-list small text-muted';
-dz.insertAdjacentElement('afterend', list); //creates section after dropzone to show the selected file & total size.
-
-function renderList(files){ //displays file name & its size. Also shows total size at the bottom. This is called whenever teh file changes.
-    if (!files || !files.length){
-        list.innerHTML = '';
-        return;
+  function renderList(files) { // Displays file name & its size. Also shows total size at the bottom. This is called whenever the file changes.
+    if (!files || !files.length) {
+      list.innerHTML = '';
+      return;
     }
     let total = 0;
     let html = '<ul class="mb-1">';
     Array.from(files).forEach(f => {
-        total += f.size || 0;
-        html += '<li class="text-truncate">${f.name} <span class="text-secondary">(${formatBytes(f.size || 0)})</span></li>';
+      total += f.size || 0;
+      html += `<li class="text-truncate">${f.name} <span class="text-secondary">(${formatBytes(f.size || 0)})</span></li>`;
     });
     html += '</ul>';
-    html += '<div class="text-secondary">Total: <strong>${formatBytes(total)}</strong></div>';
+    html += `<div class="text-secondary">Total: <strong>${formatBytes(total)}</strong></div>`;
     list.innerHTML = html;
-}
+  }
 
-on(fileInput, 'change', e => renderList(e.target.files));                      //When files are picked through the standard input, they will render on the list.
+  on(fileInput, 'change', e => renderList(e.target.files)); // When files are picked through the standard input, they will render on the list.
 
-//Drag & drop styling
-['dragenter', 'dragover'].forEach(ev => on(dz, ev, (e) =>{
+  // Drag & drop styling
+  ['dragenter', 'dragover'].forEach(ev => on(dz, ev, (e) => {
     e.preventDefault(); e.stopPropagation();
     dz.classList.add('is-dragging');
-}));
-['dragleave', 'dragend', 'drop'].forEach(ev => on(dz, ev, (e) =>{
+  }));
+  ['dragleave', 'dragend', 'drop'].forEach(ev => on(dz, ev, (e) => {
     e.preventDefault(); e.stopPropagation();
     dz.classList.remove('is-dragging');
-}));                                                                           //Adds/removes a CSS class while dragging files over dropzone and prevents browser from opening the file if dropped.
+  })); // Adds/removes a CSS class while dragging files over dropzone and prevents browser from opening the file if dropped.
 
-on(dz, 'drop', (e) =>{                                                        //When dropped, files are put into the real input. A change event is then triggered so the list updates.
-    const dt = e.dataTranfer;
+  on(dz, 'drop', (e) => { // When dropped, files are put into the real input. A change event is then triggered so the list updates.
+    const dt = e.dataTransfer;
     if (!dt || !dt.files || !dt.files.length) return;
     fileInput.files = dt.files;
-    const evt = new Event('change', { bubbles: true});
+    const evt = new Event('change', { bubbles: true });
     fileInput.dispatchEvent(evt);
-});
+  });
 
-//Pre-submission checks
-on(form, 'submit', (e) => { 
+  // Pre-submission checks
+  on(form, 'submit', (e) => {
     const files = fileInput.files || [];
     if (!files.length) return;
 
     const MAX_FILES = 20;
     const MAX_FILE_MB = 50;
-    let overs = [];
+    const overs = [];
 
     Array.from(files).forEach((f) => {
-        if (f.size > MAX_FILE_MB * 1024 * 1024) overs.push(f.name);
+      if (f.size > MAX_FILE_MB * 1024 * 1024) overs.push(f.name);
     });
 
-    if (files.length > MAX_FILES){
-        e.preventDefault();
-        alaert('Too many files selected');
+    if (files.length > MAX_FILES) {
+      e.preventDefault();
+      alert('Too many files selected');
+      return;
     }
-
-});
+    if (overs.length) {
+      e.preventDefault();
+      alert(`These files exceed ${MAX_FILE_MB}MB:\n- ${overs.join('\n- ')}`);
+    }
+  });
+})();
