@@ -276,17 +276,26 @@ form[method="get"] .form-control:focus {
   white-space: nowrap;
 }
 
+
 .list-chip {
   display: inline-flex;
   align-items: center;
-  gap: .35rem;
-  padding: .25rem .5rem;
+  gap: .45rem;
+  padding: .28rem .65rem;
   border-radius: 999px;
-  font-size: .75rem;
-  line-height: 1;
+  background: var(--msg-accent-weak);
   color: var(--msg-text);
-  background: var(--msg-bg-muted);
   border: 1px solid var(--msg-border);
+  font-weight: 600;
+  font-size: .825rem;
+  line-height: 1;
+  text-decoration: none;
+  transition: background-color .15s ease, border-color .15s ease, transform .05s ease;
+}
+.list-chip:hover {
+  background: #eef5ff;
+  border-color: #cfe0ff;
+  text-decoration: none;
 }
 
 .badge-archived {
