@@ -85,7 +85,7 @@
 .project-hero {
   min-height: 160px;
   background:
-    linear-gradient(to right, rgba(0,0,0,0.35) 0%, purple 30%),
+    linear-gradient(to right, #6d4fbb, #7ad1c4),
     linear-gradient(90deg, var(--proj-grad-1), var(--proj-grad-2));
   color: #fff;
   border-bottom: 1px solid rgba(255,255,255,0.08);
