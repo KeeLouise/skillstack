@@ -1,26 +1,95 @@
 {% extends "base.html" %}
+{% load static %}
 {% load crispy_forms_tags %}
+
+{% block extra_head %}
+  <link rel="stylesheet" href="{% static 'css/messages.css' %}">
+{% endblock %}
 
 {% block title %}{% if is_reply %}Reply{% else %}Compose Message{% endif %}{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
+<div class="container py-5">
+
+  {# Gradient hero, consistent with profile/projects #}
+  <div class="msg-hero d-flex align-items-end p-4 mb-4">
+    <div class="w-100 d-flex align-items-center flex-wrap gap-3 gap-md-4">
+      <div class="avatar-circle avatar-lg flex-shrink-0">
+        <span class="fw-semibold">
+          {% if is_reply %}
+            {{ original_msg.sender.first_name|default:original_msg.sender.username|first|upper }}
+          {% else %}
+            {{ user.first_name|default:user.username|first|upper }}
+          {% endif %}
+        </span>
+      </div>
+      <div class="flex-grow-1 text-white">
+        <h2 class="mb-1 fw-bold">
+          {% if is_reply %}
+            Reply to {{ original_msg.sender.get_full_name|default:original_msg.sender.username }}
+          {% else %}
+            Compose New Message
+          {% endif %}
+        </h2>
+        <div class="small text-white-50">
+          {% if is_reply %}
+            Regarding: {{ original_msg.subject|default:"(no subject)" }}
+          {% else %}
+            Start a new conversation
+          {% endif %}
+        </div>
+      </div>
+      <div class="ms-auto d-flex flex-wrap gap-2">
+        <a href="{% url 'messages' %}" class="btn btn-dark">Back to Messages</a>
+      </div>
+    </div>
+  </div>
+
+  {% if is_reply %}
+    <div class="card shadow-sm border-0 mb-4">
+      <div class="card-body py-3">
+        <button class="btn btn-sm btn-outline-secondary" type="button"
+                data-bs-toggle="collapse" data-bs-target="#originalPreview"
+                aria-expanded="false" aria-controls="originalPreview">
+          Show Original Message
+        </button>
+        <div class="collapse mt-3" id="originalPreview">
+          <div class="p-3 rounded bg-light">
+            <div class="d-flex justify-content-between">
+              <div class="small text-muted">
+                From: {{ original_msg.sender.get_full_name|default:original_msg.sender.username }}<br>
+                To: {{ original_msg.recipient.get_full_name|default:original_msg.recipient.username }}
+              </div>
+              <div class="small text-muted">
+                {{ original_msg.sent_at|date:"M d, Y H:i" }}
+              </div>
+            </div>
+            <hr class="my-2">
+            <div class="fw-semibold mb-1">{{ original_msg.subject|default:"(no subject)" }}</div>
+            <div class="text-muted">{{ original_msg.body|linebreaksbr }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
   <div class="card shadow-sm border-0">
     <div class="card-body p-4">
-      <h3 class="mb-4 text-center">
-        {% if is_reply %}
-          Reply to {{ original_msg.sender.get_full_name|default:original_msg.sender.username }}
-        {% else %}
-          Compose New Message
-        {% endif %}
-      </h3>
-
       <form method="post" enctype="multipart/form-data" novalidate>
         {% csrf_token %}
         {% crispy form %}
-        <button type="submit" class="btn btn-primary w-100 mt-3">Send</button>
+
+        <div class="d-flex justify-content-end gap-2 mt-3">
+          <a href="{% url 'messages' %}" class="btn btn-outline-secondary">Cancel</a>
+          <button type="submit" class="btn btn-gradient px-4 text-white">Send</button>
+        </div>
       </form>
     </div>
   </div>
+
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+  <script src="{% static 'js/messages.js' %}"></script>
 {% endblock %}
