@@ -95,6 +95,7 @@ def create_project(request):
 
     return render(request, 'projects/create_project.html', {'form': form})
 
+
 @login_required
 def project_detail(request, pk):
     project = get_object_or_404(Project, pk=pk)
@@ -116,9 +117,32 @@ def project_detail(request, pk):
             'attachments': attachments,
             'can_upload': can_upload,
             'upload_form': ProjectAttachmentUploadForm(),  
-            'status_choices': status_choices,          
+            'status_choices': status_choices,              
         },
     )
+
+@login_required
+@require_POST
+def update_project_status(request, pk):
+    project = get_object_or_404(Project, pk=pk)
+
+    if request.user != project.owner:
+        return JsonResponse({"ok": False, "error": "Forbidden"}, status=403)
+    
+    new_status = request.POST.get("status", "").strip()
+
+    valid_statuses = {c[0] for c in Project._meta.get_field('status').choices}
+    if new_status not in valid_statuses:
+        return JsonResponse({"ok": False, "error": "Invalid status"}, status=400)
+    
+    project.status = new_status
+    project.save(update_fields=["status"])
+
+    return JsonResponse({
+        "ok": True,
+        "status": new_status,
+        "label": project.get_status_display(),
+    })
 
 @login_required
 def edit_project(request, pk):
