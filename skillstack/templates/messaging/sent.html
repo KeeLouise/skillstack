@@ -1,45 +1,101 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block title %}Sent Messages{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/messages.css' %}">
+{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="mb-0">Sent Messages</h2>
-    <a href="{% url 'compose' %}" class="btn btn-dark">New Message</a>
+    <a href="{% url 'compose' %}" class="btn btn-gradient btn-lg px-4 py-2 fw-semibold text-white">
+      <i class="bi bi-pencil-square me-1"></i> New Message
+    </a>
   </div>
 
-  {% with items=messages|default:messages %}
+  {% with items=message_list|default:messages %}
     {% if items %}
-      <ul class="list-group">
+      <div class="row row-cols-1 g-3">
         {% for msg in items %}
-          <li class="list-group-item">
-            <div class="d-flex justify-content-between align-items-start">
-              <div class="pe-3">
-                <a href="{% url 'message_detail' msg.pk %}" class="fw-semibold text-decoration-none">{{ msg.subject|default:"(no subject)" }}</a>
-                <div class="small text-muted">To: {{ msg.recipient.get_full_name|default:msg.recipient.username }}</div>
-              </div>
-              <div class="text-end">
-                <span class="badge {% if msg.importance == 'high' %}bg-danger{% elif msg.importance == 'normal' %}bg-primary{% else %}bg-secondary{% endif %}">
-                  {{ msg.get_importance_display }}
-                </span>
-                <div class="small text-muted mt-1">{{ msg.sent_at|date:"M d, Y H:i" }}</div>
+          <div class="col">
+            <div class="card shadow-sm card-hover">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                  <div class="d-flex align-items-center gap-3">
+                    <div class="avatar-circle">
+                      <span class="fw-semibold">
+                        {{ msg.recipient.first_name|default:msg.recipient.username|first|upper }}
+                      </span>
+                    </div>
+                    <div class="min-w-0">
+                      <h5 class="mb-0 text-truncate" title="{{ msg.subject|default:'(no subject)' }}">
+                        {{ msg.subject|default:"(no subject)" }}
+                      </h5>
+                      <div class="small text-muted mt-1">
+                        <span class="list-chip">To: {{ msg.recipient.get_full_name|default:msg.recipient.username }}</span>
+                        <span class="list-chip">Sent</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="text-end">
+                    <span class="badge
+                      {% if msg.importance == 'high' %}bg-danger
+                      {% elif msg.importance == 'normal' %}bg-primary
+                      {% else %}bg-secondary{% endif %}">
+                      {{ msg.get_importance_display }}
+                    </span>
+                    <div class="small text-muted mt-1">
+                      {{ msg.sent_at|date:"M d, Y H:i" }}
+                    </div>
+                  </div>
+                </div>
+
+                {% if msg.body %}
+                  <p class="card-text text-muted mb-3">{{ msg.body|truncatechars:140 }}</p>
+                {% endif %}
+
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="small text-muted">
+                    {% if msg.conversation_id %}
+                      <i class="bi bi-chat-dots me-1"></i>Thread
+                    {% else %}
+                      <i class="bi bi-envelope me-1"></i>Single
+                    {% endif %}
+                  </div>
+                  <div class="d-flex gap-2">
+                    <a href="{% url 'message_detail' msg.pk %}" class="btn btn-outline-primary btn-sm" data-no-card-click>
+                      View
+                    </a>
+                    <form method="POST" action="{% url 'delete_message' msg.pk %}" class="d-inline" data-no-card-click>
+                      {% csrf_token %}
+                      <input type="hidden" name="next" value="{% url 'sent' %}">
+                      <button type="submit" class="btn btn-sm btn-outline-danger"
+                              onclick="return confirm('Delete this message for you?');">
+                        Delete
+                      </button>
+                    </form>
+                  </div>
+                </div>
+
               </div>
             </div>
-            {% if msg.body %}
-              <p class="mb-2 mt-2 text-muted">{{ msg.body|truncatechars:140 }}</p>
-            {% endif %}
-            <div class="d-flex gap-2">
-              <a href="{% url 'message_detail' msg.pk %}" class="btn btn-outline-primary btn-sm">View</a>
-              <form method="POST" action="{% url 'delete_message' msg.pk %}">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Delete this message?');">Delete</button>
-              </form>
-            </div>
-          </li>
+          </div>
         {% endfor %}
-      </ul>
+      </div>
     {% else %}
-      <div class="alert alert-info">You haven’t sent any messages yet.</div>
+      <div class="card shadow-sm text-center p-5">
+        <div class="card-body">
+          <h5 class="mb-2">You haven’t sent any messages yet</h5>
+          <p class="text-muted mb-4">Compose your first message to get started.</p>
+          <a href="{% url 'compose' %}" class="btn btn-primary">
+            <i class="bi bi-pencil-square me-1"></i>Compose
+          </a>
+        </div>
+      </div>
     {% endif %}
   {% endwith %}
 </div>
