@@ -60,20 +60,25 @@
     </div>
     <hr class="my-3">
 
-    {% if user == project.owner %}
-      <div class="mb-3">
-        <label for="project-status-select" class="form-label">Change status</label>
-        <select
-          id="project-status-select"
-          class="form-select"
-          data-update-url="{% url 'update_project_status' project.pk %}">
-          {% for value,label in project._meta.get_field('status').choices %}
-            <option value="{{ value }}" {% if project.status == value %}selected{% endif %}>{{ label }}</option>
-          {% endfor %}
-        </select>
-        <div class="form-text">This saves immediately.</div>
-      </div>
+   {% if user == project.owner %}
+    <select id="statusDropdown" class="form-select form-select-sm w-auto">
+      <option value="">Select status</option>
+      {% for value,label in status_choices %}
+        <option value="{{ value }}" {% if project.status == value %}selected{% endif %}>
+          {{ label }}
+        </option>
+      {% endfor %}
+    </select>
+    <span id="statusSaveMsg" class="small ms-2 text-muted"></span>
+  {% else %}
+    {% if project.status == 'completed' %}
+      <span class="badge bg-success">Completed</span>
+    {% elif project.status == 'ongoing' %}
+      <span class="badge bg-warning text-dark">Ongoing</span>
+    {% else %}
+      <span class="badge bg-danger">Paused</span>
     {% endif %}
+  {% endif %}
 
     <p class="text-muted small mb-2">Description</p>
     <div class="description-box">
