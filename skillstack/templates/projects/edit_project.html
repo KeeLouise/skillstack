@@ -41,19 +41,10 @@
         {{ form|crispy }}
       </form>
     </div>
-
-    <div class="card-footer bg-transparent border-top-0 d-flex justify-content-between">
-      <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">← Back to Dashboard</a>
-      <div class="d-flex gap-2">
-        <a href="{% url 'project_detail' project.pk %}" class="btn btn-warning">Cancel</a>
-        <button type="submit" form="editProjectForm" class="btn btn-success">Save Changes</button>
-      </div>
-    </div>
-
   </div>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
-<script src="{% static 'js/projects.js' %}"></script>
+<script src="{% static 'js/edit_project.js' %}"></script>
 {% endblock %}

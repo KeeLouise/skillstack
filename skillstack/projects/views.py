@@ -119,6 +119,7 @@ def project_detail(request, pk):
 })
 
 
+
 @login_required
 def edit_project(request, pk):
     project = get_object_or_404(Project, pk=pk)
@@ -127,35 +128,36 @@ def edit_project(request, pk):
         messages.error(request, "You don't have permission to edit this project.")
         return redirect('dashboard')
 
+    current_collab_emails = list(
+        project.collaborators.values_list('email', flat=True)
+    )
+    collab_attr_value = ",".join([e for e in current_collab_emails if e])
+
     if request.method == 'POST':
         form = ProjectForm(request.POST, instance=project)
+
+        if 'invite_emails' in form.fields:
+            form.fields['invite_emails'].widget.attrs['data-collaborators'] = collab_attr_value
+
         if form.is_valid():
-            with transaction.atomic():
-                form.save()
-
-                files = request.FILES.getlist('attachments')
-                for f in files:
-                    if not f:
-                        continue
-                    kwargs = {
-                        'project': project,
-                        'file': f,
-                        'original_name': getattr(f, 'name', '') or '',
-                        'size': getattr(f, 'size', None),
-                    }
-                    if hasattr(ProjectAttachment, 'uploaded_by'):
-                        kwargs['uploaded_by'] = request.user
-                    ProjectAttachment.objects.create(**kwargs)
-
+            form.save()
             messages.success(request, 'Project updated successfully.')
             return redirect('project_detail', pk=project.pk)
         else:
             messages.error(request, 'Please correct the errors below.')
     else:
         form = ProjectForm(instance=project)
+        if 'invite_emails' in form.fields:
+            form.fields['invite_emails'].widget.attrs['data-collaborators'] = collab_attr_value
 
-    return render(request, 'projects/edit_project.html', {'form': form, 'project': project})
-
+    return render(
+        request,
+        'projects/edit_project.html',
+        {
+            'form': form,
+            'project': project,
+        }
+    )
 
 @login_required
 @require_POST
