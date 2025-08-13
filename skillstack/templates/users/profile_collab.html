@@ -77,18 +77,26 @@
             {% if project_list %}
               <div class="row g-3">
                 {% for p in project_list %}
-                  <div class="col-md-6 col-lg-4">
-                    <a class="card h-100 text-decoration-none hover-lift" href="{% url 'project_detail' p.pk %}">
-                      <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start">
-                          <h6 class="mb-1 text-truncate" title="{{ p.title }}">{{ p.title }}</h6>
-                          <span class="badge text-bg-light border">{{ p.get_status_display|default:p.status }}</span>
-                        </div>
-                        <div class="small text-muted">{{ p.category|title }}</div>
-                      </div>
-                    </a>
-                  </div>
-                {% endfor %}
+  <div class="col-md-6 col-lg-4">
+    <a class="project-card card h-100 text-decoration-none hover-lift status-{{ p.status }}"
+       href="{% url 'project_detail' p.pk %}">
+      <div class="project-status-strip" aria-hidden="true"></div>
+
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start">
+          <h6 class="mb-1 text-truncate" title="{{ p.title }}">{{ p.title }}</h6>
+          <span class="badge project-status-badge
+            {% if p.status == 'completed' %}bg-success
+            {% elif p.status == 'ongoing' %}bg-warning text-dark
+            {% else %}bg-danger{% endif %}">
+            {{ p.get_status_display|default:p.status }}
+          </span>
+        </div>
+        <div class="small text-muted">{{ p.category|title }}</div>
+      </div>
+    </a>
+  </div>
+{% endfor %}
               </div>
             {% else %}
               <div class="alert alert-light border">
