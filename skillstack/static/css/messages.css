@@ -191,3 +191,115 @@ form[method="get"] .form-control:focus {
 }
 
 .msg-file-total { font-size: .9rem; }
+
+/* Thread styles */
+
+.thread-card {
+  position: relative;
+  border: 1px solid var(--msg-border);
+  background: var(--msg-bg);
+  box-shadow: var(--msg-card-shadow);
+  transition: box-shadow .2s ease, border-color .2s ease, transform .05s ease;
+}
+
+.thread-card::before {
+  content: "";
+  position: absolute;
+  left: 18px;
+  top: -8px;
+  bottom: -8px;
+  width: 2px;
+  background: linear-gradient(
+    to bottom,
+    rgba(59,130,246,0.15),
+    rgba(59,130,246,0.15)
+  );
+  border-radius: 1px;
+  pointer-events: none;
+}
+
+.thread-card::after {
+  content: "";
+  position: absolute;
+  left: 9px;
+  top: 28px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--msg-bg);
+  border: 2px solid var(--msg-accent);
+  box-shadow: 0 0 0 2px var(--msg-bg);
+}
+
+.thread-card:first-child::before { top: 24px; }
+.thread-card:last-child::before { bottom: 24px; }
+
+.thread-card:hover {
+  box-shadow: var(--msg-card-shadow-strong);
+  border-color: rgba(59, 130, 246, 0.35);
+}
+
+.thread-card.unread {
+  border-color: var(--msg-unread-border) !important;
+  background: var(--msg-unread-bg) !important;
+}
+
+.thread-card .card-body {
+  padding: 1.25rem 1.25rem 1rem;
+}
+.thread-card hr {
+  margin: 0.9rem 0 1rem;
+  border-color: var(--msg-border);
+  opacity: 1;
+}
+
+.avatar-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  letter-spacing: .25px;
+  color: #fff;
+  background: linear-gradient(135deg, var(--msg-accent), #7ad1c4);
+  box-shadow: 0 2px 10px rgba(13, 110, 253, .25);
+  user-select: none;
+}
+
+.min-w-0 { min-width: 0; }
+.text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.list-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .25rem .5rem;
+  border-radius: 999px;
+  font-size: .75rem;
+  line-height: 1;
+  color: var(--msg-text);
+  background: var(--msg-bg-muted);
+  border: 1px solid var(--msg-border);
+}
+
+.badge-archived {
+  background: transparent;
+  color: var(--msg-muted);
+  border: 1px dashed var(--msg-border);
+}
+
+.attachments-list .preview img {
+  max-height: 220px;
+  width: auto;
+}
+
+@media (max-width: 576px) {
+  .thread-card::before { left: 14px; }
+  .thread-card::after { left: 5px; }
+  .avatar-circle { width: 36px; height: 36px; font-size: .9rem; }
+}
