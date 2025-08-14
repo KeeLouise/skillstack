@@ -96,6 +96,112 @@ body { color: var(--msg-text); }
   background:var(--msg-unread-bg)!important;
 }
 
+/* Compose */
+/* Base readability */
+.msg-compose .form-label { font-weight: 600; }
+.msg-compose .form-control,
+.msg-compose .form-select {
+  font-size: 16px;              /* mobile legibility */
+  min-height: 46px;
+}
+
+/* Textarea comfort */
+.msg-compose textarea.form-control {
+  min-height: 36vh;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+/* Participants row (chips) */
+.msg-compose .participants-row,
+.msg-compose .recipient-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .35rem .4rem;
+  margin-top: .25rem;
+}
+
+.msg-compose .list-chip {
+  position: static;
+  float: none;
+  max-width: 100%;
+  margin: .15rem .25rem 0 0;
+  transform: none;               /* avoid hover “lift” on touch */
+}
+
+/* Attachment dropzone spacing (if present) */
+.msg-compose .msg-dropzone { margin-top: .5rem; }
+
+/* Sticky action bar (uses the form-actions-sticky class) */
+.msg-compose .form-actions-sticky {
+  position: sticky;
+  bottom: 0;
+  background: rgba(255,255,255,.9);
+  backdrop-filter: saturate(120%) blur(4px);
+  padding-top: .75rem;
+  margin-top: 1rem;
+  border-top: 1px solid rgba(15,23,42,.08);
+  z-index: 5;
+}
+
+/* Hero: tighter on small screens */
+@media (max-width: 576px) {
+  .msg-hero { min-height: 140px; padding: 1rem !important; }
+  .msg-hero .avatar-lg { width: 64px; height: 64px; font-size: 1rem; }
+  .msg-hero h2 { font-size: clamp(1.25rem, 2.8vw + .9rem, 1.5rem); }
+  .msg-hero .small { font-size: .95rem; }
+}
+
+/* Phones */
+@media (max-width: 576px) {
+  .msg-compose .card-body { padding: 1rem 1.1rem; }
+
+  .msg-compose .form-control,
+  .msg-compose .form-select {
+    min-height: 48px;
+  }
+
+  .msg-compose textarea.form-control {
+    min-height: 40vh;
+  }
+
+  .msg-compose .participants-row { gap: .28rem .32rem; }
+  .msg-compose .list-chip {
+    font-size: .9rem;
+    padding: .28rem .6rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,.08);
+  }
+
+  /* Buttons: bigger tap, full width nicely */
+  .msg-compose .form-actions-sticky .btn {
+    min-height: 44px;
+  }
+  .msg-compose .form-actions-sticky {
+    gap: .6rem;
+  }
+  .msg-compose .form-actions-sticky .btn-gradient {
+    flex: 1 1 55%;
+  }
+  .msg-compose .form-actions-sticky .btn-outline-secondary {
+    flex: 1 1 45%;
+  }
+}
+
+/* Landscape tablets */
+@media (min-width: 820px) and (max-width: 1180px) and (orientation: landscape) {
+  .msg-compose .card-body { padding: 1.25rem 1.35rem; }
+  .msg-compose textarea.form-control { min-height: 34vh; }
+  .msg-compose .list-chip { font-size: .92rem; padding: .28rem .6rem; }
+}
+
+/* Prevent pills overlapping inputs inside form groups */
+.msg-compose .form-group,
+.msg-compose .input-group,
+.msg-compose .form-floating {
+  overflow: visible;
+}
+
 /* Avatar */
 .avatar-circle{
   width:38px; height:38px; border-radius:50%;

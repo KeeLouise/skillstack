@@ -69,11 +69,13 @@
   const shareBtn = document.getElementById('shareBtn');
   if (!shareBtn) return;
 
+  const shareUrl = shareBtn.dataset.shareUrl || window.location.href;
+
   shareBtn.addEventListener('click', async () => {
     const shareData = {
-      title: document.title,
-      text: "Check out this portfolio!",
-      url: window.location.href
+      title: "Check out my portfolio!",
+      text: "Here's my work:",
+      url: shareUrl
     };
 
     if (navigator.share) {
