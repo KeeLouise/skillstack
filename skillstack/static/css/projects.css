@@ -181,6 +181,19 @@ form .form-select:focus {
 @media (max-width:576px){
   html{ font-size:100%; }
   body{ font-size:16px; }
+  .navbar-brand img{
+    max-width: 250px;
+    max-height: 125px;
+  }
+ 
+  form[action*="create_project"] .btn {
+    flex: none;           
+    width: auto;          
+    min-height: auto;     
+    font-size: 0.9rem;    
+    padding: 0.5rem 1rem; 
+  }
+
 
   .container.py-5{ padding-top:1.5rem !important; padding-bottom:1.5rem !important; }
 
@@ -228,7 +241,13 @@ form .form-select:focus {
     gap:.5rem;
   }
   .attachment-list{ grid-template-columns: repeat(2, 1fr); }
+
+  .navbar-brand img{
+    max-width: 250px;
+    max-height: 125px;
+  }
 }
+
 
 @media (min-width:768px) and (max-width:991.98px){
   .project-hero{ min-height: 180px; }
@@ -236,6 +255,11 @@ form .form-select:focus {
   .attachment-list{ grid-template-columns: repeat(2, 1fr); }
   .section-card{ padding: 1.15rem 1.25rem; }
 }
+
+.navbar-brand img{
+    max-width: 500px;
+    max-height: 250px;
+  }
 
 @media (min-width:820px) and (max-width:1180px) and (orientation:landscape){
   .project-hero{ min-height: 180px; }
