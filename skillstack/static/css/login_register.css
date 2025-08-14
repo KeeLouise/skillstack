@@ -13,11 +13,12 @@
 .navbar {
   min-height: 64px;
 }
-.navbar-brand img {
-  height: auto;
-  max-height: 48px;
-  width: auto;
-}
+
+.navbar-brand img{
+    max-width: 250px;
+    max-height: 125px;
+  }
+  
 .navbar-toggler {
   border: none;
 }
