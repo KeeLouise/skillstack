@@ -279,38 +279,46 @@ form[method="get"] .form-control:focus {
 
 /* Participant pill */
 .list-chip {
-  display: inline-block;
-  background-color: #f1f5f9;
-  color: #1f2937; 
-  padding: 0.35rem 0.75rem;
-  font-size: 0.875rem;
-  border-radius: 9999px;
-  font-weight: 500;
-  line-height: 1.2;
-  border: 1px solid #e2e8f0;
-  transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .3rem .7rem;
+  border-radius: 999px;
+  font-size: .85rem;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+
+  background: linear-gradient(90deg, #4f7dbb, #7ad1c4);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
 }
 
 .list-chip:hover {
-  background-color: #e2e8f0;
-  color: #0d6efd;
   text-decoration: none;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  filter: brightness(0.97);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
 }
 
 .list-chip:active {
-  background-color: #cbd5e1;
-  color: #0a58ca;
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+  transform: translateY(1px);
 }
 
-
-a.list-chip {
-  text-decoration: none;
+.list-chip:focus-visible {
+  outline: 2px solid rgba(79, 125, 187, 0.6);
+  outline-offset: 2px;
 }
 
-a.list-chip:hover {
-  text-decoration: none;
+.list-chip:not(a) {
+  cursor: default;
+}
+
+.card .list-chip { color: #fff; }
+
+.mt-1.d-flex.flex-wrap.gap-1 .list-chip,
+.small.text-muted .list-chip {
+  margin-top: .15rem;
 }
 
 .badge-archived {
