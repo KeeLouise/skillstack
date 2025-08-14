@@ -61,5 +61,8 @@
 {% endblock %}
 
 {% block extra_scripts %}
+<script>
+  window.PORTFOLIO_PREVIEW_URL = "{% url 'portfolio:preview_api' %}";
+</script>
 <script src="{% static 'js/portfolio.js' %}"></script>
 {% endblock %}
