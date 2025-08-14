@@ -17,11 +17,10 @@
   /* nav toggle */
   --nav-toggle-size:28px;
   --nav-toggle-stroke:2.6;
-  --nav-toggle-color:#0f172a;
-  --nav-toggle-color-invert:#ffffff;
+  --nav-toggle-color: white;
   --nav-toggle-bg:transparent;
   --nav-toggle-border:rgba(255,255,255,.18);
-  --nav-toggle-shadow:0 6px 16px rgba(2,8,23,.10);
+  --nav-toggle-shadow:0 6px 16px purple;
 }
 
 /* cards */
