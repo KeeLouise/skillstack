@@ -19,12 +19,6 @@
 html { -webkit-text-size-adjust: 100%; }
 body { color: var(--msg-text); }
 
-.container,
-.container-fluid {
-  padding-left: 16px;
-  padding-right: 16px;
-}
-
 .message-detail-container{
   max-width: 1120px;          
   margin-inline: auto;

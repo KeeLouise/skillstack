@@ -218,7 +218,7 @@ hr {
   border-top-right-radius: var(--profile-card-radius);
 }
 
-/*Project card styles*/
+/* Project card styles */
 
 .project-card {
   display: flex;
@@ -275,7 +275,102 @@ hr {
 }
 
 @media (max-width: 576px) {
-  .avatar { width: 76px; height: 76px; }
+  html { font-size: 100%; }
+  body { font-size: 16px; }
+
+  .container.py-5 {
+    padding-top: 1.5rem !important;
+    padding-bottom: 1.5rem !important;
+  }
+
+  .profile-cover .d-flex {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center;
+    gap: .75rem;
+  }
+  .profile-cover .flex-grow-1 {
+    width: 100%;
+    order: 2;
+  }
+  .profile-cover .ms-auto {
+    margin-left: 0 !important;
+    order: 3;
+    width: 100%;
+    display: flex !important;
+    justify-content: center !important;
+    gap: .5rem;
+  }
+  .profile-cover .ms-auto .btn {
+    min-width: 44%;
+  }
+
+  .avatar { width: 80px; height: 80px; }
   .avatar-xl { width: 88px; height: 88px; }
   .profile-cover { min-height: 160px; }
+
+  .card.profile-card .card-body {
+    padding: 1.25rem;
+  }
+
+  .profile-bio {
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  .list-group-item {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .project-card .project-title,
+  .project-card h6 {
+    font-size: 1rem;
+  }
+}
+
+@media (min-width: 577px) and (max-width: 767.98px) {
+  .profile-cover .d-flex {
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+    gap: 1rem;
+  }
+  .profile-cover .ms-auto {
+    margin-left: 0 !important;
+    width: 100%;
+    display: flex !important;
+    justify-content: center !important;
+    gap: .5rem;
+  }
+  .avatar { width: 90px; height: 90px; }
+  .avatar-xl { width: 96px; height: 96px; }
+}
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .profile-cover { min-height: 180px; }
+  .profile-cover .d-flex { gap: 1rem; }
+  .avatar { width: 96px; height: 96px; }
+  .avatar-xl { width: 104px; height: 104px; }
+  .profile-bio { font-size: .95rem; }
+  .project-card .project-title,
+  .project-card h6 { font-size: 1rem; }
+}
+
+@media (min-width: 820px) and (max-width: 1180px) and (orientation: landscape) {
+  .container.py-5 { padding-left: 1rem; padding-right: 1rem; }
+  .profile-cover { min-height: 180px; }
+  .profile-cover .d-flex { gap: 1rem; }
+
+  .profile-cover .ms-auto {
+    display: flex !important;
+    gap: .5rem;
+  }
+
+  .avatar { width: 100px; height: 100px; }
+  .avatar-xl { width: 108px; height: 108px; }
+}
+
+@media (min-width: 1200px) {
+  .profile-card { border-radius: 14px; }
 }
