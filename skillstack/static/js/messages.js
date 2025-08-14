@@ -1,4 +1,6 @@
 (function () {
+
+  // Unread badge setup - KR 14/08/2025
   var pageBadge = document.getElementById('page-unread-badge');
   var inboxBadge = document.getElementById('inbox-unread-badge');
   var unreadUrl =
@@ -6,6 +8,7 @@
     (pageBadge && pageBadge.dataset.unreadUrl) ||
     '';
 
+  // Helper: update badge count - KR 14/08/2025
   function setBadge(el, n) {
     if (!el) return;
     n = Number(n) || 0;
@@ -18,6 +21,7 @@
     }
   }
 
+  // Fetch unread count - KR 14/08/2025
   async function refreshUnread() {
     if (!unreadUrl) return;
     try {
@@ -35,29 +39,31 @@
     }
   }
 
+  // Initialise unread refresh - KR 14/08/2025
   if (unreadUrl) {
     refreshUnread();
     setInterval(refreshUnread, 30000);
   }
-
   document.addEventListener('visibilitychange', function () {
     if (document.visibilityState === 'visible') {
       refreshUnread();
     }
   });
 
+  // Helper: get CSRF token - KR 14/08/2025
   function getCsrf() {
     var m = document.cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/);
     return m ? decodeURIComponent(m[1]) : '';
   }
 
+  // Mark message as read on click - KR 14/08/2025
   var cards = document.querySelectorAll('[data-msg-id]');
   cards.forEach(function (card) {
     card.addEventListener('click', function (e) {
-      // Ignore clicks on delete/archive buttons or anything with data-no-card-click - KR 11/08/2025
+      // Ignore clicks on forms/buttons or elements flagged no-card-click - KR 14/08/2025
       if (
-        e.target.closest('form') || 
-        e.target.closest('button') || 
+        e.target.closest('form') ||
+        e.target.closest('button') ||
         e.target.closest('[data-no-card-click]')
       ) {
         return;
@@ -67,26 +73,28 @@
       var id = card.getAttribute('data-msg-id');
       if (!url || !id) return;
 
-      try {
-        fetch(url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRFToken': getCsrf(),
-          },
-          body: JSON.stringify({ id: id }),
-          credentials: 'same-origin',
-        }).catch(function (e) {
-          if (window.DEBUG) console.debug(e);
-        });
-      } catch (e) {
-        if (window.DEBUG) console.debug(e);
-      }
+      // Instantly update UI to show message as read - KR 14/08/2025
+      card.classList.remove('unread');
+
+      // Fire-and-forget mark as read request - KR 14/08/2025
+      navigator.sendBeacon
+        ? navigator.sendBeacon(url, JSON.stringify({ id: id }))
+        : fetch(url, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Requested-With': 'XMLHttpRequest',
+              'X-CSRFToken': getCsrf(),
+            },
+            body: JSON.stringify({ id: id }),
+            credentials: 'same-origin',
+          }).catch(function (e) {
+            if (window.DEBUG) console.debug(e);
+          });
     });
   });
 
-  // --- Auto-dismiss Bootstrap alerts after 4s ---
+  // Auto-dismiss Bootstrap alerts - KR 14/08/2025
   function autoDismissAlerts() {
     var alerts = document.querySelectorAll('.alert');
     alerts.forEach(function (el) {
@@ -94,9 +102,7 @@
         try {
           var inst = bootstrap.Alert.getOrCreateInstance(el);
           inst.close();
-        } catch (e) {
-          /* ignore */
-        }
+        } catch (e) { /* ignore */ }
       }, 4000);
     });
   }
@@ -108,10 +114,10 @@
       autoDismissAlerts();
     }
   });
+
 })();
 
-// attachment dropzone + live list (partially reused from projects.js- KR 13/08/2025
-
+// Attachment dropzone + live list - KR 14/08/2025
 (function composeAttachments() {
   const form = document.querySelector('.container form[enctype="multipart/form-data"]');
   if (!form) return;
@@ -123,6 +129,7 @@
   const MAX_FILE_MB = 25;
   const MAX_TOTAL_MB = 100;
 
+  // Helper: format bytes - KR 14/08/2025
   function formatBytes(bytes) {
     if (!Number.isFinite(bytes)) return '0 B';
     const units = ['B', 'KB', 'MB', 'GB', 'TB'];
@@ -131,12 +138,12 @@
     return v.toFixed(v >= 10 || i === 0 ? 0 : 1) + ' ' + units[i];
   }
 
+  // Create dropzone UI - KR 14/08/2025
   const dropzone = document.createElement('div');
   dropzone.className = 'msg-dropzone';
   dropzone.setAttribute('role', 'button');
   dropzone.setAttribute('tabindex', '0');
   dropzone.setAttribute('aria-label', 'Add attachments: drop files here or press Enter/Space to select');
-
   dropzone.innerHTML = `
     <div class="dz-inner">
       <div class="dz-icon" aria-hidden="true">📎</div>
@@ -153,6 +160,7 @@
   fileInput.insertAdjacentElement('afterend', dropzone);
   dropzone.insertAdjacentElement('afterend', listWrap);
 
+  // Dropzone interactions - KR 14/08/2025
   dropzone.addEventListener('click', () => fileInput.click());
   dropzone.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -193,6 +201,7 @@
     renderList(e.target.files);
   });
 
+  // Render attachment list - KR 14/08/2025
   function renderList(files) {
     listWrap.innerHTML = '';
     if (!files || !files.length) return;
@@ -238,13 +247,14 @@
     listWrap.appendChild(total);
   }
 
+  // Validate attachments on submit - KR 14/08/2025
   form.addEventListener('submit', (e) => {
     const files = fileInput.files || [];
     if (!files.length) return;
 
     let totalSize = 0;
     const oversized = [];
-    const seen = new Set(); // prevent duplicates by name+size signature
+    const seen = new Set();
 
     for (const f of files) {
       totalSize += f.size || 0;
@@ -273,4 +283,5 @@
       alert(`Total upload size exceeds ${MAX_TOTAL_MB}MB.`);
     }
   });
+
 })();
