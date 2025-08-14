@@ -222,7 +222,7 @@ form .form-select:focus {
   .attachment-item{ padding: 1rem; }
 
   .form-select, .form-control{ font-size:1rem; }
-  .btn{ font-size:1rem; }
+  .btn{ font-size:0.8rem; }
 }
 
 @media (min-width:577px) and (max-width:767.98px){
