@@ -13,6 +13,11 @@ body {
   background-attachment: fixed;
 }
 
+.navbar-brand img{
+    max-width: 500px;
+    max-height: 250px;
+  }
+  
 .profile-card {
   border-radius: var(--profile-card-radius);
   overflow: hidden;
@@ -278,6 +283,10 @@ hr {
   html { font-size: 100%; }
   body { font-size: 16px; }
 
+  .navbar-brand img{
+    max-width: 250px;
+    max-height: 125px;
+  }
   .container.py-5 {
     padding-top: 1.5rem !important;
     padding-bottom: 1.5rem !important;
@@ -336,6 +345,12 @@ hr {
     text-align: center;
     gap: 1rem;
   }
+
+  .navbar-brand img{
+    max-width: 250px;
+    max-height: 125px;
+  }
+
   .profile-cover .ms-auto {
     margin-left: 0 !important;
     width: 100%;
@@ -347,6 +362,7 @@ hr {
   .avatar-xl { width: 96px; height: 96px; }
 }
 
+
 @media (min-width: 768px) and (max-width: 991.98px) {
   .profile-cover { min-height: 180px; }
   .profile-cover .d-flex { gap: 1rem; }
@@ -357,6 +373,11 @@ hr {
   .project-card h6 { font-size: 1rem; }
 }
 
+.navbar-brand img{
+    max-width: 250px;
+    max-height: 125px;
+  }
+
 @media (min-width: 820px) and (max-width: 1180px) and (orientation: landscape) {
   .container.py-5 { padding-left: 1rem; padding-right: 1rem; }
   .profile-cover { min-height: 180px; }
@@ -365,6 +386,11 @@ hr {
   .profile-cover .ms-auto {
     display: flex !important;
     gap: .5rem;
+  }
+
+  .navbar-brand img{
+    max-width: 500px;
+    max-height: 250px;
   }
 
   .avatar { width: 100px; height: 100px; }
