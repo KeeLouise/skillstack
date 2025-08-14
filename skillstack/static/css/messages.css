@@ -19,8 +19,8 @@
   --nav-toggle-stroke:2.6;
   --nav-toggle-color:#0f172a;
   --nav-toggle-color-invert:#ffffff;
-  --nav-toggle-bg:#ffffff;
-  --nav-toggle-border:rgba(15,23,42,.15);
+  --nav-toggle-bg:transparent;
+  --nav-toggle-border:rgba(255,255,255,.18);
   --nav-toggle-shadow:0 6px 16px rgba(2,8,23,.10);
 }
 
@@ -174,68 +174,70 @@ form[method="get"] .form-control:focus{
   .message-detail-container .text-truncate{ max-width:100%; }
 }
 
-.navbar-toggler{
+.navbar-dark .navbar-toggler{
   padding:.55rem .7rem; border-radius:12px;
   border:1px solid var(--nav-toggle-border);
   background:var(--nav-toggle-bg);
   box-shadow:var(--nav-toggle-shadow);
   transition:transform .12s ease, box-shadow .12s ease, background .2s ease;
 }
-.navbar-toggler:focus{ outline:none; box-shadow:0 0 0 .2rem rgba(79,125,187,.25); }
-.navbar-toggler:hover{ transform:translateY(-1px); }
-.navbar-toggler-icon {
-  width: var(--nav-toggle-size);
-  height: var(--nav-toggle-size);
-  background-size: 100% 100%;
-  background-repeat: no-repeat;
-  background-position: center;
-  background: rgba(255,255,255,0.85);
-}
-.navbar-toggler-icon::before,
-.navbar-toggler-icon::after,
-.navbar-toggler-icon span{
-  content:""; position:absolute; left:4px; right:4px;
-  height:var(--nav-toggle-stroke); border-radius:2px;
-  background:var(--nav-toggle-color);
-  transform-origin:50% 50%;
-  transition:transform .2s ease, opacity .2s ease, top .2s ease, bottom .2s ease;
-}
-.navbar-toggler-icon::before{ top:7px; }
-.navbar-toggler-icon span{ top:50%; transform:translateY(-50%); }
-.navbar-toggler-icon::after{ bottom:7px; }
-.navbar-toggler:not(.collapsed) .navbar-toggler-icon::before{ top:50%; transform:translateY(-50%) rotate(45deg); }
-.navbar-toggler:not(.collapsed) .navbar-toggler-icon span{ opacity:0; }
-.navbar-toggler:not(.collapsed) .navbar-toggler-icon::after{ bottom:auto; top:50%; transform:translateY(-50%) rotate(-45deg); }
+.navbar-dark .navbar-toggler:hover{ transform:translateY(-1px); }
+.navbar-dark .navbar-toggler:focus{ outline:none; box-shadow:0 0 0 .2rem rgba(79,125,187,.25); }
 
-.nav-toggle-label{ font-weight:700; font-size:.85rem; letter-spacing:.06em; margin-left:.5rem; color:var(--nav-toggle-color); }
+.navbar-dark .navbar-toggler-icon{
+  position:relative;
+  width:var(--nav-toggle-size);
+  height:var(--nav-toggle-size);
+  display:block;
+  color:var(--nav-toggle-color-invert);
+  background:none;
+  box-shadow:none;
+  background-image:
+    linear-gradient(currentColor, currentColor),
+    linear-gradient(currentColor, currentColor),
+    linear-gradient(currentColor, currentColor);
+  background-repeat:no-repeat;
+  background-size: calc(100% - 10px) var(--nav-toggle-stroke);
+  background-position:
+    center calc(50% - 6px),
+    center,
+    center calc(50% + 6px);
+}
+
+.navbar-dark .navbar-toggler:not(.collapsed) .navbar-toggler-icon{
+  background-image:none;
+}
+.navbar-dark .navbar-toggler-icon::before,
+.navbar-dark .navbar-toggler-icon::after{
+  content:"";
+  position:absolute;
+  left:5px; right:5px;
+  height:var(--nav-toggle-stroke);
+  border-radius:2px;
+  background:currentColor;
+  opacity:0;
+  transform-origin:50% 50%;
+  transition:transform .2s ease, opacity .2s ease;
+}
+.navbar-dark .navbar-toggler:not(.collapsed) .navbar-toggler-icon::before{
+  top:50%; transform:translateY(-50%) rotate(45deg); opacity:1;
+}
+.navbar-dark .navbar-toggler:not(.collapsed) .navbar-toggler-icon::after{
+  top:50%; transform:translateY(-50%) rotate(-45deg); opacity:1;
+}
+
 @media (min-width:768px){ .nav-toggle-label{ display:none; } }
+
 @media (max-width:360px){
   :root{ --nav-toggle-size:30px; --nav-toggle-stroke:3; }
-  .navbar-toggler{ padding:.6rem .8rem; }
+  .navbar-dark .navbar-toggler{ padding:.6rem .8rem; }
 }
 
-@media (min-width: 820px) and (max-width: 1180px) and (orientation: landscape) {
-  .navbar {
-    padding-top: 0.35rem;
-    padding-bottom: 0.35rem;
-  }
-
-  .navbar-nav .nav-link {
-    font-size: 0.9rem;
-    padding: 0.35rem 0.65rem;
-  }
-
-  .navbar-brand {
-    font-size: 1.05rem;
-  }
-
-  .navbar-toggler {
-    padding: 0.35rem 0.55rem;
-    border-radius: 8px;
-  }
-
-  .navbar-toggler-icon {
-    width: 1.1rem;
-    height: 1.1rem;
-  }
+/* landscape tablet */
+@media (min-width:820px) and (max-width:1180px) and (orientation:landscape){
+  .navbar{ padding-top:.35rem; padding-bottom:.35rem; }
+  .navbar-brand{ font-size:1.05rem; }
+  .navbar-nav .nav-link{ font-size:.95rem; padding:.35rem .65rem; }
+  .navbar-dark .navbar-toggler{ padding:.35rem .55rem; border-radius:8px; }
+  .navbar-dark .navbar-toggler-icon{ width:1.1rem; height:1.1rem; }
 }
