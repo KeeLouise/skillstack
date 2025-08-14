@@ -201,7 +201,7 @@ form[method="get"] .form-control:focus{
 /* RESPONSIVE */
 
 /* Tablet */
-@media (min-width:577px) and (max-width:991.98px){
+@media (min-width:577px) and (max-width:1180px){
   .navbar-brand img{
     max-width: 500px;
     max-height: 250px;
