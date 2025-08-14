@@ -9,9 +9,22 @@
 
 {% block content %}
 <div class="container py-5">
-  <div class="d-flex justify-content-between align-items-center mb-4">
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
     <h2 class="mb-0">My Portfolio</h2>
-    <a href="{% url 'portfolio:portfolio_create' %}" class="btn btn-dark">+ Add Link</a>
+    <div class="d-flex gap-2">
+      <a href="{% url 'portfolio:portfolio_create' %}" class="btn btn-dark">+ Add Link</a>
+
+      {# Build the absolute public URL for this user #}
+      {% url 'portfolio:portfolio_public' request.user.username as public_path %}
+      <button
+        type="button"
+        class="btn btn-primary"
+        id="shareBtn"
+        data-share-url="{{ request.build_absolute_uri(public_path) }}"
+        aria-label="Share my public portfolio">
+        Share
+      </button>
+    </div>
   </div>
 
   {% if links %}
@@ -41,4 +54,8 @@
     </div>
   {% endif %}
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'js/portfolio-share.js' %}"></script>
 {% endblock %}
