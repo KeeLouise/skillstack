@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',
     'projects',
     'messaging',
+    'portfolio',
 
     # Django default apps
     'django.contrib.admin',

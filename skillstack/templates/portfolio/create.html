@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags static %}
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/portfolio.css' %}">
+{% endblock %}
+{% block title %}Add Portfolio Link{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="card shadow-sm border-0">
+    <div class="card-body p-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">Add Link</h4>
+        <a href="{% url 'portfolio_gallery' %}" class="btn btn-outline-secondary">Back</a>
+      </div>
+
+      <form method="post" enctype="multipart/form-data" id="portfolioForm" class="row g-3">
+        {% csrf_token %}
+        <div class="col-12 col-lg-6">
+          {{ form|crispy }}
+          <small class="text-muted">You can upload a custom thumbnail, or we’ll try to use the site’s Open Graph image.</small>
+        </div>
+
+        <div class="col-12 col-lg-6">
+          <div class="preview-card">
+            <div class="preview-thumb" id="liveThumb">
+              <div class="preview-placeholder">Preview</div>
+            </div>
+            <div class="preview-meta">
+              <div class="preview-title text-truncate" id="liveTitle">Title will appear here</div>
+              <div class="preview-url text-muted text-truncate" id="liveUrl">https://your-link.example</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12">
+          <button class="btn btn-dark">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const urlInput = document.querySelector('#id_url');
+  const titleInput = document.querySelector('#id_title');
+  const liveTitle = document.getElementById('liveTitle');
+  const liveUrl   = document.getElementById('liveUrl');
+  const liveThumb = document.getElementById('liveThumb');
+
+  function setThumb(src){
+    if (!src) {
+      liveThumb.innerHTML = '<div class="preview-placeholder">Preview</div>';
+      liveThumb.style.backgroundImage = '';
+      return;
+    }
+    liveThumb.innerHTML = '';
+    liveThumb.style.backgroundImage = `url("${src}")`;
+  }
+
+  function updateTexts(){
+    if (titleInput) liveTitle.textContent = titleInput.value || 'Title will appear here';
+    if (urlInput)   liveUrl.textContent   = urlInput.value || 'https://your-link.example';
+  }
+  updateTexts();
+
+  if (titleInput) titleInput.addEventListener('input', updateTexts);
+  if (urlInput) {
+    urlInput.addEventListener('input', updateTexts);
+    let t;
+    urlInput.addEventListener('blur', function(){
+      const v = urlInput.value.trim();
+      if (!/^https?:\/\//i.test(v)) return;
+      clearTimeout(t);
+      t = setTimeout(async function(){
+        try{
+          const res = await fetch("{% url 'portfolio_preview_api' %}?url=" + encodeURIComponent(v));
+          if (!res.ok) return;
+          const data = await res.json();
+          if (!titleInput.value && data.title) {
+            titleInput.value = data.title;
+            updateTexts();
+          }
+          setThumb(data.image_url || '');
+        }catch(e){}
+      }, 150);
+    });
+  }
+})();
+</script>
+{% endblock %}
