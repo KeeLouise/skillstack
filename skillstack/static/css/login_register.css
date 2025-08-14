@@ -64,7 +64,7 @@ body {
   text-align: center;
   font-weight: 800;
   margin-bottom: 1rem;
-  background: linear-gradient(90deg, var(--auth-grad-1), var(--auth-grad-2));
+  color: black;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -95,10 +95,11 @@ body {
   font-weight: 700;
 }
 .btn-dark {
-  background: #10192d;
-  border-color: #10192d;
+  background: linear-gradient(90deg, var(--auth-grad-1), var(--auth-grad-2));
+  border: none;
   color: #fff;
 }
+
 .btn-dark:hover {
   background: #0c1423;
   border-color: #0c1423;
