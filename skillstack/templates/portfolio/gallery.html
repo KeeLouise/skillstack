@@ -1,40 +1,43 @@
 {% extends "base.html" %}
 {% load static %}
+
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'css/portfolio.css' %}">
 {% endblock %}
+
 {% block title %}My Portfolio{% endblock %}
 
 {% block content %}
 <div class="container py-5">
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="mb-0">My Portfolio</h2>
-    <a href="{% url 'portfolio_create' %}" class="btn btn-dark">+ Add Link</a>
+    <a href="{% url 'portfolio:portfolio_create' %}" class="btn btn-dark">+ Add Link</a>
   </div>
 
   {% if links %}
     <div class="portfolio-grid">
       {% for item in links %}
-      <a class="portfolio-card" href="{{ item.url }}" target="_blank" rel="noopener noreferrer">
-        <div class="portfolio-thumb">
-          <img loading="lazy" src="{{ item.display_image }}" alt="{{ item.title|default:'Preview' }}">
-        </div>
-        <div class="portfolio-info">
-          <div class="title text-truncate">{{ item.title|default:item.url }}</div>
-          <div class="url text-muted text-truncate">{{ item.url }}</div>
-        </div>
-      </a>
-      <form method="post" action="{% url 'portfolio_delete' item.slug %}" class="mt-2">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
-      </form>
+        <a class="portfolio-card" href="{{ item.url }}" target="_blank" rel="noopener noreferrer">
+          <div class="portfolio-thumb">
+            <img loading="lazy" src="{{ item.display_image }}" alt="{{ item.title|default:'Preview' }}">
+          </div>
+          <div class="portfolio-info">
+            <div class="title text-truncate">{{ item.title|default:item.url }}</div>
+            <div class="url text-muted text-truncate">{{ item.url }}</div>
+          </div>
+        </a>
+
+        <form method="post" action="{% url 'portfolio:portfolio_delete' item.slug %}" class="mt-2">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+        </form>
       {% endfor %}
     </div>
   {% else %}
     <div class="card p-5 text-center shadow-sm">
       <h5 class="mb-2">No links yet</h5>
       <p class="text-muted mb-3">Add your first portfolio link to show a live preview.</p>
-      <a href="{% url 'portfolio_create' %}" class="btn btn-primary">Add Link</a>
+      <a href="{% url 'portfolio:portfolio_create' %}" class="btn btn-primary">Add Link</a>
     </div>
   {% endif %}
 </div>

@@ -1,28 +1,33 @@
 {% extends "base.html" %}
 {% load static %}
+
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'css/portfolio.css' %}">
 <link rel="canonical" href="{{ request.build_absolute_uri }}">
+
 <meta property="og:title" content="{{ owner.first_name|default:owner.username }} — Portfolio">
 <meta property="og:type" content="website">
 <meta property="og:url" content="{{ request.build_absolute_uri }}">
-{% if og_image %}<meta property="og:image" content="{{ og_image }}">{% endif %}
+{% if og_image %}
+<meta property="og:image" content="{{ og_image }}">
+{% endif %}
 <meta name="twitter:card" content="summary_large_image">
 {% endblock %}
+
 {% block title %}{{ owner.first_name|default:owner.username }} — Portfolio{% endblock %}
 
 {% block content %}
 <div class="container py-5">
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="mb-0">{{ owner.first_name|default:owner.username }}’s Portfolio</h2>
-    <a href="/" class="btn btn-outline-secondary">Home</a>
+    <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Home</a>
   </div>
 
   {% if links %}
     <div class="portfolio-grid">
       {% for item in links %}
       <a class="portfolio-card" href="{{ item.url }}" target="_blank" rel="noopener noreferrer">
-        <div class="portfolio-thumb" style="background-image:url('{{ item.display_image }}')"></div>
+        <div class="portfolio-thumb" style="background-image:url('{{ item.display_image }}')"></div> 
         <div class="portfolio-info">
           <div class="title text-truncate">{{ item.title|default:item.url }}</div>
           <div class="url text-muted text-truncate">{{ item.url }}</div>

@@ -1,4 +1,3 @@
-# portfolio/views.py
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect, get_object_or_404
@@ -11,6 +10,7 @@ def portfolio_gallery(request):
     links = PortfolioLink.objects.filter(owner=request.user).order_by("-created_at")
     return render(request, "portfolio/gallery.html", {"links": links})
 
+
 @login_required
 def portfolio_create(request):
     if request.method == "POST":
@@ -19,7 +19,6 @@ def portfolio_create(request):
             link = form.save(commit=False)
             link.owner = request.user
             link.save()
-            # redirect to the gallery (namespaced)
             return redirect("portfolio:portfolio_gallery")
     else:
         form = PortfolioLinkForm()
