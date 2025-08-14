@@ -8,10 +8,10 @@
     (pageBadge && pageBadge.dataset.unreadUrl) ||
     '';
 
-  // Helper: update badge count - KR 14/08/2025
+  // update badge count - KR 14/08/2025
   function setBadge(el, n) {
     if (!el) return;
-    n = Number(n) || 0;
+    n = Math.max(0, Number(n) || 0);
     if (n > 0) {
       el.textContent = n;
       el.style.display = '';
@@ -19,6 +19,21 @@
       el.textContent = '';
       el.style.display = 'none';
     }
+  }
+
+  //  read current badge count - KR 14/08/2025
+  function getBadgeCount(el) {
+    if (!el) return 0;
+    var n = parseInt((el.textContent || '').trim(), 10);
+    return isNaN(n) ? 0 : n;
+  }
+
+  //  decrement both badges once - KR 14/08/2025
+  function decrementUnreadBadges() {
+    var p = getBadgeCount(pageBadge);
+    var i = getBadgeCount(inboxBadge);
+    if (p > 0) setBadge(pageBadge, p - 1);
+    if (i > 0) setBadge(inboxBadge, i - 1);
   }
 
   // Fetch unread count - KR 14/08/2025
@@ -50,17 +65,43 @@
     }
   });
 
-  // Helper: get CSRF token - KR 14/08/2025
+  // get CSRF token - KR 14/08/2025
   function getCsrf() {
     var m = document.cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/);
     return m ? decodeURIComponent(m[1]) : '';
   }
 
-  // Mark message as read on click - KR 14/08/2025
+  function cardLooksUnread(card) {
+    if (!card) return false;
+    if (card.classList.contains('unread')) return true;
+    if (card.classList.contains('bg-light') && card.classList.contains('border-primary')) return true;
+    var unreadBadge = card.querySelector('.badge.bg-success');
+    if (unreadBadge && /unread/i.test(unreadBadge.textContent || '')) return true;
+    var chipUnread = card.querySelector('.list-chip');
+    if (chipUnread && /unread/i.test(chipUnread.textContent || '')) return true;
+    return false;
+  }
+
+  // Mutate card DOM to "read" state immediately - KR 14/08/2025
+  function markCardReadLocally(card) {
+    if (!card) return;
+    card.classList.remove('unread', 'bg-light', 'border-primary');
+
+    var unreadBadge = card.querySelector('.badge.bg-success');
+    if (unreadBadge && /unread/i.test(unreadBadge.textContent || '')) {
+      unreadBadge.remove();
+    }
+
+    var chips = card.querySelectorAll('.list-chip');
+    chips.forEach(function (chip) {
+      if (/unread/i.test(chip.textContent || '')) chip.remove();
+    });
+  }
+
+  // Mark message as read on click + instant badge decrement - KR 14/08/2025
   var cards = document.querySelectorAll('[data-msg-id]');
   cards.forEach(function (card) {
     card.addEventListener('click', function (e) {
-      // Ignore clicks on forms/buttons or elements flagged no-card-click - KR 14/08/2025
       if (
         e.target.closest('form') ||
         e.target.closest('button') ||
@@ -73,13 +114,21 @@
       var id = card.getAttribute('data-msg-id');
       if (!url || !id) return;
 
-      // Instantly update UI to show message as read - KR 14/08/2025
-      card.classList.remove('unread');
+      // Prevent double-decrement if user taps the same card multiple times - KR 14/08/2025
+      var wasUnread = cardLooksUnread(card);
+      if (wasUnread && card.dataset.readLocally !== '1') {
+        markCardReadLocally(card);
+        decrementUnreadBadges();
+        card.dataset.readLocally = '1';
+      }
 
-      // Fire-and-forget mark as read request - KR 14/08/2025
-      navigator.sendBeacon
-        ? navigator.sendBeacon(url, JSON.stringify({ id: id }))
-        : fetch(url, {
+      // Send mark-as-read - KR 14/08/2025
+      try {
+        if (navigator.sendBeacon) {
+          var blob = new Blob([JSON.stringify({ id: id })], { type: 'application/json' });
+          navigator.sendBeacon(url, blob);
+        } else {
+          fetch(url, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -91,6 +140,10 @@
           }).catch(function (e) {
             if (window.DEBUG) console.debug(e);
           });
+        }
+      } catch (err) {
+        if (window.DEBUG) console.debug(err);
+      }
     });
   });
 
@@ -129,7 +182,7 @@
   const MAX_FILE_MB = 25;
   const MAX_TOTAL_MB = 100;
 
-  // Helper: format bytes - KR 14/08/2025
+  // format bytes - KR 14/08/2025
   function formatBytes(bytes) {
     if (!Number.isFinite(bytes)) return '0 B';
     const units = ['B', 'KB', 'MB', 'GB', 'TB'];
@@ -138,7 +191,7 @@
     return v.toFixed(v >= 10 || i === 0 ? 0 : 1) + ' ' + units[i];
   }
 
-  // Create dropzone UI - KR 14/08/2025
+  // Create dropzone  - KR 14/08/2025
   const dropzone = document.createElement('div');
   dropzone.className = 'msg-dropzone';
   dropzone.setAttribute('role', 'button');
