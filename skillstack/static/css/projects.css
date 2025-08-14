@@ -14,6 +14,11 @@
   --status-paused: #ef4444;
 }
 
+.navbar-brand img{
+    width: 500px;
+    height: 250px;
+  }
+  
 /* Header action button */
 .projects-header .btn-primary-strong {
   background-color: #10192d;

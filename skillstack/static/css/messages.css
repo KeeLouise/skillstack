@@ -15,6 +15,10 @@
   --msg-brand-grad-2:#7ad1c4;
 }
 
+.navbar-brand img{
+    width: 500px;
+    height: 250px;
+  }
 
 html { -webkit-text-size-adjust: 100%; }
 body { color: var(--msg-text); }
