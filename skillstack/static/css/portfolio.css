@@ -69,8 +69,15 @@
   background:#fff;
 }
 .preview-thumb{
-  aspect-ratio:16 / 9;
-  background:linear-gradient(90deg, var(--pf-grad-1), var(--pf-grad-2));
-  background-size:cover;
-  background-position:center;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border: 1px solid rgba(15,23,42,.1);
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+}
+.preview-placeholder{ color:#94a3b8; font-weight:600; }
  

@@ -6,6 +6,8 @@ from django.urls import reverse
 from .models import PortfolioLink
 from .forms import PortfolioLinkForm
 from django.templatetags.static import static
+from django.http import JsonResponse, HttpResponseBadRequest
+from .utils import fetch_og_image, fetch_og_title
 
 def _display_image_abs(request, link: PortfolioLink) -> str:
     """
@@ -93,3 +95,13 @@ def portfolio_delete(request, slug):
         return redirect('portfolio:portfolio_gallery')
 
     return redirect('portfolio:portfolio_gallery')
+
+@login_required
+def preview_api(request):
+    url = (request.GET.get("url") or "").strip()
+    if not url:
+        return HttpResponseBadRequest("missing url")
+
+    title = fetch_og_title(url) or ""
+    image = fetch_og_image(url) or ""
+    return JsonResponse({"title": title, "image_url": image})
