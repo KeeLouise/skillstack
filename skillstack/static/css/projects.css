@@ -14,6 +14,7 @@
   --status-paused: #ef4444;
 }
 
+/* Header action button */
 .projects-header .btn-primary-strong {
   background-color: #10192d;
   border-color: #10192d;
@@ -24,6 +25,8 @@
   border-color: #0c1423;
   color: #fff;
 }
+
+/* Cards */
 
 .project-card {
   display: block;
@@ -41,20 +44,12 @@
   box-shadow: var(--proj-hover-shadow);
   border-color: rgba(15, 23, 42, 0.16);
 }
-
 .project-card-header {
   height: 6px;
   background: linear-gradient(90deg, var(--proj-grad-1), var(--proj-grad-2));
 }
-
-.project-card-body {
-  padding: 1rem 1rem 1.1rem;
-}
-
-.project-title {
-  font-weight: 700;
-  color: var(--proj-text);
-}
+.project-card-body { padding: 1rem 1rem 1.1rem; }
+.project-title { font-weight: 700; color: var(--proj-text); }
 
 .project-category {
   display: inline-block;
@@ -80,7 +75,9 @@
 
 .text-muted { color: var(--proj-muted) !important; }
 
-/*Project detail styling - KR 13/08/20258*/
+/* Project detail */
+
+.card.shadow-sm.border-0.overflow-hidden.project-detail { border-radius: 16px; }
 
 .project-hero {
   min-height: 160px;
@@ -89,6 +86,8 @@
     linear-gradient(90deg, var(--proj-grad-1), var(--proj-grad-2));
   color: #fff;
   border-bottom: 1px solid rgba(255,255,255,0.08);
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
 }
 .project-hero-mark {
   width: 8px;
@@ -129,20 +128,22 @@
   color: #0f172a;
 }
 
+.project-status-badge {
+  font-size: .8rem;
+  padding: .4rem .55rem;
+}
+
+/* Upload & attachments */
+
 .upload-dropzone {
   border: 1px dashed rgba(15, 23, 42, 0.2);
   border-radius: 12px;
   background: #f8fafc;
   padding: 1rem;
 }
-.upload-dropzone input[type="file"] {
-  display: block;
-}
+.upload-dropzone input[type="file"] { display: block; }
 
-.attachment-list {
-  display: grid;
-  gap: .75rem;
-}
+.attachment-list { display: grid; gap: .75rem; }
 .attachment-item {
   border: 1px solid rgba(15, 23, 42, 0.08);
   border-radius: 10px;
@@ -169,15 +170,86 @@
 }
 .attachment-link:hover { text-decoration: underline; }
 
-.project-status-badge {
-  font-size: .8rem;
-  padding: .4rem .55rem;
+form .form-control:focus,
+form .form-select:focus {
+  border-color: var(--proj-grad-1);
+  box-shadow: 0 0 0 .25rem rgba(79,125,187,.22);
 }
 
-.card.shadow-sm.border-0.overflow-hidden.project-detail {
-  border-radius: 16px;
+/* Responsive media queries */
+
+@media (max-width:576px){
+  html{ font-size:100%; }
+  body{ font-size:16px; }
+
+  .container.py-5{ padding-top:1.5rem !important; padding-bottom:1.5rem !important; }
+
+  .project-hero .w-100{
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center;
+    gap: .75rem;
+  }
+  .project-hero-mark{ display:none; }
+  .project-hero .flex-grow-1{ width:100%; }
+  .project-hero .ms-auto{
+    margin-left:0 !important;
+    width:100%;
+    display:flex !important;
+    justify-content:center !important;
+    gap:.5rem;
+  }
+  .project-hero .ms-auto .btn{
+    flex: 1 1 46%;
+    min-height: 44px;
+  }
+  .meta-chip{ font-size:.92rem; padding:.32rem .7rem; }
+
+  .project-detail .card-body{ padding: 1.25rem !important; }
+  .section-card{ padding: 1rem; }
+  .description-box{ padding: 1rem; line-height:1.65; }
+
+  .attachment-list{ grid-template-columns: 1fr; }
+  .attachment-item{ padding: 1rem; }
+
+  .form-select, .form-control{ font-size:1rem; }
+  .btn{ font-size:1rem; }
 }
-.project-hero {
-  border-top-left-radius: 16px;
-  border-top-right-radius: 16px;
+
+@media (min-width:577px) and (max-width:767.98px){
+  .project-hero .w-100{
+    justify-content:center;
+    text-align:center;
+    gap:1rem;
+  }
+  .project-hero .ms-auto{
+    margin-left:0 !important;
+    display:flex !important;
+    gap:.5rem;
+  }
+  .attachment-list{ grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width:768px) and (max-width:991.98px){
+  .project-hero{ min-height: 180px; }
+  .meta-chip{ font-size:.9rem; }
+  .attachment-list{ grid-template-columns: repeat(2, 1fr); }
+  .section-card{ padding: 1.15rem 1.25rem; }
+}
+
+@media (min-width:820px) and (max-width:1180px) and (orientation:landscape){
+  .project-hero{ min-height: 180px; }
+  .project-hero-mark{ height:56px; }
+  .project-hero .meta-chip{ font-size:.9rem; }
+  .project-detail .card-body{ padding: 1.5rem 1.75rem !important; }
+  .section-card{ padding: 1.25rem 1.35rem; }
+  .attachment-list{ grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width:992px) and (max-width:1199.98px){
+  .attachment-list{ grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width:1200px){
+  .attachment-list{ grid-template-columns: repeat(3, 1fr); }
 }
