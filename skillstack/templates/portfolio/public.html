@@ -16,9 +16,14 @@
 
 {% block content %}
 <div class="container py-5">
-  <div class="d-flex justify-content-between align-items-center mb-4">
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
     <h2 class="mb-0">{{ owner.first_name|default:owner.username }}’s Portfolio</h2>
-    <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Home</a>
+    <div class="d-flex gap-2">
+      <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Home</a>
+      <button type="button" class="btn btn-primary" id="shareBtn">
+        <i class="bi bi-share"></i> Share
+      </button>
+    </div>
   </div>
 
   {% if links %}
@@ -40,4 +45,8 @@
     </div>
   {% endif %}
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'js/portfolio.js' %}"></script>
 {% endblock %}

@@ -62,3 +62,33 @@
     });
   }
 })();
+
+//Portfolio share
+
+(function () {
+  const shareBtn = document.getElementById('shareBtn');
+  if (!shareBtn) return;
+
+  shareBtn.addEventListener('click', async () => {
+    const shareData = {
+      title: document.title,
+      text: "Check out this portfolio!",
+      url: window.location.href
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        console.error('Share failed:', err.message);
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(shareData.url);
+        alert("Link copied to clipboard!");
+      } catch (err) {
+        console.error('Clipboard copy failed:', err.message);
+      }
+    }
+  });
+})();
