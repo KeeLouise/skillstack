@@ -39,16 +39,23 @@ def _display_image_abs(request, link: PortfolioLink) -> str:
 def portfolio_gallery(request):
     links = PortfolioLink.objects.filter(owner=request.user).order_by("-created_at")
     for l in links:
-        l.display_image = _display_image_abs(request, l)
+        l.display_image = l.display_image(request) if callable(l.display_image) else getattr(l, "display_image", "")
 
     og_image = links[0].display_image if links else request.build_absolute_uri(
         static("images/og/portfolio-default.jpg")
     )
 
+    public_path = reverse("portfolio:portfolio_public", args=[request.user.username])
+    public_abs_url = request.build_absolute_uri(public_path)
+
     return render(
         request,
         "portfolio/gallery.html",
-        {"links": links, "og_image": og_image},
+        {
+            "links": links,
+            "og_image": og_image,
+            "public_abs_url": public_abs_url,
+        },
     )
 
 
