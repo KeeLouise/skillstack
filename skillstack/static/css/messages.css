@@ -176,10 +176,14 @@ form[method="get"] .form-control:focus{
   html, body { font-size:16px; }
   body{ overflow-x:hidden; } 
 
-  .message-detail-container{
-    max-width:100%!important;
-    padding-left:1rem; padding-right:1rem;
+  .message-detail-container nav,
+  .message-detail-container .nav-tabs {
+    font-size: 0.9rem;       
   }
+  .message-detail-container .nav-link {
+    padding: .4rem .6rem;   
+  }
+
   .message-detail-container .thread-card .card-text,
   .message-detail-container .thread-card .mb-3{
     font-size:1rem; line-height:1.65;
@@ -196,23 +200,23 @@ form[method="get"] .form-control:focus{
 
 .navbar-brand img{
   height:auto;
-  max-height:48px;    
+  max-height:48px;       
   width:auto;
-  max-width:220px;     
+  max-width:240px;      
 }
 
 @media (max-width: 992px){
   .navbar-brand img{
-    max-width:180px;   
-    max-height:42px;
+    max-width:200px;    
+    max-height:46px;
   }
 }
 @media (max-width: 576px){
   .navbar-brand img{
-    max-width:140px;   
-    max-height:38px;
-    display:block;     
-    margin:0 auto;     
+    max-width:170px;    
+    max-height:44px;
+    display:block;
+    margin:0 auto;
   }
 
   .navbar .container-fluid{
