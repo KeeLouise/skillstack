@@ -190,7 +190,7 @@ form .form-select:focus {
     flex: none;           
     width: auto;          
     min-height: auto;     
-    font-size: 0.9rem;    
+    font-size: 0.75rem;    
     padding: 0.5rem 1rem; 
   }
 
@@ -246,6 +246,14 @@ form .form-select:focus {
     max-width: 250px;
     max-height: 125px;
   }
+
+   form[action*="create_project"] .btn {
+    flex: none;           
+    width: auto;          
+    min-height: auto;     
+    font-size: 0.75rem;    
+    padding: 0.5rem 1rem; 
+  }
 }
 
 
@@ -257,8 +265,8 @@ form .form-select:focus {
 }
 
 .navbar-brand img{
-    max-width: 500px;
-    max-height: 250px;
+    max-width: 250px;
+    max-height: 125px;
   }
 
 @media (min-width:820px) and (max-width:1180px) and (orientation:landscape){
@@ -270,9 +278,19 @@ form .form-select:focus {
   .attachment-list{ grid-template-columns: repeat(2, 1fr); }
 }
 
+.navbar-brand img{
+    max-width: 250px;
+    max-height: 125px;
+  }
+
 @media (min-width:992px) and (max-width:1199.98px){
   .attachment-list{ grid-template-columns: repeat(2, 1fr); }
 }
+
+.navbar-brand img{
+    max-width: 250px;
+    max-height: 125px;
+  }
 
 @media (min-width:1200px){
   .attachment-list{ grid-template-columns: repeat(3, 1fr); }
