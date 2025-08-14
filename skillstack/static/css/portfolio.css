@@ -131,10 +131,21 @@
 
 
 @media (max-width: 576px){
-  .portfolio-header{ flex-direction:column; align-items:flex-start; gap:.5rem; }
+  .portfolio-header{ 
+    flex-direction:column; 
+    align-items:flex-start; 
+    gap:.5rem; 
+  }
   .portfolio-actions{ width:100%; }
-  .portfolio-grid{ grid-template-columns: 1fr; gap: .85rem; }
-  .portfolio-info{ padding:.7rem .8rem .8rem; }
+  
+  .portfolio-grid{ 
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
+    gap: .65rem; 
+  }
+
+  .portfolio-info{ 
+    padding:.65rem .7rem .7rem; 
+  }
   .preview-card{ margin-top:.5rem; }
 }
 
