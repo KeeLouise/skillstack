@@ -1,9 +1,12 @@
 {% extends 'base.html' %}
 {% load static %}
+
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'css/messages.css' %}">
 {% endblock %}
+
 {% block title %}Messages{% endblock %}
+
 {% block content %}
 <div class="container py-5">
   <div class="d-flex justify-content-between align-items-center mb-4">
@@ -17,6 +20,7 @@
       + New Message
     </a>
   </div>
+
   <ul class="nav nav-tabs mb-4">
     <li class="nav-item">
       <a class="nav-link {% if active_tab == 'all' %}active{% endif %}" href="{% url 'all_messages' %}">All</a>
@@ -36,9 +40,12 @@
       <a class="nav-link {% if active_tab == 'archived' %}active{% endif %}" href="{% url 'archived_messages' %}">Archived</a>
     </li>
   </ul>
+
   <form method="get" class="mb-4 d-flex">
     <input type="text" name="q" class="form-control me-2" placeholder="Search messages..." value="{{ query|default:'' }}">
-    <button type="submit" class="btn btn-outline-primary"><i class="bi bi-search me-1"></i>Search</button>
+    <button type="submit" class="btn btn-outline-primary">
+      <i class="bi bi-search me-1"></i>Search
+    </button>
   </form>
 
   {# Threaded inbox view #}
@@ -64,7 +71,7 @@
                           <h5 class="mb-0 text-truncate" title="{{ last_msg.subject|default:'(no subject)' }}">
                             {{ last_msg.subject|default:"(no subject)" }}
                           </h5>
-                          <div class="small text-muted mt-1">
+                          <div class="mt-1 d-flex flex-wrap gap-1">
                             {% for p in convo.participants.all %}
                               {% if p.id != user.id %}
                                 <a href="{% url 'collab_profile' p.id %}" class="list-chip text-decoration-none">
@@ -77,9 +84,9 @@
                       </div>
                       <div class="text-end">
                         <span class="badge
-                          {% if last_msg.importance == 'high' %}danger
-                          {% elif last_msg.importance == 'normal' %}accent
-                          {% else %}badge{% endif %}">
+                          {% if last_msg.importance == 'high' %}bg-danger
+                          {% elif last_msg.importance == 'normal' %}bg-primary
+                          {% else %}bg-secondary{% endif %}">
                           {{ last_msg.get_importance_display }}
                         </span>
                         <div class="small text-muted mt-1">
@@ -92,7 +99,7 @@
                       <div class="small text-muted">
                         {{ msgs|length }} message{{ msgs|length|pluralize }}
                         {% if not last_msg.is_read and last_msg.recipient_id == user.id %}
-                          • <span class="badge success">Unread</span>
+                          • <span class="badge bg-success">Unread</span>
                         {% endif %}
                       </div>
                       <a href="{% url 'conversation_detail' convo.id %}" class="btn btn-outline-primary btn-sm" data-no-card-click>
@@ -132,10 +139,10 @@
                     <h5 class="mb-0 text-truncate" title="{{ msg.subject|default:'(no subject)' }}">
                       {{ msg.subject|default:"(no subject)" }}
                     </h5>
-                    <div class="small text-muted mt-1">
+                    <div class="mt-1 d-flex flex-wrap gap-1">
                       {% if msg.sender_id == user.id %}
                         <a href="{% url 'collab_profile' msg.recipient.id %}" class="list-chip text-decoration-none">
-                        To: {{ msg.recipient.get_full_name|default:msg.recipient.username }}
+                          To: {{ msg.recipient.get_full_name|default:msg.recipient.username }}
                         </a>
                         <span class="list-chip">Sent</span>
                       {% else %}
@@ -152,9 +159,9 @@
                 </div>
                 <div class="text-end">
                   <span class="badge
-                    {% if msg.importance == 'high' %}danger
-                    {% elif msg.importance == 'normal' %}accent
-                    {% else %}badge{% endif %}">
+                    {% if msg.importance == 'high' %}bg-danger
+                    {% elif msg.importance == 'normal' %}bg-primary
+                    {% else %}bg-secondary{% endif %}">
                     {{ msg.get_importance_display }}
                   </span>
                   <div class="small text-muted mt-1">{{ msg.sent_at|date:"M d, Y H:i" }}</div>
@@ -170,9 +177,8 @@
                   {% endif %}
                 </div>
                 <div class="d-flex gap-2">
-                  <a href="{% url 'message_detail' msg.pk %}" class="btn btn-outline-primary btn-sm" data-no-card-click>
-                    View
-                  </a>
+                  <a href="{% url 'message_detail' msg.pk %}" class="btn btn-outline-primary btn-sm" data-no-card-click>View</a>
+                  {# Archive / Unarchive / Delete actions remain unchanged #}
                   {% if active_tab != 'archived' %}
                     <form method="POST" action="{% url 'archive_message' msg.pk %}" class="d-inline" data-no-card-click>
                       {% csrf_token %}
@@ -192,18 +198,14 @@
                       {% csrf_token %}
                       <input type="hidden" name="next" value="{% url 'sent' %}">
                       <button type="submit" class="btn btn-sm btn-outline-danger"
-                              onclick="return confirm('Delete this message for you?');">
-                        Delete
-                      </button>
+                              onclick="return confirm('Delete this message for you?');">Delete</button>
                     </form>
                   {% elif active_tab == 'inbox' and msg.recipient_id == user.id %}
                     <form method="POST" action="{% url 'delete_message' msg.pk %}" class="d-inline" data-no-card-click>
                       {% csrf_token %}
                       <input type="hidden" name="next" value="{% url 'messages' %}">
                       <button type="submit" class="btn btn-sm btn-outline-danger"
-                              onclick="return confirm('Delete this message for you?');">
-                        Delete
-                      </button>
+                              onclick="return confirm('Delete this message for you?');">Delete</button>
                     </form>
                   {% elif active_tab == 'all' %}
                     {% if msg.sender_id == user.id or msg.recipient_id == user.id %}
@@ -211,9 +213,7 @@
                         {% csrf_token %}
                         <input type="hidden" name="next" value="{% url 'all_messages' %}">
                         <button type="submit" class="btn btn-sm btn-outline-danger"
-                                onclick="return confirm('Delete this message for you?');">
-                          Delete
-                        </button>
+                                onclick="return confirm('Delete this message for you?');">Delete</button>
                       </form>
                     {% endif %}
                   {% endif %}
@@ -238,6 +238,7 @@
   {% endif %}
 </div>
 {% endblock content %}
+
 {% block extra_scripts %}
 <script src="{% static 'js/messages.js' %}"></script>
 {% endblock %}
