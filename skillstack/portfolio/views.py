@@ -6,7 +6,7 @@ from .forms import PortfolioLinkForm
 
 @login_required
 def portfolio_gallery(request):
-    links = PortfolioLink.objects.filter(owner=request.user).order_by('position', '-created_at')
+    links = PortfolioLink.objects.filter(owner=request.user).order_by('-created_at')
     return render(request, 'portfolio/gallery.html', {'links': links})
 
 @login_required
@@ -24,5 +24,5 @@ def portfolio_create(request):
 
 def portfolio_public(request, username):
     owner = get_object_or_404(User, username=username)
-    links = PortfolioLink.objects.filter(owner=owner, is_published=True).order_by('position', '-created_at')
+    links = PortfolioLink.objects.filter(owner=owner, is_published=True).order_by('-created_at')
     return render(request, 'portfolio/public.html', {'owner': owner, 'links': links})
