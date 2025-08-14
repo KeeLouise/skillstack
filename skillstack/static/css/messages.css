@@ -213,3 +213,29 @@ form[method="get"] .form-control:focus{
   :root{ --nav-toggle-size:30px; --nav-toggle-stroke:3; }
   .navbar-toggler{ padding:.6rem .8rem; }
 }
+
+@media (min-width: 820px) and (max-width: 1180px) and (orientation: landscape) {
+  .navbar {
+    padding-top: 0.35rem;
+    padding-bottom: 0.35rem;
+  }
+
+  .navbar-nav .nav-link {
+    font-size: 0.9rem;
+    padding: 0.35rem 0.65rem;
+  }
+
+  .navbar-brand {
+    font-size: 1.05rem;
+  }
+
+  .navbar-toggler {
+    padding: 0.35rem 0.55rem;
+    border-radius: 8px;
+  }
+
+  .navbar-toggler-icon {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+}
