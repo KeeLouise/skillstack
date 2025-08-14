@@ -183,9 +183,13 @@ form[method="get"] .form-control:focus{
 }
 .navbar-toggler:focus{ outline:none; box-shadow:0 0 0 .2rem rgba(79,125,187,.25); }
 .navbar-toggler:hover{ transform:translateY(-1px); }
-.navbar-toggler-icon{
-  width:var(--nav-toggle-size); height:var(--nav-toggle-size);
-  background-image:none!important; position:relative; display:inline-block;
+.navbar-toggler-icon {
+  width: var(--nav-toggle-size);
+  height: var(--nav-toggle-size);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  background: rgba(255,255,255,0.85);
 }
 .navbar-toggler-icon::before,
 .navbar-toggler-icon::after,
