@@ -58,6 +58,7 @@ def portfolio_create(request):
             link = form.save(commit=False)
             link.owner = request.user
             link.save()
+            link.ensure_preview()
             messages.success(request, "Link added to your portfolio.")
             return redirect("portfolio:portfolio_gallery")
     else:

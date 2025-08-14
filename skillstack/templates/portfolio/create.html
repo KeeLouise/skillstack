@@ -16,22 +16,35 @@
         <a href="{% url 'portfolio:portfolio_gallery' %}" class="btn btn-outline-secondary">Back</a>
       </div>
 
-      <form method="post" enctype="multipart/form-data" id="portfolioForm" class="row g-3">
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger mb-3">
+          {% for err in form.non_field_errors %}<div>{{ err }}</div>{% endfor %}
+        </div>
+      {% endif %}
+
+      <form
+        method="post"
+        enctype="multipart/form-data"
+        id="portfolioForm"
+        class="row g-3"
+        novalidate
+        data-preview-url="{% url 'portfolio:preview_api' %}">
         {% csrf_token %}
+        {{ form.media }}
 
         <div class="col-12 col-lg-6">
           {{ form|crispy }}
-          <small class="text-muted">
+          <small class="text-muted d-block mt-1">
             You can upload a custom thumbnail, or we’ll try to use the site’s Open Graph image.
           </small>
         </div>
 
         <div class="col-12 col-lg-6">
           <div class="preview-card">
-            <div class="preview-thumb" id="liveThumb">
+            <div class="preview-thumb" id="liveThumb" aria-label="Live preview">
               <div class="preview-placeholder">Preview</div>
             </div>
-            <div class="preview-meta">
+            <div class="preview-meta mt-2">
               <div class="preview-title text-truncate" id="liveTitle">Title will appear here</div>
               <div class="preview-url text-muted text-truncate" id="liveUrl">https://your-link.example</div>
             </div>

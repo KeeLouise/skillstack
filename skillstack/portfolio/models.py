@@ -1,41 +1,77 @@
-from django.conf import settings
-from django.core.validators import URLValidator
 from django.db import models
+from django.contrib.auth import get_user_model
+from django.templatetags.static import static
 from django.utils.text import slugify
 
+from .utils import fetch_og_image
+
+User = get_user_model()
+
 class PortfolioLink(models.Model):
-    owner       = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="portfolio_links")
-    title       = models.CharField(max_length=120)
-    url         = models.URLField()
-    image_url   = models.URLField(blank=True)
-    image_file  = models.ImageField(upload_to="portfolio_thumbs/", blank=True, null=True)
-    slug        = models.SlugField(max_length=140, blank=True)
-    created_at  = models.DateTimeField(auto_now_add=True)
-    updated_at  = models.DateTimeField(auto_now=True)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="portfolio_links")
+    title = models.CharField(max_length=200, blank=True)
+    url = models.URLField()
+    slug = models.SlugField(max_length=140, blank=True)
+    image_file = models.ImageField(upload_to="portfolio/thumbs/", blank=True, null=True)
+    image_url = models.URLField(blank=True)
+    is_published = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ["-created_at"]
-        unique_together = [("owner", "slug")]
+        constraints = [
+            models.UniqueConstraint(fields=["owner", "slug"], name="portfolio_owner_slug_unique"),
+        ]
+        indexes = [
+            models.Index(fields=["owner", "-created_at"]),
+        ]
+
+    def __str__(self):
+        return self.title or self.url
 
     def save(self, *args, **kwargs):
+        # Auto-create a slug (unique per owner) if missing
         if not self.slug:
-            base = slugify(self.title or self.url)
-            s = base
-            n = 1
-            while PortfolioLink.objects.filter(owner=self.owner, slug=s).exclude(pk=self.pk).exists():
-                n += 1
-                s = f"{base}-{n}"
-            self.slug = s
+            base = slugify(self.title or self.url) or "link"
+            candidate = base
+            i = 1
+            while PortfolioLink.objects.filter(owner=self.owner, slug=candidate).exclude(pk=self.pk).exists():
+                i += 1
+                candidate = f"{base}-{i}"
+            self.slug = candidate
         super().save(*args, **kwargs)
 
-    def display_image(self):
+    def display_image(self, request=None) -> str:
+        """
+        Returns a preview image URL.
+        - Prefers uploaded file, then scraped image_url, then static fallback.
+        - If `request` is provided and the URL is relative, it returns an absolute URL (good for OG).
+        """
+        url = ""
+        if self.image_file and getattr(self.image_file, "url", None):
+            url = self.image_file.url
+        elif self.image_url:
+            url = self.image_url
+        else:
+            url = static("images/og/portfolio-default.jpg")
+
+        if request and not (url.startswith("http://") or url.startswith("https://")):
+            return request.build_absolute_uri(url)
+        return url
+
+    def ensure_preview(self, force: bool = False) -> bool:
+        """
+        Populate image_url from target site if missing (or force). Returns True if updated.
+        """
         if self.image_file:
-            return self.image_file.url
-        if self.image_url:
-            return self.image_url
-        return "data:image/svg+xml;utf8," \
-               "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 630'>" \
-               "<defs><linearGradient id='g' x1='0' x2='1'><stop stop-color='%234f7dbb'/>" \
-               "<stop offset='1' stop-color='%237ad1c4'/></linearGradient></defs>" \
-               "<rect width='1200' height='630' fill='url(%23g)'/>" \
-               "</svg>"
+            return False
+        if self.image_url and not force:
+            return False
+
+        img = fetch_og_image(self.url)
+        if img:
+            self.image_url = img
+            self.save(update_fields=["image_url"])
+            return True
+        return False
