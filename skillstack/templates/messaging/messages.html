@@ -8,46 +8,39 @@
 {% block title %}Messages{% endblock %}
 
 {% block content %}
-{# HERO #}
-<section class="messages-hero">
-  <div class="container py-4 py-md-5">
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
-      <div class="min-w-0">
-        <h1 class="messages-hero-title mb-1">
-          Messages
-          {% if unread_count > 0 %}
-            <span id="page-unread-badge" class="hero-unread badge">{{ unread_count }}</span>
-          {% endif %}
-        </h1>
-        <p class="messages-hero-subtitle mb-0">Your conversations in one place</p>
-      </div>
-      <a href="{% url 'compose' %}" class="btn btn-hero">+ New Message</a>
-    </div>
-
-    <ul class="nav nav-pills messages-hero-tabs mt-4">
-      <li class="nav-item">
-        <a class="nav-link {% if active_tab == 'all' %}active{% endif %}" href="{% url 'all_messages' %}">All</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link {% if active_tab == 'inbox' %}active{% endif %}" href="{% url 'messages' %}">
-          Inbox
-          {% if unread_count > 0 %}
-            <span id="inbox-unread-badge" class="badge ms-1">{{ unread_count }}</span>
-          {% endif %}
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link {% if active_tab == 'sent' %}active{% endif %}" href="{% url 'sent' %}">Sent</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link {% if active_tab == 'archived' %}active{% endif %}" href="{% url 'archived_messages' %}">Archived</a>
-      </li>
-    </ul>
-  </div>
-  <div class="messages-hero-wave" aria-hidden="true"></div>
-</section>
-
 <div class="container py-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold mb-1 text-primary-emphasis">
+      Messages
+      {% if unread_count > 0 %}
+        <span id="page-unread-badge" class="badge bg-danger">{{ unread_count }}</span>
+      {% endif %}
+    </h2>
+    <a href="{% url 'compose' %}" class="btn btn-dark btn-lg px-4 fw-semibold">
+      + New Message
+    </a>
+  </div>
+
+  <ul class="nav nav-tabs mb-4">
+    <li class="nav-item">
+      <a class="nav-link {% if active_tab == 'all' %}active{% endif %}" href="{% url 'all_messages' %}">All</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if active_tab == 'inbox' %}active{% endif %}" href="{% url 'messages' %}">
+        Inbox
+        {% if unread_count > 0 %}
+          <span id="inbox-unread-badge" class="badge bg-danger ms-1">{{ unread_count }}</span>
+        {% endif %}
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if active_tab == 'sent' %}active{% endif %}" href="{% url 'sent' %}">Sent</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if active_tab == 'archived' %}active{% endif %}" href="{% url 'archived_messages' %}">Archived</a>
+    </li>
+  </ul>
+
   <form method="get" class="mb-4 d-flex">
     <input type="text" name="q" class="form-control me-2" placeholder="Search messages..." value="{{ query|default:'' }}">
     <button type="submit" class="btn btn-outline-primary">
@@ -185,6 +178,7 @@
                 </div>
                 <div class="d-flex gap-2">
                   <a href="{% url 'message_detail' msg.pk %}" class="btn btn-outline-primary btn-sm" data-no-card-click>View</a>
+                  {# Archive / Unarchive / Delete actions remain unchanged #}
                   {% if active_tab != 'archived' %}
                     <form method="POST" action="{% url 'archive_message' msg.pk %}" class="d-inline" data-no-card-click>
                       {% csrf_token %}
@@ -203,20 +197,23 @@
                     <form method="POST" action="{% url 'delete_message' msg.pk %}" class="d-inline" data-no-card-click>
                       {% csrf_token %}
                       <input type="hidden" name="next" value="{% url 'sent' %}">
-                      <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this message for you?');">Delete</button>
+                      <button type="submit" class="btn btn-sm btn-outline-danger"
+                              onclick="return confirm('Delete this message for you?');">Delete</button>
                     </form>
                   {% elif active_tab == 'inbox' and msg.recipient_id == user.id %}
                     <form method="POST" action="{% url 'delete_message' msg.pk %}" class="d-inline" data-no-card-click>
                       {% csrf_token %}
                       <input type="hidden" name="next" value="{% url 'messages' %}">
-                      <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this message for you?');">Delete</button>
+                      <button type="submit" class="btn btn-sm btn-outline-danger"
+                              onclick="return confirm('Delete this message for you?');">Delete</button>
                     </form>
                   {% elif active_tab == 'all' %}
                     {% if msg.sender_id == user.id or msg.recipient_id == user.id %}
                       <form method="POST" action="{% url 'delete_message' msg.pk %}" class="d-inline" data-no-card-click>
                         {% csrf_token %}
                         <input type="hidden" name="next" value="{% url 'all_messages' %}">
-                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this message for you?');">Delete</button>
+                        <button type="submit" class="btn btn-sm btn-outline-danger"
+                                onclick="return confirm('Delete this message for you?');">Delete</button>
                       </form>
                     {% endif %}
                   {% endif %}
