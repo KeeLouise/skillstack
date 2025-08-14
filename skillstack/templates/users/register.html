@@ -1,7 +1,12 @@
 {% extends "base.html" %}
+{% load static %}
 {% load crispy_forms_tags %}
 
 {% block title %}Register{% endblock %}
+
+{% block extra_head %}
+  <link rel="stylesheet" href="{% static 'css/login_register.css' %}">
+{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
