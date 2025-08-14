@@ -186,13 +186,15 @@ form .form-select:focus {
     max-height: 125px;
   }
  
-  form[action*="create_project"] .btn {
-    flex: none;           
-    width: auto;          
-    min-height: auto;     
-    font-size: 0.75rem;    
-    padding: 0.5rem 1rem; 
+  
+  .projects-header .btn {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
+    line-height: 1.1;
+    border-radius: 6px;
+    min-height: auto; 
   }
+
 
 
   .container.py-5{ padding-top:1.5rem !important; padding-bottom:1.5rem !important; }
