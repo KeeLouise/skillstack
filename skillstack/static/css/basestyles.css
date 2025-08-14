@@ -53,14 +53,3 @@ p, p.lead{
   box-shadow: 0 6px 16px rgba(0, 123, 255, 0.4);
 }
 
-@media (min-width:577px) and (max-width:1180px){
-  .navbar-brand img{
-    max-width: 500px;
-    max-height: 250px;
-  }
-}
-
-/* Phones */
-@media (max-width:576px){
-  html, body { font-size: 16px; }
-}

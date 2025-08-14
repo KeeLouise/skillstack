@@ -15,10 +15,10 @@
 }
 
 .navbar-brand img{
-    max-width: 250px;
-    max-height: 125px;
+    max-width: 500px;
+    max-height: 250px;
   }
-  
+
 .navbar-toggler {
   border: none;
 }
@@ -158,8 +158,8 @@ small {
     width: 1.75rem;
     height: 1.75rem;
   }
-}
 
+}
 
 /* Tablets */
 @media (min-width: 577px) and (max-width: 991.98px) {
