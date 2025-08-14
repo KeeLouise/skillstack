@@ -12,11 +12,6 @@ body {
   background: linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
   background-attachment: fixed;
 }
-
-.navbar-brand img{
-    width: 500px;
-    height: 250px;
-  }
   
 .profile-card {
   border-radius: var(--profile-card-radius);
@@ -283,10 +278,6 @@ hr {
   html { font-size: 100%; }
   body { font-size: 16px; }
 
-  .navbar-brand img{
-    max-width: 250px;
-    max-height: 125px;
-  }
   .container.py-5 {
     padding-top: 1.5rem !important;
     padding-bottom: 1.5rem !important;
@@ -346,11 +337,6 @@ hr {
     gap: 1rem;
   }
 
-  .navbar-brand img{
-    max-width: 250px;
-    max-height: 125px;
-  }
-
   .profile-cover .ms-auto {
     margin-left: 0 !important;
     width: 100%;
@@ -373,10 +359,6 @@ hr {
   .project-card h6 { font-size: 1rem; }
 }
 
-.navbar-brand img{
-    max-width: 250px;
-    max-height: 125px;
-  }
 
 @media (min-width: 820px) and (max-width: 1180px) and (orientation: landscape) {
   .container.py-5 { padding-left: 1rem; padding-right: 1rem; }
@@ -388,10 +370,6 @@ hr {
     gap: .5rem;
   }
 
-  .navbar-brand img{
-    max-width: 500px;
-    max-height: 250px;
-  }
 
   .avatar { width: 100px; height: 100px; }
   .avatar-xl { width: 108px; height: 108px; }

@@ -14,11 +14,7 @@
   --status-paused: #ef4444;
 }
 
-.navbar-brand img{
-    width: 500px;
-    height: 250px;
-  }
-  
+
 /* Header action button */
 .projects-header .btn-primary-strong {
   background-color: #10192d;
@@ -186,12 +182,7 @@ form .form-select:focus {
 @media (max-width:576px){
   html{ font-size:100%; }
   body{ font-size:16px; }
-  .navbar-brand img{
-    max-width: 250px;
-    max-height: 125px;
-  }
  
-  
   .projects-header .btn {
     font-size: 0.8rem;
     padding: 0.25rem 0.5rem;
@@ -199,8 +190,6 @@ form .form-select:focus {
     border-radius: 6px;
     min-height: auto; 
   }
-
-
 
   .container.py-5{ padding-top:1.5rem !important; padding-bottom:1.5rem !important; }
 
@@ -249,11 +238,6 @@ form .form-select:focus {
   }
   .attachment-list{ grid-template-columns: repeat(2, 1fr); }
 
-  .navbar-brand img{
-    max-width: 250px;
-    max-height: 125px;
-  }
-
    form[action*="create_project"] .btn {
     flex: none;           
     width: auto;          
@@ -271,11 +255,6 @@ form .form-select:focus {
   .section-card{ padding: 1.15rem 1.25rem; }
 }
 
-.navbar-brand img{
-    max-width: 250px;
-    max-height: 125px;
-  }
-
 @media (min-width:820px) and (max-width:1180px) and (orientation:landscape){
   .project-hero{ min-height: 180px; }
   .project-hero-mark{ height:56px; }
@@ -285,19 +264,10 @@ form .form-select:focus {
   .attachment-list{ grid-template-columns: repeat(2, 1fr); }
 }
 
-.navbar-brand img{
-    max-width: 250px;
-    max-height: 125px;
-  }
-
 @media (min-width:992px) and (max-width:1199.98px){
   .attachment-list{ grid-template-columns: repeat(2, 1fr); }
 }
 
-.navbar-brand img{
-    max-width: 250px;
-    max-height: 125px;
-  }
 
 @media (min-width:1200px){
   .attachment-list{ grid-template-columns: repeat(3, 1fr); }

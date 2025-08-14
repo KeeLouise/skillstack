@@ -188,11 +188,7 @@ form[method="get"] .form-control:focus{
 
 /* Tablet */
 @media (min-width:577px) and (max-width:1180px){
-  .navbar-brand img{
-    max-width: 500px;
-    max-height: 250px;
-  }
-
+  
   .message-detail-container{
     padding-inline: 12px; 
     font-size: 1.02rem;
@@ -214,11 +210,6 @@ form[method="get"] .form-control:focus{
     max-width:100%;
     padding-left: 14px;
     padding-right:14px;
-  }
-
-  .navbar-brand img{
-    max-width: 250px;     
-    max-height: 125px;
   }
 
   /* Bigger hamburger icon for visibility */

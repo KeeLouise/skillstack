@@ -53,3 +53,24 @@ p, p.lead{
   box-shadow: 0 6px 16px rgba(0, 123, 255, 0.4);
 }
 
+.navbar-brand img {
+  height: auto !important;     
+  max-width: 500px;
+  max-height: 250px;
+}
+
+@media (max-width: 992px) {
+  .navbar-brand img {
+    width: 250px;
+    max-width: 250px;
+    max-height: 125px;
+  }
+}
+
+@media (max-width: 576px) {
+  .navbar-brand img {
+    width: 250px;
+    max-width: 250px;
+    max-height: 125px;
+  }
+}
