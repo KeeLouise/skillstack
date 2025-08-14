@@ -12,7 +12,7 @@
   <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
       <h2 class="fw-bold mb-1 text-primary-emphasis">
-        Welcome, {{ request.user.first_name|default:request.user.username }}
+        Welcome, {{ request.user.get_full_name|default:request.user.username }}
       </h2>
       <p class="text-secondary mb-0">Here’s a snapshot of your software projects.</p>
     </div>
