@@ -59,7 +59,7 @@ p, p.lead{
   max-height: 250px;
 }
 
-@media (max-width: 1024px) and (orientation: landscape) {
+@media (max-width: 1366px) and (orientation: landscape) {
   .navbar-nav .nav-link {
     padding: 0.25rem 0.5rem;
     font-size: 1.0 rem;
