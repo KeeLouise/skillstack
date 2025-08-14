@@ -334,6 +334,141 @@ form[method="get"] .form-control:focus {
   width: auto;
 }
 
+.thread-card {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 14px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 10px 28px rgba(2, 8, 23, 0.08);
+  position: relative;
+}
+
+.thread-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 6px;
+  background: linear-gradient(90deg, #4f7dbb, #7ad1c4);
+  border-top-left-radius: 14px;
+  border-bottom-left-radius: 14px;
+}
+
+.thread-head {
+  background:
+    linear-gradient(180deg, rgba(79,125,187,0.08), rgba(122,209,196,0.08));
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+  padding: .85rem 1rem;
+}
+
+.thread-body {
+  padding: 1rem 1rem 1.25rem;
+}
+
+.avatar-circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  color: #0b1020;
+  background: #fff;
+  position: relative;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .08);
+}
+.avatar-circle::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4f7dbb, #7ad1c4);
+  z-index: -1;
+}
+
+.thread-title {
+  font-weight: 700;
+  letter-spacing: .2px;
+}
+.thread-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  align-items: center;
+}
+
+.time-pill {
+  padding: .25rem .55rem;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.06);
+  color: #475569;
+  font-size: .75rem;
+}
+
+.badge.bg-primary { background-color: #4f7dbb !important; }
+.badge.bg-danger  { background-color: #dc3545 !important; }
+.badge.bg-secondary { background-color: #111827 !important; color: #fff !important; }
+
+.list-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .3rem .65rem;
+  border-radius: 999px;
+  font-size: .85rem;
+  background: linear-gradient(90deg, #4f7dbb, #7ad1c4);
+  color: #fff;
+  text-decoration: none;
+  transition: background .2s, color .2s, transform .06s ease;
+}
+.list-chip:hover {
+  background: #000;
+  color: #fff;
+}
+.list-chip .chip-label {
+  opacity: .9;
+  font-weight: 600;
+}
+
+.thread-content {
+  color: #0f172a;
+  line-height: 1.6;
+}
+
+.attachments-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: .75rem;
+}
+.attachment-tile {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 12px;
+  padding: .75rem;
+  background: linear-gradient(180deg, #ffffff, #f8fafc);
+  transition: transform .12s ease, box-shadow .18s ease, border-color .2s ease;
+}
+.attachment-tile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(2, 8, 23, 0.12);
+  border-color: rgba(15, 23, 42, 0.18);
+}
+.attachment-tile a {
+  text-decoration: none;
+  font-weight: 600;
+  color: #0f172a;
+}
+.attachment-tile .text-muted {
+  color: #64748b !important;
+}
+
+.thread-actions .btn {
+  border-radius: 999px;
+  padding: .4rem .85rem;
+}
+
+.thread-card.unread {
+  background: linear-gradient(180deg, #fff, #f4f8ff);
+  border-color: rgba(64, 120, 182, .25);
+}
 
 @media (max-width: 576px) {
   .thread-card::before { left: 14px; }
