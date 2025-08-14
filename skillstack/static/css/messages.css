@@ -261,7 +261,6 @@ form[method="get"] .form-control:focus{
 }
 
 @media (min-width:820px) and (max-width:1180px) and (orientation:landscape){
-  .navbar{ padding-top:.35rem; padding-bottom:.35rem; }
   .navbar-brand{ font-size:1rem; }
   .navbar-dark .navbar-toggler{ padding:.45rem .6rem; border-radius:.5rem; }
   .navbar-dark .navbar-toggler-icon{ width:1.6rem; height:1.6rem; }
