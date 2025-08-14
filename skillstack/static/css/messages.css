@@ -277,24 +277,39 @@ form[method="get"] .form-control:focus {
 }
 
 
+/* Participant pill */
 .list-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: .45rem;
-  padding: .28rem .65rem;
-  border-radius: 999px;
-  background: var(--msg-accent-weak);
-  color: var(--msg-text);
-  border: 1px solid var(--msg-border);
-  font-weight: 600;
-  font-size: .825rem;
-  line-height: 1;
-  text-decoration: none;
-  transition: background-color .15s ease, border-color .15s ease, transform .05s ease;
+  display: inline-block;
+  background-color: #f1f5f9;
+  color: #1f2937; 
+  padding: 0.35rem 0.75rem;
+  font-size: 0.875rem;
+  border-radius: 9999px;
+  font-weight: 500;
+  line-height: 1.2;
+  border: 1px solid #e2e8f0;
+  transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 }
+
 .list-chip:hover {
-  background: #eef5ff;
-  border-color: #cfe0ff;
+  background-color: #e2e8f0;
+  color: #0d6efd;
+  text-decoration: none;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.list-chip:active {
+  background-color: #cbd5e1;
+  color: #0a58ca;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+}
+
+
+a.list-chip {
+  text-decoration: none;
+}
+
+a.list-chip:hover {
   text-decoration: none;
 }
 
