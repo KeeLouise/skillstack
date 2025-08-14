@@ -33,12 +33,6 @@ body { color: var(--msg-text); }
 
 /* NAVBAR */
 
-
-.navbar {
-  padding-top: .65rem;     
-  padding-bottom: .65rem;
-}
-
 .navbar .container-fluid{
   display: flex;
   align-items: center;
@@ -46,12 +40,6 @@ body { color: var(--msg-text); }
   gap: .5rem;
 }
 
-.navbar-brand img{
-  height: auto;
-  max-height: 48px;            
-  width: auto;
-  max-width: 220px;
-}
 
 .navbar-dark .navbar-toggler{
   padding:.55rem .7rem;
@@ -143,9 +131,9 @@ body { color: var(--msg-text); }
 .nav-tabs{
   border-bottom: 0;
   gap: .5rem;
-  flex-wrap: nowrap;                 /* prevents multi-line wrapping on small screens */
-  overflow-x: auto;                  /* allow horizontal scroll if needed */
-  -webkit-overflow-scrolling: touch; /* smooth momentum on iOS */
+  flex-wrap: nowrap;                
+  overflow-x: auto;                  
+  -webkit-overflow-scrolling: touch; 
 }
 .nav-tabs .nav-link{ border-radius:999px; white-space: nowrap; }
 .nav-tabs .nav-link.active{
