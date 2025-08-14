@@ -24,6 +24,17 @@ def portfolio_create(request):
         form = PortfolioLinkForm()
     return render(request, "portfolio/create.html", {"form": form})
 
+@login_required
+def portfolio_delete(request, slug):
+    link = get_object_or_404(PortfolioLink, slug=slug, owner=request.user)
+
+    if request.method == 'POST':
+        link.delete()
+        messages.success(request, "Portfolio link deleted successfully.")
+        return redirect('portfolio:portfolio_gallery')
+
+    return redirect('portfolio:portfolio_gallery')
+
 def portfolio_public(request, username):
     owner = get_object_or_404(User, username=username)
     links = PortfolioLink.objects.filter(owner=owner).order_by("-created_at")
