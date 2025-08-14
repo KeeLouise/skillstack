@@ -175,14 +175,16 @@ form[method="get"] .form-control:focus{
   .message-detail-container .attachments-list .preview img{ max-height:220px; }
   .message-detail-container .text-truncate{ max-width:100%; }
   .list-chip, .nav-toggle-label, .badge, .small { font-size:.9rem; }
-}
+
 
 .navbar-dark .navbar-toggler{
   padding:.55rem .7rem; border-radius:12px;
+  width: 2rem;
+  height: 2rem;
   border:1px solid var(--nav-toggle-border);
   background:var(--nav-toggle-bg);
   box-shadow:var(--nav-toggle-shadow);
   transition:transform .12s ease, box-shadow .12s ease, background .2s ease;
 }
 .navbar-dark .navbar-toggler:hover{ transform:translateY(-1px); }
-.navbar-dark .navbar-toggler:focus{ outline:none; box-shadow:0 0 0 .2rem rgba(79,125,187,.25); }
+.navbar-dark .navbar-toggler:focus{ outline:none; box-shadow:0 0 0 .2rem rgba(79,125,187,.25); }}
