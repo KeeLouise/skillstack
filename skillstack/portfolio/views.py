@@ -1,8 +1,8 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import PortfolioLink  # adjust to your model name
-from .forms import PortfolioLinkForm  # adjust to your form name
+from .models import PortfolioLink
+from .forms import PortfolioLinkForm
 
 @login_required
 def portfolio_gallery(request):
