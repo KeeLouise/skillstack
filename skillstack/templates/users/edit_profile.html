@@ -76,7 +76,7 @@
     </div>
 
     <div class="col-12">
-      <h5 class="mb-3">About You</h5>
+      <h5 class="mb-3">About </h5>
       {{ p_form.bio|as_crispy_field }}
     </div>
   </div>
@@ -91,4 +91,5 @@
 
 {% block extra_scripts %}
 <script src="{% static 'js/profile.js' %}"></script>
+<script src="{% static 'js/user_form_validation.js' %}"></script>
 {% endblock %}

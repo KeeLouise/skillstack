@@ -59,6 +59,30 @@ p, p.lead{
   max-height: 250px;
 }
 
+/* Form Validation Styles  */
+
+.is-valid {
+  border-color: #28a745 !important; 
+  box-shadow: 0 0 0 0.1rem rgba(40, 167, 69, 0.25);
+}
+
+.is-invalid {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 0 0.1rem rgba(220, 53, 69, 0.25);
+}
+
+.invalid-feedback {
+  display: block; 
+  font-size: 0.875rem;
+  color: #dc3545; 
+  margin-top: 0.25rem;
+}
+
+#bio-counter {
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+  color: #6c757d;
+}
 @media (min-width: 1024px) and (max-width: 1180px) and (orientation: landscape) {
   .navbar-nav .nav-link {
     padding: 0.25rem 0.5rem;
