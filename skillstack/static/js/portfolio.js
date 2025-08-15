@@ -1,5 +1,6 @@
 // Portfolio form live preview + OG fetch - KR 15/08/2025
-(function () {
+document.addEventListener('DOMContentLoaded', function () {
+    (function () {
   const form = document.getElementById('portfolioForm');
   if (!form) return;
   const previewApi = form.dataset.previewUrl || '/portfolio/preview/';
@@ -145,3 +146,4 @@
     btn.addEventListener('click', () => handleShareClick(btn));
   });
 })();
+});

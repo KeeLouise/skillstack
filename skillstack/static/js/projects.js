@@ -1,4 +1,5 @@
 // Helper functions - KR 13/08/2025
+document.addEventListener('DOMContentLoaded', function () {
 function $(sel, ctx) { return (ctx || document).querySelector(sel); } // Selects first element on the page that matches the CSS selector given.
 function $all(sel, ctx) { return Array.prototype.slice.call((ctx || document).querySelectorAll(sel)); } // Selects all matching elements and returns them as an array.
 function on(el, ev, fn, opts) { if (el) el.addEventListener(ev, fn, opts || false); } // Adds event listener.
@@ -189,3 +190,4 @@ function formatBytes(bytes) {                                                   
     }
   });
 })();
+});

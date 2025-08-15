@@ -1,4 +1,5 @@
-(function () {
+document.addEventListener('DOMContentLoaded', function () {
+  (function () {
   // Helpers - KR 12/08/2025
   function $(sel, ctx) { return (ctx || document).querySelector(sel); }
   function $all(sel, ctx) { return Array.prototype.slice.call((ctx || document).querySelectorAll(sel)); }
@@ -127,5 +128,5 @@
     // Expose for avatar preview callback - KR 12/08/2025
     window.updateProfileCompletion = render;
   })();
-
 })();
+});

@@ -1,5 +1,5 @@
-(function () {
-
+document.addEventListener('DOMContentLoaded', function () {
+  (function () {
   // Unread badge setup - KR 14/08/2025
   var pageBadge = document.getElementById('page-unread-badge');
   var inboxBadge = document.getElementById('inbox-unread-badge');
@@ -338,3 +338,4 @@
   });
 
 })();
+});

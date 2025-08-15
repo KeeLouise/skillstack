@@ -1,4 +1,5 @@
 // Helpers - KR 13/08/2025
+document.addEventListener('DOMContentLoaded', function () {
 function $(sel, ctx) { return (ctx || document).querySelector(sel); }
 function $all(sel, ctx) { return Array.prototype.slice.call((ctx || document).querySelectorAll(sel)); }
 function on(el, ev, fn, opts) { if (el) el.addEventListener(ev, fn, opts || false); }
@@ -198,3 +199,4 @@ function debounce(fn, wait) { let t; return function () { clearTimeout(t); t = s
   on(inviteInput, 'input', debounce(render, 100));
   render();
 })();
+});
