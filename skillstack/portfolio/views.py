@@ -108,24 +108,15 @@ def portfolio_create(request):
 
 
 def portfolio_public(request, username):
-    """
-    Public portfolio page.
-    - Only shows published links.
-    - Adds absolute display images & per-link share URLs.
-    - Provides og_image & share_page_url for social previews / share buttons.
-    """
     owner = get_object_or_404(User, username=username)
     links = PortfolioLink.objects.filter(owner=owner, is_published=True).order_by("-created_at")
 
     for l in links:
         l.display_image = _display_image_abs(request, l)
-        if hasattr(l, "get_absolute_url") and callable(l.get_absolute_url):
-            l.absolute_url = _abs(request, l.get_absolute_url())
-        else:
-            l.absolute_url = getattr(l, "url", "")
 
-    og_image = links[0].display_image if links else _default_og_abs(request)
-    share_page_url = _abs(request, request.path)
+    og_image = links[0].display_image if links else request.build_absolute_uri(
+        static("images/og/portfolio-default.jpg")
+    )
 
     return render(
         request,
@@ -134,7 +125,9 @@ def portfolio_public(request, username):
             "owner": owner,
             "links": links,
             "og_image": og_image,
-            "share_page_url": share_page_url,  # page-level share link - KR 15/08/2025
+            # tell base.html this is a public-facing page (hide app nav) - KR 15/08/2025
+            "suppress_user_nav": True,
+            "is_public_page": True,
         },
     )
 
