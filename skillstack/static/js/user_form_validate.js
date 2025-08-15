@@ -62,10 +62,11 @@ document.addEventListener('DOMContentLoaded', function () {
       const pw1         = form.querySelector('input[name="password1"]');
       const pw2         = form.querySelector('input[name="password2"]');
       const usernameInp = form.querySelector('input[name="username"]');
+      const submitBtn = form.querySelector('button[type="submit"], input[type="submit"]');
 
       // Track username availability - KR 15/08/2025
       let usernameState = { taken: false, checking: false, lastChecked: '' };
-      const usernameCheckUrl = form.getAttribute('data-check-username-url') || '/users/check-username/';
+      const usernameCheckUrl = form.getAttribute('data-username-check-url') || '/users/check-username/';
 
       // Name: at least 2 visible characters - KR 15/08/2025
       function validateName() {
@@ -106,6 +107,7 @@ document.addEventListener('DOMContentLoaded', function () {
           usernameState.checking = false;
           usernameInp.classList.remove('is-invalid', 'is-valid');
           ensureErrorEl(usernameInp).textContent = '';
+          if (submitBtn) submitBtn.disabled = false;
           return;
         }
 
@@ -113,10 +115,12 @@ document.addEventListener('DOMContentLoaded', function () {
           usernameState.taken = false;
           usernameState.checking = false;
           setFieldError(usernameInp, 'Username must be at least 3 characters.');
+          if (submitBtn) submitBtn.disabled = false;
           return;
         }
 
         usernameState.checking = true;
+        if (submitBtn) submitBtn.disabled = true;
         usernameInp.classList.remove('is-invalid', 'is-valid');
         ensureErrorEl(usernameInp).textContent = 'Checking availability…';
 
@@ -135,12 +139,14 @@ document.addEventListener('DOMContentLoaded', function () {
             } else {
               setFieldError(usernameInp, '');
             }
+            if (submitBtn) submitBtn.disabled = false;
           })
           .catch(() => {
             if ((usernameInp.value || '').trim() !== usernameState.lastChecked) return;
             usernameState.checking = false;
             usernameInp.classList.remove('is-invalid', 'is-valid');
             ensureErrorEl(usernameInp).textContent = '';
+            if (submitBtn) submitBtn.disabled = false;
           });
       }, 250);
 
@@ -251,10 +257,9 @@ document.addEventListener('DOMContentLoaded', function () {
           (validateBio()   !== false) &&
           (validateUsernameImmediate() !== false);
 
-        // If username still checking, delay submit briefly - KR 15/08/2025
+        // If username still checking, block submission until it finishes - KR 15/08/2025
         if (usernameInp && usernameState.checking) {
           e.preventDefault();
-          setTimeout(() => form.requestSubmit(), 150);
           return;
         }
 
