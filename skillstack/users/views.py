@@ -55,10 +55,13 @@ def register_view(request):
 
 @require_GET
 def check_username(request):
-    username = request.GET.get("username", "").strip()
+    
+    username = (request.GET.get("username") or "").strip()
     taken = False
+
     if username:
         taken = User.objects.filter(username__iexact=username).exists()
+
     return JsonResponse({"taken": taken})
 
 # Login View
