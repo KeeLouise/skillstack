@@ -22,3 +22,5 @@ soupsieve==2.7
 typing_extensions==4.14.1
 urllib3==2.5.0
 requests>=2.31.0
+django-fernet-fields==0.6
+cryptography>=42.0.0
