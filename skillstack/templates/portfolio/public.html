@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block head_extra %}
+{% block extra_head %}
   <meta property="og:title" content="{{ owner.username }}’s Portfolio">
   <meta property="og:type" content="website">
   <meta property="og:url" content="{{ share_page_url|default:request.build_absolute_uri }}">
@@ -24,7 +24,8 @@
                     class="btn btn-outline-secondary btn-share"
                     aria-label="Share {{ link.title|default:'link' }}"
                     data-share-url="{{ link.absolute_url }}"
-                    data-share-title="{{ link.title|default:'Portfolio link' }}">
+                    data-share-title="{{ link.title|default:'Portfolio link' }}"
+                    data-share-text="Check out this link from {{ owner.username }}’s portfolio">
               Share
             </button>
           </div>
@@ -36,10 +37,13 @@
   {% endfor %}
 </div>
 
-{# optional toast for feedback #}
 <div class="toast-container position-fixed bottom-0 end-0 p-3">
   <div id="share-toast" class="toast" role="status" aria-live="polite" aria-atomic="true">
     <div class="toast-body">Link copied to clipboard</div>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+  <script src="{% static 'js/portfolio.js' %}"></script>
 {% endblock %}

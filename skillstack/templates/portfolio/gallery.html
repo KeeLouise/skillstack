@@ -10,21 +10,23 @@
 {% block content %}
 <div class="container py-5">
   {# templates/portfolio/gallery.html #}
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h2 class="mb-0">My Portfolio</h2>
-  <div class="d-flex gap-2">
-    <a href="{% url 'portfolio:portfolio_create' %}" class="btn btn-dark">+ Add Link</a>
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">My Portfolio</h2>
+    <div class="d-flex gap-2">
+      <a href="{% url 'portfolio:portfolio_create' %}" class="btn btn-dark">+ Add Link</a>
 
-    <button
-      type="button"
-      class="btn btn-primary"
-      id="shareBtn"
-      data-share-url="{{ public_abs_url }}"
-      aria-label="Share my public portfolio">
-      Share
-    </button>
+      <button
+        type="button"
+        class="btn btn-primary"
+        id="shareBtn"
+        data-share-url="{{ public_abs_url }}"
+        data-share-title="My portfolio on SkillStack"
+        data-share-text="Here’s my public portfolio:"
+        aria-label="Share my public portfolio">
+        Share
+      </button>
+    </div>
   </div>
-</div>
 
   {% if links %}
     <div class="portfolio-grid">
@@ -56,5 +58,5 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<script src="{% static 'js/portfolio-share.js' %}"></script>
+  <script src="{% static 'js/portfolio.js' %}"></script>
 {% endblock %}
