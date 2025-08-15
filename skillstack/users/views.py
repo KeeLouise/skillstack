@@ -6,6 +6,8 @@ from django.contrib import messages
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils import timezone
+from django.views.decorators.http import require_GET
+from django.http import JsonResponse
 from .forms import CustomUserRegistrationForm, EmailLoginForm, UserUpdateForm, ProfileForm
 from datetime import timedelta
 from .models import Profile
@@ -51,6 +53,13 @@ def register_view(request):
 
     return render(request, 'users/register.html', {'form': form})
 
+@require_GET
+def check_username(request):
+    username = request.GET.get("username", "").strip()
+    taken = False
+    if username:
+        taken = User.objects.filter(username__iexact=username).exists()
+    return JsonResponse({"taken": taken})
 
 # Login View
 def email_login_view(request):
