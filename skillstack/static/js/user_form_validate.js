@@ -1,4 +1,4 @@
-// Live validation for user forms - KR 15/08/2025
+// Live validation for user forms + username availability - KR 15/08/2025
 document.addEventListener('DOMContentLoaded', function () {
   (function () {
     const q  = (s, r=document) => r.querySelector(s);
@@ -37,10 +37,18 @@ document.addEventListener('DOMContentLoaded', function () {
       if (/[a-z]/.test(pw) && /[A-Z]/.test(pw)) s++;
       if (/\d/.test(pw)) s++;
       if (/[^A-Za-z0-9]/.test(pw)) s++;
-      return s; // 0..4
+      return s; 
     }
     function labelForScore(s) {
       return ['Very weak','Weak','Okay','Good','Strong'][Math.min(4, Math.max(0, s))];
+    }
+
+    function debounce(fn, ms) {
+      let t;
+      return function (...args) {
+        clearTimeout(t);
+        t = setTimeout(() => fn.apply(this, args), ms);
+      };
     }
 
     function wireFormValidation(form) {
@@ -48,11 +56,16 @@ document.addEventListener('DOMContentLoaded', function () {
       form.__wired = true;
       form.setAttribute('novalidate', 'novalidate');
 
-      const nameInput  = form.querySelector('input[name="full_name"]') || form.querySelector('input[name$="first_name"]');
-      const emailInput = form.querySelector('input[name$="email"]');
-      const bioInput   = form.querySelector('textarea[name$="bio"]');
-      const pw1        = form.querySelector('input[name="password1"]');
-      const pw2        = form.querySelector('input[name="password2"]');
+      const nameInput   = form.querySelector('input[name="full_name"]') || form.querySelector('input[name$="first_name"]');
+      const emailInput  = form.querySelector('input[name$="email"]');
+      const bioInput    = form.querySelector('textarea[name$="bio"]');
+      const pw1         = form.querySelector('input[name="password1"]');
+      const pw2         = form.querySelector('input[name="password2"]');
+      const usernameInp = form.querySelector('input[name="username"]');
+
+      // Track username availability - KR 15/08/2025
+      let usernameState = { taken: false, checking: false, lastChecked: '' };
+      const usernameCheckUrl = form.getAttribute('data-check-username-url') || '/users/check-username/';
 
       // Name: at least 2 visible characters - KR 15/08/2025
       function validateName() {
@@ -66,11 +79,10 @@ document.addEventListener('DOMContentLoaded', function () {
         return true;
       }
 
-      // Email: format only (server handles required/uniqueness) - KR 15/08/2025
       function validateEmail() {
         if (!emailInput) return true;
         const v = (emailInput.value || '').trim();
-        if (!v) { // don’t show red just for empty; let server require it
+        if (!v) {
           emailInput.classList.remove('is-invalid', 'is-valid');
           ensureErrorEl(emailInput).textContent = '';
           return true;
@@ -81,6 +93,76 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         setFieldError(emailInput, '');
         return true;
+      }
+
+      // basic length and live availability via AJAX - KR 15/08/2025
+      const doCheckUsername = debounce(function () {
+        if (!usernameInp) return;
+        const v = (usernameInp.value || '').trim();
+        usernameState.lastChecked = v;
+
+        if (!v) {
+          usernameState.taken = false;
+          usernameState.checking = false;
+          usernameInp.classList.remove('is-invalid', 'is-valid');
+          ensureErrorEl(usernameInp).textContent = '';
+          return;
+        }
+
+        if (v.length < 3) {
+          usernameState.taken = false;
+          usernameState.checking = false;
+          setFieldError(usernameInp, 'Username must be at least 3 characters.');
+          return;
+        }
+
+        usernameState.checking = true;
+        usernameInp.classList.remove('is-invalid', 'is-valid');
+        ensureErrorEl(usernameInp).textContent = 'Checking availability…';
+
+        fetch(`${usernameCheckUrl}?username=${encodeURIComponent(v)}`, {
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+          .then(res => res.json())
+          .then(data => {
+            if ((usernameInp.value || '').trim() !== usernameState.lastChecked) return;
+
+            usernameState.checking = false;
+            usernameState.taken = !!(data && data.taken);
+
+            if (usernameState.taken) {
+              setFieldError(usernameInp, 'This username is already taken.');
+            } else {
+              setFieldError(usernameInp, '');
+            }
+          })
+          .catch(() => {
+            if ((usernameInp.value || '').trim() !== usernameState.lastChecked) return;
+            usernameState.checking = false;
+            usernameInp.classList.remove('is-invalid', 'is-valid');
+            ensureErrorEl(usernameInp).textContent = '';
+          });
+      }, 250);
+
+      function validateUsernameImmediate() {
+        if (!usernameInp) return true;
+        const v = (usernameInp.value || '').trim();
+        if (!v) {
+          usernameInp.classList.remove('is-invalid', 'is-valid');
+          ensureErrorEl(usernameInp).textContent = '';
+          usernameState.taken = false;
+          usernameState.checking = false;
+          return true;
+        }
+        if (v.length < 3) {
+          setFieldError(usernameInp, 'Username must be at least 3 characters.');
+          usernameState.taken = false;
+          usernameState.checking = false;
+          return false;
+        }
+
+        doCheckUsername();
+        return !usernameState.taken;
       }
 
       // Passwords: strength (pw1) + match (pw1/pw2) - KR 15/08/2025
@@ -104,7 +186,6 @@ document.addEventListener('DOMContentLoaded', function () {
           setFieldError(pw2, 'Passwords do not match.');
           return false;
         }
-        // Only mark valid if user typed something and it matches
         if (b && a === b) setFieldError(pw2, '');
         else {
           pw2.classList.remove('is-invalid','is-valid');
@@ -150,28 +231,37 @@ document.addEventListener('DOMContentLoaded', function () {
       }
 
       // Live inline checks - KR 15/08/2025
-      if (nameInput)  { nameInput.addEventListener('input', validateName);  nameInput.addEventListener('blur', validateName); }
-      if (emailInput) { emailInput.addEventListener('input', validateEmail); emailInput.addEventListener('blur', validateEmail); }
-      if (pw1)        { pw1.addEventListener('input', validatePw1);         pw1.addEventListener('blur', validatePw1); }
-      if (pw2)        { pw2.addEventListener('input', validatePw2);         pw2.addEventListener('blur', validatePw2); }
-      if (bioInput)   { bioInput.addEventListener('input', validateBio);    bioInput.addEventListener('blur', validateBio); }
+      if (nameInput)   { nameInput.addEventListener('input', validateName);            nameInput.addEventListener('blur', validateName); }
+      if (emailInput)  { emailInput.addEventListener('input', validateEmail);         emailInput.addEventListener('blur', validateEmail); }
+      if (usernameInp) { usernameInp.addEventListener('input', validateUsernameImmediate); usernameInp.addEventListener('blur', validateUsernameImmediate); }
+      if (pw1)         { pw1.addEventListener('input', validatePw1);                  pw1.addEventListener('blur', validatePw1); }
+      if (pw2)         { pw2.addEventListener('input', validatePw2);                  pw2.addEventListener('blur', validatePw2); }
+      if (bioInput)    { bioInput.addEventListener('input', validateBio);             bioInput.addEventListener('blur', validateBio); }
 
       // Initial render (show bio counter immediately) - KR 15/08/2025
       validateBio();
 
       // Submit gate - KR 15/08/2025
       form.addEventListener('submit', (e) => {
-        const ok =
+        const okSync =
           (validateName()  !== false) &&
           (validateEmail() !== false) &&
           (validatePw1()   !== false) &&
           (validatePw2()   !== false) &&
-          (validateBio()   !== false);
+          (validateBio()   !== false) &&
+          (validateUsernameImmediate() !== false);
 
-        if (!ok) {
+        // If username still checking, delay submit briefly - KR 15/08/2025
+        if (usernameInp && usernameState.checking) {
+          e.preventDefault();
+          setTimeout(() => form.requestSubmit(), 150);
+          return;
+        }
+
+        if (!okSync || (usernameInp && usernameState.taken)) {
           e.preventDefault();
           e.stopPropagation();
-          const firstBad = form.querySelector('.is-invalid');
+          const firstBad = form.querySelector('.is-invalid') || usernameInp;
           if (firstBad) firstBad.focus();
         }
       });
@@ -188,7 +278,8 @@ document.addEventListener('DOMContentLoaded', function () {
         form.querySelector('input[name$="email"]') ||
         form.querySelector('input[name="password1"]') ||
         form.querySelector('input[name="password2"]') ||
-        form.querySelector('textarea[name$="bio"]');
+        form.querySelector('textarea[name$="bio"]') ||
+        form.querySelector('input[name="username"]');
       if (looksUserForm) wireFormValidation(form);
     });
   })();
