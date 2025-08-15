@@ -3,31 +3,21 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
-from django.http import JsonResponse, HttpResponseBadRequest
 from django.templatetags.static import static
-from django.contrib.staticfiles.storage import staticfiles_storage
+from django.http import JsonResponse, HttpResponseBadRequest
 
 from .models import PortfolioLink
 from .forms import PortfolioLinkForm
 from .utils import fetch_og_image, fetch_og_title
 
 
-# Return absolute URL for any given path or URL - KR 15/08/2025
-def _abs(request, url_or_path: str) -> str:
-    return request.build_absolute_uri(url_or_path)
-
-
-# Return absolute URL to default OG image (hashed in prod if available) - KR 15/08/2025
-def _default_og_abs(request) -> str:
-    try:
-        url = staticfiles_storage.url("images/og/portfolio-default.jpg")
-    except Exception:
-        url = static("images/og/portfolio-default.jpg")
-    return _abs(request, url)
-
-
-# Compute absolute display image URL for a given PortfolioLink - KR 15/08/2025
 def _display_image_abs(request, link: PortfolioLink) -> str:
+    """
+    Returns an absolute URL for the link's preview image.
+    - Prefers uploaded file, falls back to image_url.
+    - If relative, makes it absolute.
+    - If nothing is available, returns a default static image.  - KR 15/08/2025
+    """
     img = None
     try:
         if getattr(link, "image_file", None) and getattr(link.image_file, "url", None):
@@ -41,42 +31,40 @@ def _display_image_abs(request, link: PortfolioLink) -> str:
     if img:
         if img.startswith(("http://", "https://")):
             return img
-        return _abs(request, img)
+        return request.build_absolute_uri(img)
 
-    return _default_og_abs(request)
+    return request.build_absolute_uri(static("images/og/portfolio-default.jpg"))
+
+
+def _absolute_url(request, link: PortfolioLink) -> str:
+    """
+    Returns an absolute URL for the link target:
+    - If link.url is already absolute, return as-is.
+    - If it's relative, make it absolute.                         
+    """
+    url = getattr(link, "url", "") or ""
+    if url.startswith(("http://", "https://")):
+        return url
+    return request.build_absolute_uri(url)
 
 
 @login_required
 def portfolio_gallery(request):
-    """
-    Owner's private gallery.
-    - Adds absolute display images.
-    - Adds absolute per-link URL for sharing.
-    - Exposes a public_abs_url to share the whole portfolio page.
-    """
+    # User’s private gallery view - KR 15/08/2025
     links = PortfolioLink.objects.filter(owner=request.user).order_by("-created_at")
 
+    # Precompute images for template
     for l in links:
-        # Prefer model's own display_image method if callable, otherwise compute - KR 15/08/2025
-        if hasattr(l, "display_image") and callable(l.display_image):
-            try:
-                di = l.display_image(request)
-            except TypeError:
-                di = l.display_image()
-            l.display_image = di
-        else:
-            l.display_image = _display_image_abs(request, l)
+        # Use helper for absolute image URL
+        l.display_image = _display_image_abs(request, l)
 
-        # Absolute URL to detail/public-facing page for sharing - KR 15/08/2025
-        if hasattr(l, "get_absolute_url") and callable(l.get_absolute_url):
-            l.absolute_url = _abs(request, l.get_absolute_url())
-        else:
-            l.absolute_url = getattr(l, "url", "")
-
-    og_image = links[0].display_image if links else _default_og_abs(request)
+    # OG image (first link if present, else default)
+    og_image = links[0].display_image if links else request.build_absolute_uri(
+        static("images/og/portfolio-default.jpg")
+    )
 
     public_path = reverse("portfolio:portfolio_public", args=[request.user.username])
-    public_abs_url = _abs(request, public_path)
+    public_abs_url = request.build_absolute_uri(public_path)
 
     return render(
         request,
@@ -84,22 +72,20 @@ def portfolio_gallery(request):
         {
             "links": links,
             "og_image": og_image,
-            "public_abs_url": public_abs_url,  # used for Share my portfolio button - KR 15/08/2025
+            "public_abs_url": public_abs_url,
         },
     )
 
 
 @login_required
 def portfolio_create(request):
-    # Create new portfolio link - KR 15/08/2025
     if request.method == "POST":
         form = PortfolioLinkForm(request.POST, request.FILES)
         if form.is_valid():
             link = form.save(commit=False)
             link.owner = request.user
             link.save()
-            if hasattr(link, "ensure_preview"):
-                link.ensure_preview()  # populate OG metadata - KR 15/08/2025
+            link.ensure_preview()
             messages.success(request, "Link added to your portfolio.")
             return redirect("portfolio:portfolio_gallery")
     else:
@@ -112,12 +98,14 @@ def portfolio_public(request, username):
     links = PortfolioLink.objects.filter(owner=owner, is_published=True).order_by("-created_at")
 
     for l in links:
+        l.absolute_url = _absolute_url(request, l)
         l.display_image = _display_image_abs(request, l)
 
     og_image = links[0].display_image if links else request.build_absolute_uri(
         static("images/og/portfolio-default.jpg")
     )
 
+    # Pass flag to hide private/app nav on public page - KR 15/08/2025
     return render(
         request,
         "portfolio/public.html",
@@ -125,32 +113,27 @@ def portfolio_public(request, username):
             "owner": owner,
             "links": links,
             "og_image": og_image,
-            # tell base.html this is a public-facing page (hide app nav) - KR 15/08/2025
-            "suppress_user_nav": True,
-            "is_public_page": True,
+            "share_page_url": request.build_absolute_uri(),  # for og:url if needed
+            "suppress_user_nav": True,                       # hide authenticated nav on public pages
         },
     )
 
 
 @login_required
 def portfolio_delete(request, slug):
-    # Delete an existing portfolio link - KR 15/08/2025
+    # Delete flow - KR 15/08/2025
     link = get_object_or_404(PortfolioLink, slug=slug, owner=request.user)
-
     if request.method == "POST":
         link.delete()
         messages.success(request, "Portfolio link deleted successfully.")
         return redirect("portfolio:portfolio_gallery")
-
     return redirect("portfolio:portfolio_gallery")
 
 
 @login_required
 def preview_api(request):
-    """
-    AJAX endpoint used by form JS to fetch OG title & image
-    """
-    url = (request.GET.get("url") or "").strip()
+    # Open Graph preview endpoint - KR 15/08/2025
+    url = (request.GET.get("url") or "").trim() if hasattr(str, "trim") else (request.GET.get("url") or "").strip()
     if not url:
         return HttpResponseBadRequest("missing url")
 
