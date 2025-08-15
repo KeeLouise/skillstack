@@ -1,15 +1,15 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
-from .views import (
+from . import (
     register_view, email_login_view, logout_view,
-    verify_2fa_code, resend_code, profile_view, edit_profile_view, collaborator_profile_view, check_username
+    verify_2fa_code, resend_code, profile_view, edit_profile_view, collaborator_profile_view,
 )
-
+from. import views
 app_name = "users" 
 
 urlpatterns = [
     path('register/', register_view, name='register'),
-    path("check-username/", check_username, name="check_username"),
+    path("check-username/", views.check_username, name="check_username"),
     path('login/', email_login_view, name='login'),
     path("profile/", profile_view, name="profile"),
     path("profile/edit/", edit_profile_view, name="edit_profile"),
