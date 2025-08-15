@@ -1,4 +1,5 @@
-(function () {
+document.addEventListener('DOMContentLoaded', function () {
+    (function () {
   const q  = (s, r=document) => r.querySelector(s);
   const qa = (s, r=document) => Array.from(r.querySelectorAll(s));
 
@@ -129,4 +130,5 @@
       wireFormValidation(form);
     }
   });
-})();
+ })();
+});
