@@ -16,15 +16,9 @@ import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-
-SECRET_KEY = os.environ.get('SECRET_KEY', 'your-dev-fallback-key')
-
+SECRET_KEY = os.environ.get('SECRET_KEY', 'your-dev-fallback-key') 
 DEBUG = True
-
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'skillstack-1bx8.onrender.com']
-
 
 INSTALLED_APPS = [
     # Local apps
@@ -40,7 +34,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_cryptography',
 
     # Third-party apps
     'crispy_forms',
@@ -57,7 +50,7 @@ CLOUDINARY_STORAGE = {
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware', 
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -84,12 +77,11 @@ TEMPLATES = [
     },
 ]
 
-
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_DIRS = [BASE_DIR / 'static'] 
+STATIC_ROOT = BASE_DIR / 'staticfiles'   
 
-# Django 5+ storage settings
+# Django 5+ storages
 STORAGES = {
     "default": {
         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
@@ -104,12 +96,10 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 WSGI_APPLICATION = 'skillstack.wsgi.application'
 
+# Crispy Forms
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
-
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 DATABASES = {
     'default': dj_database_url.config(
         default=os.getenv('DATABASE_URL', 'postgresql://skillstack_user:Skill2025***@localhost:5432/skillstack'),
@@ -117,13 +107,10 @@ DATABASES = {
     )
 }
 
-
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'home'
 LOGIN_URL = 'login'
 
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -131,39 +118,24 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-PASSWORD_HASHERS = [
-    "django.contrib.auth.hashers.Argon2PasswordHasher",   
-    "django.contrib.auth.hashers.PBKDF2PasswordHasher",    
-    "django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher",  
-    "django.contrib.auth.hashers.BCryptSHA256PasswordHasher"
-]
-
-EMAIL_HASH_SALT = os.environ.get("EMAIL_HASH_SALT", "")
+# using Django’s default secure password hashing
 
 AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
-    'users.backends.EmailBackend',
+    'django.contrib.auth.backends.ModelBackend', 
+    'users.backends.EmailBackend',             
 ]
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'email.skillstack@gmail.com'
-EMAIL_HOST_PASSWORD = 'weak oicm numt zjyd'
-DEFAULT_FROM_EMAIL = 'No-Reply-SkillStack <email.skillstack@gmail.com>'
-EMAIL_ENCRYPTION_KEY = os.environ.get('EMAIL_ENCRYPTION_KEY')
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')       
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '') 
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'No-Reply-SkillStack <email.skillstack@gmail.com>')
 
-# Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField',
-
-# Email encryption salt for hashing (not the same as encryption key) - KR 15/08/2025
-EMAIL_HASH_SALT = os.environ.get("EMAIL_ENCRYPTION_KEY", "")
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
