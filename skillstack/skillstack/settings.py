@@ -40,15 +40,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_cryptography'
 
     # Third-party apps
     'crispy_forms',
     'crispy_bootstrap5',
     'cloudinary',
     'cloudinary_storage',
-
-    # Encryption support for email-at-rest
-    'fernet_fields',
 ]
 
 CLOUDINARY_STORAGE = {
@@ -165,13 +163,7 @@ USE_TZ = True
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField',
 
-
-# Fernet encryption keys for encrypted email fields
-FERNET_KEYS = [
-    os.environ.get("FERNET_KEY", "dev-ONLY-rotate-me"),
-]
-
-# Salt for one-way, searchable email hash
-EMAIL_HASH_SALT = os.environ.get("EMAIL_HASH_SALT", "dev-ONLY-change-me")
+# Email encryption salt for hashing (not the same as encryption key) - KR 15/08/2025
+EMAIL_HASH_SALT = os.environ.get("EMAIL_ENCRYPTION_KEY", "")
