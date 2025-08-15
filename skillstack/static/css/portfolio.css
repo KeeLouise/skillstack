@@ -127,22 +127,43 @@
 /* Public page cards - KR 15/08/2025 */
 .card.h-100 {
   border: 1px solid var(--pf-card-border);
-  border-radius: 16px !important;
+  border-radius: 14px !important;
   overflow: hidden;
   background: var(--pf-card-bg);
   box-shadow: var(--pf-card-shadow);
   transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  max-width: 320px;   
+  margin-inline: auto; 
 }
+
 .card.h-100:hover {
-  transform: translateY(-4px);
+  transform: translateY(-3px);
   box-shadow: var(--pf-card-shadow-hover);
   border-color: rgba(13,110,253,.25);
 }
 
 .card-img-top {
-  height: 180px;
+  height: 140px;   
   object-fit: cover;
   background: #f3f4f6;
+}
+
+.card-body {
+  padding: 0.85rem;
+}
+
+.card-body .card-title {
+  font-size: 1rem;        
+  margin-bottom: 0.4rem;
+}
+
+.card-body .card-text {
+  font-size: 0.85rem;   
+}
+
+.card-body .btn {
+  padding: 0.35rem 0.65rem;
+  font-size: 0.85rem;
 }
 
 /* Buttons inside cards - KR 15/08/2025 */
