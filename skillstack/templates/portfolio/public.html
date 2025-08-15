@@ -1,43 +1,45 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}{{ owner.first_name|default:owner.username }} — Portfolio{% endblock %}
-
-{% block extra_head %}
-<link rel="stylesheet" href="{% static 'css/portfolio.css' %}">
-<link rel="canonical" href="{{ request.build_absolute_uri }}">
-<meta property="og:title" content="{{ owner.first_name|default:owner.username }} — Portfolio">
-<meta property="og:type" content="website">
-<meta property="og:url" content="{{ request.build_absolute_uri }}">
-{% if og_image %}
-<meta property="og:image" content="{{ og_image }}">
-{% endif %}
+{% block head_extra %}
+  <meta property="og:title" content="{{ owner.username }}’s Portfolio">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="{{ share_page_url|default:request.build_absolute_uri }}">
+  <meta property="og:image" content="{{ og_image }}">
+  <meta property="og:description" content="Links and projects from {{ owner.username }}.">
 {% endblock %}
 
 {% block content %}
-<div class="container py-5">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="mb-0">{{ owner.first_name|default:owner.username }}’s Portfolio</h2>
-    <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Home</a>
-  </div>
-
-  {% if links %}
-    <div class="portfolio-grid">
-      {% for item in links %}
-        <a class="portfolio-card" href="{{ item.url }}" target="_blank" rel="noopener noreferrer">
-          <div class="portfolio-thumb" style="background-image:url('{{ item.display_image }}')"></div>
-          <div class="portfolio-info">
-            <div class="title text-truncate">{{ item.title|default:item.url }}</div>
-            <div class="url text-muted text-truncate">{{ item.url }}</div>
+<div class="row g-3">
+  {% for link in links %}
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card h-100" data-share-url="{{ link.absolute_url }}">
+        <img class="card-img-top" src="{{ link.display_image }}" alt="">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title">{{ link.title|default:link.absolute_url }}</h5>
+          {% if link.description %}<p class="card-text">{{ link.description }}</p>{% endif %}
+          <div class="mt-auto d-flex gap-2">
+            <a href="{{ link.absolute_url }}" class="btn btn-outline-primary">Open</a>
+            <button type="button"
+                    class="btn btn-outline-secondary btn-share"
+                    aria-label="Share {{ link.title|default:'link' }}"
+                    data-share-url="{{ link.absolute_url }}"
+                    data-share-title="{{ link.title|default:'Portfolio link' }}">
+              Share
+            </button>
           </div>
-        </a>
-      {% endfor %}
+        </div>
+      </div>
     </div>
-  {% else %}
-    <div class="card p-5 text-center shadow-sm">
-      <h5 class="mb-2">No links yet</h5>
-      <p class="text-muted mb-0">Check back soon.</p>
-    </div>
-  {% endif %}
+  {% empty %}
+    <p>No public links yet.</p>
+  {% endfor %}
+</div>
+
+{# optional toast for feedback #}
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+  <div id="share-toast" class="toast" role="status" aria-live="polite" aria-atomic="true">
+    <div class="toast-body">Link copied to clipboard</div>
+  </div>
 </div>
 {% endblock %}
