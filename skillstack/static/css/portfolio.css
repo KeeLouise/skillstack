@@ -127,43 +127,43 @@
 /* Public page cards - KR 15/08/2025 */
 .card.h-100 {
   border: 1px solid var(--pf-card-border);
-  border-radius: 14px !important;
+  border-radius: 12px !important;
   overflow: hidden;
   background: var(--pf-card-bg);
   box-shadow: var(--pf-card-shadow);
-  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
-  max-width: 320px;   
-  margin-inline: auto; 
+  transition: transform .15s ease, box-shadow .15s ease;
+  max-width: 240px;      
+  margin-inline: auto;
 }
 
 .card.h-100:hover {
-  transform: translateY(-3px);
+  transform: translateY(-2px);
   box-shadow: var(--pf-card-shadow-hover);
-  border-color: rgba(13,110,253,.25);
 }
 
 .card-img-top {
-  height: 140px;   
+  height: 110px;     
   object-fit: cover;
   background: #f3f4f6;
 }
 
 .card-body {
-  padding: 0.85rem;
+  padding: 0.6rem;      
 }
 
 .card-body .card-title {
-  font-size: 1rem;        
-  margin-bottom: 0.4rem;
+  font-size: 0.95rem;   
+  margin-bottom: 0.3rem;
 }
 
 .card-body .card-text {
-  font-size: 0.85rem;   
+  font-size: 0.8rem;     
+  margin-bottom: 0.5rem;
 }
 
 .card-body .btn {
-  padding: 0.35rem 0.65rem;
-  font-size: 0.85rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
 }
 
 /* Buttons inside cards - KR 15/08/2025 */
