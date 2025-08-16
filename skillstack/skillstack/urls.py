@@ -18,7 +18,6 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('core.urls')),
@@ -27,27 +26,3 @@ urlpatterns = [
     path('messaging/', include('messaging.urls')),
     path("portfolio/", include(("portfolio.urls", "portfolio"), namespace="portfolio")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
-# Error handlers defined to avoid circular imports - KR 16/08/2025
-from django.template.loader import select_template
-
-def error_400(request, exception):
-    tpl = select_template(["errors/400.html", "400.html"])
-    return HttpResponseBadRequest(tpl.render({}, request))
-
-def error_403(request, exception):
-    tpl = select_template(["errors/403.html", "403.html", "403_csrf.html"])
-    return HttpResponseForbidden(tpl.render({}, request))
-
-def error_404(request, exception):
-    tpl = select_template(["errors/404.html", "404.html"])
-    return HttpResponseNotFound(tpl.render({}, request))
-
-def error_500(request):
-    tpl = select_template(["errors/500.html", "500.html"])
-    return HttpResponseServerError(tpl.render({}, request))
-
-handler400 = "skillstack.urls.error_400"
-handler403 = "skillstack.urls.error_403"
-handler404 = "skillstack.urls.error_404"
-handler500 = "skillstack.urls.error_500"
