@@ -105,11 +105,11 @@ body { color: var(--msg-text); }
   min-height: 46px;
 }
 
-.compose-heading{
+h2.compose-heading{
     font-family: 'cal sans' !important;
     color: black !important;
     font-size: 32px !important;
-
+    text-shadow: 0 2px 4px rgba(0,0,0,0.35);
 }
 
 /* Textarea comfort */

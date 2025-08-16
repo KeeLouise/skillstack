@@ -10,27 +10,31 @@
 
 {% block content %}
 <div class="container py-5 msg-compose">
-
   <div class="msg-hero d-flex align-items-end p-4 mb-4">
-    <div class="w-100 d-flex align-items-center flex-wrap gap-3 gap-md-4">
-      
+  <div class="w-100 d-flex align-items-center flex-wrap gap-3 gap-md-4">
+    <div class="flex-grow-1 text-white">
+      <h2 class="fw-bold mb-1" style="text-shadow: 0 2px 4px rgba(0,0,0,0.35);">
+  {% if is_reply %}
+    Reply to {{ original_msg.sender.get_full_name|default:original_msg.sender.username }}
+  {% else %}
+    Compose
+  {% endif %}
+</h2>
+      <p class="small text-white-50 mb-0">
+        {% if is_reply %}
+          Regarding: {{ original_msg.subject|default:"(no subject)" }}
+        {% else %}
+          Start a new conversation
+        {% endif %}
+      </p>
+    </div>
 
-      <div class="flex-grow-1 text-white">
-        <h2 class="fw-bold mb-1 text-primary-emphasis">
-        <div class="small text-white-50">
-          {% if is_reply %}
-            Regarding: {{ original_msg.subject|default:"(no subject)" }}
-          {% else %}
-            Start a new conversation
-          {% endif %}
-        </div>
-      </div>
-
-      <div class="ms-auto d-flex flex-wrap gap-2">
-        <a href="{% url 'messages' %}" class="btn btn-dark">Back to Messages</a>
-      </div>
+    <div class="ms-auto d-flex flex-wrap gap-2">
+      <a href="{% url 'messages' %}" class="btn btn-dark">Back to Messages</a>
     </div>
   </div>
+</div>
+</div>
 
   {% if is_reply %}
   <div class="card shadow-sm border-0 mb-4">
