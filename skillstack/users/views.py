@@ -47,7 +47,7 @@ def register_view(request):
                     pass 
 
             messages.success(request, 'Account created! Please log in.')
-            return redirect('login')
+            return redirect('users:login')
     else:
         form = CustomUserRegistrationForm(initial={'email': email} if email else None)
 
@@ -55,7 +55,7 @@ def register_view(request):
 
 @require_GET
 def check_username(request):
-    
+
     username = (request.GET.get("username") or "").strip()
     taken = False
 
@@ -79,7 +79,7 @@ def email_login_view(request):
                 user = User.objects.get(email=email)
             except User.DoesNotExist:
                 messages.error(request, 'No account found with that email.')
-                return redirect('login')
+                return redirect('users:login')
 
             user_auth = authenticate(request, username=user.username, password=password)
             if user_auth:
@@ -253,7 +253,7 @@ def send_verification_email(user):
 def resend_code(request):
     user_id = request.session.get('temp_user_id')
     if not user_id:
-        return redirect('login')
+        return redirect('users:login')
 
     user = User.objects.get(pk=user_id)
     send_verification_email(user)
@@ -265,7 +265,7 @@ def verify_2fa_code(request):
     user_id = request.session.get('temp_user_id')
 
     if not user_id:
-        return redirect('login')
+        return redirect('users:login')
 
     user = User.objects.get(pk=user_id)
     code_obj = EmailVerificationCode.objects.filter(user=user).first()
