@@ -14,10 +14,13 @@
     <div class="col-md-6">
       <h2 class="mb-4 text-center">Create an Account</h2>
 
-      {# Put the URL on the form, not inside the opening tag as stray attributes #}
-      <form id="registerForm" method="post" data-check-username-url="{% url 'users:check_username' %}">
+      <form id="registerForm"
+            class="auth-form"
+            method="post"
+            data-check-username-url="{% url 'users:check_username' %}">
         {% csrf_token %}
-        {{ form.as_p }}
+        {{ form|crispy }}
+
         <button type="submit" class="btn btn-primary w-100">Register</button>
       </form>
 
