@@ -17,7 +17,7 @@ import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'your-dev-fallback-key') 
-DEBUG = True
+DEBUG = False
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'skillstack-1bx8.onrender.com']
 
 INSTALLED_APPS = [
@@ -25,7 +25,7 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',
     'projects',
     'messaging',
-    'portfolio',
+    'portfolio.apps.PortfolioConfig',
 
     # Django default apps
     'django.contrib.admin',
