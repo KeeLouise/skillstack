@@ -14,8 +14,6 @@ from .models import Profile
 import random
 from django.db.models import Q
 
-from .forms import CustomUserRegistrationForm, EmailLoginForm
-from .models import EmailVerificationCode
 from projects.models import Project, Invitation
 
 # Register View
@@ -85,7 +83,7 @@ def email_login_view(request):
             if user_auth:
                 request.session['temp_user_id'] = user.id
                 send_verification_email(user)
-                return redirect('verify_code')
+                return redirect('users:verify_code')
             else:
                 messages.error(request, 'Incorrect password.')
     else:
@@ -148,7 +146,7 @@ def edit_profile_view(request):
             u_form.save()
             p_form.save()
             messages.success(request, "Your profile has been updated successfully!")
-            return redirect("profile")
+            return redirect("users:profile")
     else:
         u_form = UserUpdateForm(instance=request.user)
         p_form = ProfileForm(instance=profile)
@@ -167,7 +165,7 @@ def collaborator_profile_view(request, user_id):
     profile, _ = Profile.objects.get_or_create(user=target)
 
     if target == request.user:
-        return redirect("profile")
+        return redirect("users:profile")
 
     # Check access: must share at least one project – KR 13/08/2025
     owner_is_target = Project.objects.filter(owner=target, collaborators=request.user)
@@ -258,7 +256,7 @@ def resend_code(request):
     user = User.objects.get(pk=user_id)
     send_verification_email(user)
     messages.success(request, 'A new verification code has been sent to your email.')
-    return redirect('verify_code')
+    return redirect('users:verify_code')
 
 # Verify 2FA Code
 def verify_2fa_code(request):
@@ -277,7 +275,7 @@ def verify_2fa_code(request):
         if code_obj and code_obj.created_at < timezone.now() - timedelta(minutes=10):
             code_obj.delete()
             messages.error(request, "Verification code expired. Please log in again.")
-            return redirect('login')
+            return redirect('users:login')
 
         if code_obj and code_obj.code == code_input:
            backend = get_backends()[0]  # use the default backend
