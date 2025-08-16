@@ -13,6 +13,7 @@ def error_400(request, exception=None):
     return render(request, "errors/400.html", status=400)
 
 def error_403(request, exception=None):
+    
     return render(request, "errors/403.html", status=403)
 
 def error_404(request, exception=None):
@@ -32,3 +33,21 @@ def dashboard(request):
         project.my_role = "Owner" if project.owner == user else "Collaborator"
 
     return render(request, 'core/dashboard.html', {'projects': projects})
+
+@login_required
+def create_project(request):
+    if request.method == 'POST':
+        form = ProjectForm(request.POST)
+        if form.is_valid():
+            project = form.save(commit=False)
+            project.owner = request.user
+            project.save()
+            return redirect('dashboard')
+    else:
+        form = ProjectForm()
+    return render(request, 'projects/create_project.html', {'form': form})
+
+@login_required
+def project_detail(request, project_id):
+    project = get_object_or_404(Project, id=project_id, owner=request.user)
+    return render(request, 'projects/project_detail.html', {'project': project})
