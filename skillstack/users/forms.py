@@ -43,10 +43,26 @@ class CustomUserRegistrationForm(UserCreationForm):
     class Meta:
         model = User
         fields = ['username', 'full_name', 'email', 'company', 'password1', 'password2']
+        help_texts = {
+            'password1': None,
+            'password2': None,
+            'username': None,
+        }
+        widgets = {
+            'password1': forms.PasswordInput(attrs={'autocomplete': 'new-password'}),
+            'password2': forms.PasswordInput(attrs={'autocomplete': 'new-password'}),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
+
+        self.fields['password1'].help_text = ''
+        self.fields['password2'].help_text = ''
+
+        self.fields['username'].widget.attrs.update({'autocomplete': 'username'})
+        self.fields['email'].widget.attrs.update({'autocomplete': 'email'})
+        self.fields['full_name'].widget.attrs.update({'autocomplete': 'name'})
+
         self.helper = FormHelper()
         self.helper.form_method = 'post'
         self.helper.layout = Layout(
@@ -64,6 +80,21 @@ class CustomUserRegistrationForm(UserCreationForm):
             ),
             Submit('submit', 'Register', css_class='btn btn-primary w-100 mt-3')
         )
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError("An account with this email already exists.")
+        return email
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.email = self.cleaned_data['email']
+        user.first_name = self.cleaned_data['full_name']
+        if commit:
+            user.save()
+        Profile.objects.update_or_create(user=user, defaults={'company': self.cleaned_data['company']})
+        return user
     
     def clean_email(self):
         email = self.cleaned_data.get('email')

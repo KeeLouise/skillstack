@@ -201,17 +201,15 @@ document.addEventListener('DOMContentLoaded', function () {
       }
       // strength meter under pw1 - KR 15/08/2025
       function setMeter(text) {
-        if (!pw1) return;
-        let meter = pw1.nextElementSibling && pw1.nextElementSibling.classList && pw1.nextElementSibling.classList.contains('form-text')
-          ? pw1.nextElementSibling
-          : null;
-        if (!meter) {
-          meter = document.createElement('div');
-          meter.className = 'form-text small text-muted';
-          pw1.insertAdjacentElement('afterend', meter);
-        }
-        meter.textContent = text;
-      }
+  if (!pw1) return;
+  let meter = pw1.parentNode.querySelector('.password-strength');
+  if (!meter) {
+    meter = document.createElement('div');
+    meter.className = 'form-text small text-muted password-strength';
+    pw1.insertAdjacentElement('afterend', meter);
+  }
+  meter.textContent = text;
+}
 
       // Bio: live remaining counter + max length check - KR 15/08/2025
       function validateBio() {
