@@ -141,12 +141,12 @@
                     </h5>
                     <div class="mt-1 d-flex flex-wrap gap-1">
                       {% if msg.sender_id == user.id %}
-                        <a href="{% url 'collab_profile' msg.recipient.id %}" class="list-chip text-decoration-none">
+                        <a href="{% url 'users:collab_profile' msg.recipient.id %}" class="list-chip text-decoration-none">
                           To: {{ msg.recipient.get_full_name|default:msg.recipient.username }}
                         </a>
                         <span class="list-chip">Sent</span>
                       {% else %}
-                        <a href="{% url 'collab_profile' msg.sender.id %}" class="list-chip text-decoration-none">
+                        <a href="{% url 'users:collab_profile' msg.sender.id %}" class="list-chip text-decoration-none">
                           From: {{ msg.sender.get_full_name|default:msg.sender.username }}
                         </a>
                         <span class="list-chip">Received</span>
