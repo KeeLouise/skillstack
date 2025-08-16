@@ -105,6 +105,13 @@ body { color: var(--msg-text); }
   min-height: 46px;
 }
 
+.compose-heading{
+    font-family: 'cal sans' !important;
+    color: black !important;
+    font-size: 32px !important;
+
+}
+
 /* Textarea comfort */
 .msg-compose textarea.form-control {
   min-height: 36vh;
