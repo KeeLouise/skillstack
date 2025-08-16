@@ -13,24 +13,10 @@
 
   <div class="msg-hero d-flex align-items-end p-4 mb-4">
     <div class="w-100 d-flex align-items-center flex-wrap gap-3 gap-md-4">
-      <div class="avatar-circle avatar-lg flex-shrink-0">
-        <span class="fw-semibold">
-          {% if is_reply %}
-            {{ original_msg.sender.first_name|default:original_msg.sender.username|first|upper }}
-          {% else %}
-            {{ user.first_name|default:user.username|first|upper }}
-          {% endif %}
-        </span>
-      </div>
+      
 
       <div class="flex-grow-1 text-white">
-        <h2 class="mb-1 fw-bold">
-          {% if is_reply %}
-            Reply to {{ original_msg.sender.get_full_name|default:original_msg.sender.username }}
-          {% else %}
-            Compose New Message
-          {% endif %}
-        </h2>
+        <h2 class="mb-1 fw-bold">Compose</h2>
         <div class="small text-white-50">
           {% if is_reply %}
             Regarding: {{ original_msg.subject|default:"(no subject)" }}
