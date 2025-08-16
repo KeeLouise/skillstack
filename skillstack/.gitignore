@@ -1,17 +1,36 @@
 # Python
-*.pyc
 __pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+dist/
+build/
 
-# Virtual Environment
+# Virtual environment
 venv/
+.venv/
 
-# Django
+# Django stuff
 *.sqlite3
 *.log
+db.sqlite3
 media/
+staticfiles/        # collected static files
+*.pot               # gettext translation files
+*.mo                # compiled translations
 
-# VSCode
+# IDEs and editors
 .vscode/
+.idea/
+*.swp
+*.swo
 
-# Environment files
+# OS files
+.DS_Store
+Thumbs.db
+
+# Env / secrets
 .env
+*.env
