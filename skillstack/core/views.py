@@ -33,3 +33,16 @@ def create_project(request):
 def project_detail(request, project_id):
     project = get_object_or_404(Project, id=project_id, owner=request.user)
     return render(request, 'projects/project_detail.html', {'project': project})
+
+
+def error_404(request, exception):
+    return render(request, "errors/404.html", status=404)
+
+def error_500(request):
+    return render(request, "errors/500.html", status=500)
+
+def error_403(request, exception):
+    return render(request, "errors/403.html", status=403)
+
+def error_400(request, exception):
+    return render(request, "errors/400.html", status=400)

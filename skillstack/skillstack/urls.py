@@ -26,3 +26,8 @@ urlpatterns = [
     path('messaging/', include('messaging.urls')),
     path("portfolio/", include(("portfolio.urls", "portfolio"), namespace="portfolio")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+handler404 = 'core.views.error_404'
+handler500 = 'core.views.error_500'
+handler403 = 'core.views.error_403'
+handler400 = 'core.views.error_400'
