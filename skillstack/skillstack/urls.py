@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from core.views import error_400, error_403, error_404, error_500
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('core.urls')),
@@ -26,3 +27,9 @@ urlpatterns = [
     path('messaging/', include('messaging.urls')),
     path("portfolio/", include(("portfolio.urls", "portfolio"), namespace="portfolio")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# Custom error handlers
+handler400 = "core.views.error_400"
+handler403 = "core.views.error_403"
+handler404 = "core.views.error_404"
+handler500 = "core.views.error_500"

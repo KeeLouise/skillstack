@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Page not found{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="card shadow-sm border-0 text-center p-4">
+        <img src="{% static 'images/error/404.svg' %}" alt="" class="mx-auto mb-3" style="max-width:160px;">
+        <h2 class="mb-2">We can’t find that page</h2>
+        <p class="text-muted mb-4">The link may be broken or the page may have been removed.</p>
+        <div class="d-flex gap-2 justify-content-center">
+          <a href="{% url 'home' %}" class="btn btn-primary">Go Home</a>
+          {% if user.is_authenticated %}
+            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Dashboard</a>
+          {% else %}
+            <a href="{% url 'users:login' %}" class="btn btn-outline-secondary">Log in</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
