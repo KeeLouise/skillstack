@@ -7,6 +7,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django.views.decorators.http import require_GET
+from django.conf import settings
 from django.http import JsonResponse
 from .forms import CustomUserRegistrationForm, EmailLoginForm, UserUpdateForm, ProfileForm
 from datetime import timedelta
@@ -220,32 +221,53 @@ from django.contrib.auth import login, get_backends
 import random
 import logging
 
-logger = logging.getLogger(__name__)  # for optional logging
+logger = logging.getLogger(__name__)
 
 def send_verification_email(user):
+    """
+    Send a 6‑digit verification code to the user's email.
+    Uses configured settings for from address (no hard-coded email) - KR 16/08/2025
+    """
     try:
         code = str(random.randint(100000, 999999))
 
         EmailVerificationCode.objects.update_or_create(
             user=user,
-            defaults={'code': code, 'created_at': timezone.now()}
+            defaults={"code": code, "created_at": timezone.now()},
         )
 
-        subject = 'Your SkillStack Verification Code'
-        text_body = f'Your verification code is: {code}'
-        html_body = render_to_string('emails/verify_code.html', {'code': code, 'user': user, 'now': now()})
+        subject = "Your SkillStack Verification Code"
+        text_body = f"Your verification code is: {code}"
+        html_body = render_to_string(
+            "emails/verify_code.html", {"code": code, "user": user, "now": now()}
+        )
 
-        email = EmailMultiAlternatives(
+        # Pull from address from settings
+        from_addr = (
+            getattr(settings, "DEFAULT_FROM_EMAIL", None)
+            or getattr(settings, "EMAIL_HOST_USER", None)
+            or "no-reply@localhost"
+        )
+
+        msg = EmailMultiAlternatives(
             subject=subject,
             body=text_body,
-            from_email='email.skillstack@gmail.com',
+            from_email=from_addr,
             to=[user.email],
         )
-        email.attach_alternative(html_body, "text/html")
-        email.send(fail_silently=False)
+        msg.attach_alternative(html_body, "text/html")
+        msg.send(fail_silently=False)
 
     except Exception as e:
-        logger.error(f"Error sending verification email: {e}")
+        # Log details for debugging mail delivery issues - KR 16/08/2025
+        host = getattr(settings, "EMAIL_HOST", "<unset>")
+        user_name = getattr(settings, "EMAIL_HOST_USER", "<unset>")
+        logger.error(
+            "Error sending verification email via %s as %s: %s",
+            host,
+            user_name,
+            e,
+        )
         print(f"[EMAIL ERROR] {e}")
 
 def resend_code(request):
