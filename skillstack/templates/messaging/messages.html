@@ -74,7 +74,7 @@
                           <div class="mt-1 d-flex flex-wrap gap-1">
                             {% for p in convo.participants.all %}
                               {% if p.id != user.id %}
-                                <a href="{% url 'collab_profile' p.id %}" class="list-chip text-decoration-none">
+                                <a href="{% url 'users:collab_profile' p.id %}" class="list-chip text-decoration-none">
                                   {{ p.get_full_name|default:p.username }}
                                 </a>
                               {% endif %}
